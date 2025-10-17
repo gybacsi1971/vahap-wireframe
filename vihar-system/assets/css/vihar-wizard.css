@@ -1,0 +1,360 @@
+/**
+ * VAHAP Wizard Komponensek Stílusok
+ * Varázsló lépések egységes megjelenítése
+ */
+
+/* Wizard konténer */
+.wizard-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Wizard fejléc */
+.wizard-header {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    background: white;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Progress bar - ELTÁVOLÍTVA */
+.wizard-progress {
+    display: none;
+}
+
+/* Step indicators */
+.wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    padding: 1rem 2rem;
+}
+
+.wizard-step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Összekötő vonal minden indikátor után (kivéve az utolsó) */
+.wizard-step-indicator:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    width: 100%;
+    height: 3px;
+    background: #e9ecef;
+    z-index: 0;
+}
+
+/* Színes vonal ha mindkét szomszédos kör completed */
+.wizard-step-indicator.completed:not(:last-child)::after {
+    background: #4CAF50;
+}
+
+.wizard-step-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 10;
+    border: 4px solid white;
+    box-shadow: 0 0 0 2px #e9ecef, 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.wizard-step-indicator.active .wizard-step-circle {
+    background: #2196F3;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px #2196F3, 0 4px 12px rgba(33, 150, 243, 0.5);
+}
+
+.wizard-step-indicator.completed .wizard-step-circle {
+    background: #4CAF50;
+    color: white;
+    box-shadow: 0 0 0 2px #4CAF50, 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+.wizard-step-indicator.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.wizard-step-label {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    text-align: center;
+    color: #6c757d;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.wizard-step-indicator.active .wizard-step-label {
+    color: #2196F3;
+    font-weight: 600;
+}
+
+.wizard-step-indicator.completed .wizard-step-label {
+    color: #4CAF50;
+}
+
+/* Wizard tartalom */
+.wizard-content {
+    padding: 2.5rem 2rem;
+    min-height: 400px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.wizard-step-content {
+    animation: fadeIn 0.4s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Wizard kártyák */
+.wizard-card {
+    padding: 1.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.wizard-card:hover {
+    border-color: #2196F3;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+    transform: translateY(-2px);
+}
+
+.wizard-card.selected {
+    border-color: #2196F3;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 20%, white 100%);
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.3);
+}
+
+.wizard-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.wizard-card.disabled:hover {
+    border-color: #e9ecef;
+    transform: none;
+    box-shadow: none;
+}
+
+.wizard-card-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* Checklist item wizard */
+.checklist-item-wizard {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #e9ecef;
+    transition: all 0.3s;
+}
+
+.checklist-item-wizard:hover {
+    background: #e9ecef;
+    border-left-color: #2196F3;
+}
+
+/* Wizard summary */
+.wizard-summary {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.wizard-summary-section {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.wizard-summary-section:last-child {
+    border-bottom: none;
+}
+
+.wizard-summary-section h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.wizard-summary-value {
+    font-size: 1.125rem;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+/* Wizard footer */
+.wizard-footer {
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+}
+
+/* Checklist progress (mini) */
+.checklist-progress {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.checklist-progress-bar {
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.checklist-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+    transition: width 0.5s ease;
+    border-radius: 6px;
+}
+
+/* Checklist group */
+.checklist-group {
+    margin-bottom: 2rem;
+}
+
+.checklist-group-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(90deg, #f8f9fa 0%, white 100%);
+    border-left: 4px solid #2196F3;
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wizard-steps {
+        flex-wrap: wrap;
+        padding: 0;
+    }
+
+    .wizard-step-indicator {
+        flex: 0 0 20%;
+        margin-bottom: 1rem;
+    }
+
+    .wizard-steps::before {
+        display: none;
+    }
+
+    .wizard-step-label {
+        font-size: 0.75rem;
+    }
+
+    .wizard-step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .wizard-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .wizard-card {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .wizard-step-indicator {
+        flex: 0 0 33.333%;
+    }
+
+    .wizard-step-label {
+        font-size: 0.7rem;
+    }
+}
+
+/* Animációk */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.wizard-step-indicator.active .wizard-step-circle {
+    animation: pulse 2s infinite;
+}
+
+/* Badge-ek a wizard-ban */
+.wizard-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Tooltip wizard-hoz */
+.wizard-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #212529;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    margin-bottom: 0.5rem;
+}
+
+.wizard-step-indicator:hover .wizard-tooltip {
+    opacity: 1;
+}

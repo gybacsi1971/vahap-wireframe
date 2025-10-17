@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Nyilvántartások Paraméterezés</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app">
+        <param-header
+            title="Nyilvántartások"
+            subtitle="VNY024, HNY501 és egyéb nyilvántartási kapcsolatok"
+            :breadcrumbs="breadcrumbs"
+            :show-save="false"
+            :show-back="true"
+            @back="navigateBack">
+        </param-header>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card sticky-top" style="top: 1rem;">
+                        <div class="card-header bg-light"><h6 class="mb-0"><i class="bi bi-gear"></i> Paraméterek</h6></div>
+                        <div class="list-group list-group-flush">
+                            <a href="../index.html" class="list-group-item list-group-item-action"><i class="bi bi-house"></i> Főoldal</a>
+                            <a href="index.html" class="list-group-item list-group-item-action"><i class="bi bi-sliders"></i> Paraméterező Dashboard</a>
+                            <hr class="my-0">
+                            <a href="ellenorzesi-listak.html" class="list-group-item list-group-item-action"><i class="bi bi-list-check"></i> Ellenőrzési Listák</a>
+                            <a href="hataridok.html" class="list-group-item list-group-item-action"><i class="bi bi-calendar-event"></i> Határidők</a>
+                            <a href="dijtetelek.html" class="list-group-item list-group-item-action"><i class="bi bi-cash-stack"></i> Díjtételek</a>
+                            <a href="dokumentum-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text"></i> Dokumentum Sablonok</a>
+                            <a href="workflow-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-3"></i> Workflow Sablonok</a>
+                            <a href="alfolyamatok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-2"></i> Alfolyamatok</a>
+                            <a href="nyilvantartasok.html" class="list-group-item list-group-item-action active"><i class="bi bi-database"></i> Nyilvántartások <span class="badge bg-success float-end">Aktív</span></a>
+                            <a href="felhasznalok.html" class="list-group-item list-group-item-action"><i class="bi bi-people"></i> Felhasználók</a>
+                            <a href="szerepkorok.html" class="list-group-item list-group-item-action"><i class="bi bi-shield-check"></i> Szerepkörök</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Nyilvántartási Interfészek</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>A VAHAP rendszer kapcsolódik külső nyilvántartásokhoz az adatok lekérdezéséhez és frissítéséhez.</p>
+                            <ul>
+                                <li><strong>F-0090</strong> - VNY024 Vasútegészségügyi Nyilvántartás (vasúti modul)</li>
+                                <li><strong>F-0106</strong> - HNY501 Hajózási Létesítmények Nyilvántartása (hajózási modul)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="bi bi-database"></i> VNY024 - Vasútegészségügyi
+                                    <span class="badge bg-light text-dark float-end">F-0090</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">API Endpoint URL</label>
+                                        <input type="text" class="form-control" value="https://vny024.gov.hu/api/v1" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Autentikáció</label>
+                                        <select class="form-select">
+                                            <option>API Key</option>
+                                            <option>OAuth 2.0</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" checked>
+                                        <label class="form-check-label">Cache engedélyezve (15 perc)</label>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-arrow-repeat"></i> Kapcsolat teszt</button>
+                                        <span class="badge bg-success ms-2">✓ Online</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <i class="bi bi-database"></i> HNY501 - Hajózási Létesítmények
+                                    <span class="badge bg-light text-dark float-end">F-0106</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">API Endpoint URL</label>
+                                        <input type="text" class="form-control" value="https://hny501.gov.hu/api/v1" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Autentikáció</label>
+                                        <select class="form-select">
+                                            <option>API Key</option>
+                                            <option>OAuth 2.0</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" checked>
+                                        <label class="form-check-label">Cache engedélyezve (15 perc)</label>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-arrow-repeat"></i> Kapcsolat teszt</button>
+                                        <span class="badge bg-success ms-2">✓ Online</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Mock rendszer:</strong> Ez egy drótváz demonstráció. A valós rendszerben itt API kulcsok, kapcsolati paraméterek és nyilvántartási beállítások lennének konfigurálhatók.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+    <script src="../assets/js/components/parameterezo/param-header.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            components: { 'param-header': ParamHeader },
+            data() {
+                return {
+                    breadcrumbs: [
+                        { label: 'Főoldal', url: '../index.html' },
+                        { label: 'Paraméterező', url: 'index.html' },
+                        { label: 'Nyilvántartások', url: '' }
+                    ]
+                };
+            },
+            methods: {
+                navigateBack() { window.location.href = 'index.html'; }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vas
+
+úti járművezető alkalmassági kérelem | VAHAP</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css?v=2">
+</head>
+<body>
+    <div id="app" class="container-fluid vh-100 d-flex flex-column p-0">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-light bg-light border-bottom">
+            <div class="container-fluid px-4">
+                <span class="navbar-brand mb-0">
+                    <i class="bi bi-train-front text-vasut"></i>
+                    <strong>VAHAP - Vasúti Modul</strong>
+                    <span class="badge bg-vasut ms-2">V-044</span>
+                </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i> {{ ugyfel.nev }}
+                    </span>
+                    <button class="btn btn-outline-info btn-sm" @click="toltsPeldaAdatokkal" v-if="currentStep === 1">
+                        <i class="bi bi-lightning-fill"></i> Példaadatok
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" @click="showHelp">
+                        <i class="bi bi-question-circle"></i> Súgó
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" @click="saveDraft">
+                        <i class="bi bi-save"></i> Mentés piszkozatként
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" @click="visszaADashboardra">
+                        <i class="bi bi-arrow-left"></i> Vissza
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Wizard Progress -->
+        <div class="container-fluid px-4 py-3 bg-light border-bottom">
+            <div class="progress-wizard">
+                <!-- 1. Adatrogzítés -->
+                <div class="progress-step" :class="{'completed': currentStep > 1, 'active': currentStep === 1}">
+                    <div class="progress-step-circle">
+                        <i class="bi" :class="currentStep > 1 ? 'bi-check-lg' : 'bi-1-circle-fill'"></i>
+                    </div>
+                    <div class="progress-step-label">
+                        <small class="badge bg-info">UCE-1761</small><br>
+                        <strong>Adatrögzítés</strong><br>
+                        <small class="text-muted">F-0069</small>
+                    </div>
+                </div>
+
+                <!-- 2. Díjfizetés -->
+                <div class="progress-step" :class="{'completed': currentStep > 2, 'active': currentStep === 2}">
+                    <div class="progress-step-circle">
+                        <i class="bi" :class="currentStep > 2 ? 'bi-check-lg' : 'bi-2-circle-fill'"></i>
+                    </div>
+                    <div class="progress-step-label">
+                        <small class="badge bg-info">UCE-1762</small><br>
+                        <strong>Díjfizetés</strong><br>
+                        <small class="text-muted">F-0070, F-0082</small>
+                    </div>
+                </div>
+
+                <!-- 3. Mellékletek -->
+                <div class="progress-step" :class="{'completed': currentStep > 3, 'active': currentStep === 3}">
+                    <div class="progress-step-circle">
+                        <i class="bi" :class="currentStep > 3 ? 'bi-check-lg' : 'bi-3-circle-fill'"></i>
+                    </div>
+                    <div class="progress-step-label">
+                        <small class="badge bg-info">UCE-1772</small><br>
+                        <strong>Mellékletek</strong><br>
+                        <small class="text-muted">F-0084</small>
+                    </div>
+                </div>
+
+                <!-- 4. Véglegesítés -->
+                <div class="progress-step" :class="{'completed': currentStep > 4, 'active': currentStep === 4}">
+                    <div class="progress-step-circle">
+                        <i class="bi" :class="currentStep > 4 ? 'bi-check-lg' : 'bi-4-circle-fill'"></i>
+                    </div>
+                    <div class="progress-step-label">
+                        <small class="badge bg-info">UCE-1776</small><br>
+                        <strong>Véglegesítés</strong><br>
+                        <small class="text-muted">F-0085, F-0086</small>
+                    </div>
+                </div>
+
+                <!-- 5. Benyújtás -->
+                <div class="progress-step" :class="{'completed': currentStep > 5, 'active': currentStep === 5}">
+                    <div class="progress-step-circle">
+                        <i class="bi" :class="currentStep > 5 ? 'bi-check-lg' : 'bi-5-circle-fill'"></i>
+                    </div>
+                    <div class="progress-step-label">
+                        <small class="badge bg-info">UCE-1771</small><br>
+                        <strong>Benyújtás</strong><br>
+                        <small class="text-muted">F-0087</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fő tartalom -->
+        <div class="flex-grow-1 overflow-auto">
+            <div class="container py-4">
+
+                <!-- 1. LÉPÉS: Adatrögzítés (F-0069, UCE-1773) -->
+                <div v-if="currentStep === 1" class="card shadow-sm fade-in">
+                    <div class="card-header bg-vasut text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square"></i> Kérelem adatainak kitöltése
+                            <span class="badge bg-light text-dark ms-2">F-0069</span>
+                            <span class="badge bg-info ms-1">UCE-1773</span>
+                        </h5>
+                        <small>Vasúti járművezetők előzetes alkalmassági vizsgálata</small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Személyes adatok -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-person"></i> Személyes adatok
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Vezetéknév</label>
+                                <input type="text" class="form-control" v-model="kerelem.vezeteknev" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Keresztnév</label>
+                                <input type="text" class="form-control" v-model="kerelem.keresztnev" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Születési név</label>
+                                <input type="text" class="form-control" v-model="kerelem.szuletesiNev" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Születési hely</label>
+                                <input type="text" class="form-control" v-model="kerelem.szuletesiHely" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Születési dátum</label>
+                                <input type="date" class="form-control" v-model="kerelem.szuletesiDatum" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Anyja neve</label>
+                                <input type="text" class="form-control" v-model="kerelem.anyaNeve" required>
+                            </div>
+                        </div>
+
+                        <!-- Lakcím -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-house"></i> Lakcím
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label required">Irányítószám</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.iranyitoszam" maxlength="4" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label required">Település</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.telepules" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label required">Közterület neve</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.kozterulet" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label required">Házszám</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.hazszam" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Emelet</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.emelet">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Ajtó</label>
+                                <input type="text" class="form-control" v-model="kerelem.lakcim.ajto">
+                            </div>
+                        </div>
+
+                        <!-- Értesítési cím -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" v-model="ertesitesiCimKulonbozo" id="ertesitesiCheck">
+                            <label class="form-check-label" for="ertesitesiCheck">
+                                Értesítési cím eltér a lakcímtől
+                            </label>
+                        </div>
+
+                        <div v-if="ertesitesiCimKulonbozo" class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Irányítószám</label>
+                                <input type="text" class="form-control" v-model="kerelem.ertesitesiCim.iranyitoszam" maxlength="4">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Település</label>
+                                <input type="text" class="form-control" v-model="kerelem.ertesitesiCim.telepules">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Közterület</label>
+                                <input type="text" class="form-control" v-model="kerelem.ertesitesiCim.kozterulet">
+                            </div>
+                        </div>
+
+                        <!-- Elérhetőség -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-telephone"></i> Elérhetőség
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Telefonszám</label>
+                                <input type="tel" class="form-control" v-model="kerelem.telefonszam" placeholder="+36301234567" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">E-mail cím</label>
+                                <input type="email" class="form-control" v-model="kerelem.email" required>
+                            </div>
+                        </div>
+
+                        <!-- Vasúti specifikus adatok -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-train-front"></i> Vasúti specifikus adatok
+                        </h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">Vizsgálat típusa</label>
+                                <select class="form-select" v-model="kerelem.vizsgalatTipusa" required>
+                                    <option value="">-- Válasszon --</option>
+                                    <option value="elozetes">Előzetes alkalmassági vizsgálat</option>
+                                    <option value="megujitas">Meglévő minősítés megújítása</option>
+                                    <option value="kiegeszites">Kiegészítő vizsgálat</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Munkáltató neve</label>
+                                <input type="text" class="form-control" v-model="kerelem.munkaltato" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label required">Járművezető kategóriák</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="A" v-model="kerelem.jarmuvezetoi_kategoriak" id="katA">
+                                            <label class="form-check-label" for="katA">
+                                                Kategória A - Személyszállítás
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="B" v-model="kerelem.jarmuvezetoi_kategoriak" id="katB">
+                                            <label class="form-check-label" for="katB">
+                                                Kategória B - Áruszállítás
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="C" v-model="kerelem.jarmuvezetoi_kategoriak" id="katC">
+                                            <label class="form-check-label" for="katC">
+                                                Kategória C - Tolatás
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Egészségügyi adatok -->
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="bi bi-heart-pulse"></i> Egészségügyi adatok
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">Kezelőorvos neve</label>
+                                <input type="text" class="form-control" v-model="kerelem.kezelo_orvos_neve" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vészhelyzeti kapcsolattartó</label>
+                                <input type="text" class="form-control" v-model="kerelem.veszelyhelyzet_kapcsolattarto">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vészhelyzeti telefonszám</label>
+                                <input type="tel" class="form-control" v-model="kerelem.veszelyhelyzet_telefon">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. LÉPÉS: Díjfizetés (F-0070, F-0082, UCE-1762, UCE-1763) -->
+                <div v-if="currentStep === 2" class="fade-in">
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-vasut text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-calculator"></i> Díjkalkulátor
+                                <span class="badge bg-light text-dark ms-2">F-0070</span>
+                                <span class="badge bg-info ms-1">UCE-1763</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                A kérelem típusa és kategóriák alapján az eljárási díj automatikusan kiszámításra került.
+                            </div>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tétel</th>
+                                        <th>Leírás</th>
+                                        <th class="text-end">Összeg</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Alapdíj</td>
+                                        <td>Előzetes alkalmassági vizsgálat alapdíja</td>
+                                        <td class="text-end">{{ dijak.alapdij.toLocaleString() }} Ft</td>
+                                    </tr>
+                                    <tr v-for="(dij, index) in dijak.kategoriak" :key="index">
+                                        <td>Kategória díj</td>
+                                        <td>{{ dij.nev }}</td>
+                                        <td class="text-end">{{ dij.osszeg.toLocaleString() }} Ft</td>
+                                    </tr>
+                                    <tr class="table-primary fw-bold">
+                                        <td colspan="2">Fizetendő összesen</td>
+                                        <td class="text-end">{{ osszesitettDij.toLocaleString() }} Ft</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- F-0082 - Díjbekérő előállítása -->
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-vasut text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-file-earmark-text"></i> Díjbekérő letöltése
+                                <span class="badge bg-light text-dark ms-2">F-0082</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Töltse le a díjbekérőt, amely tartalmazza a fizetési adatokat.</p>
+                            <button class="btn btn-outline-vasut" @click="letoltDijbekero">
+                                <i class="bi bi-download"></i> Díjbekérő letöltése (PDF)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- F-0083 - Online díjfizetés -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-vasut text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-credit-card"></i> Online díjfizetés
+                                <span class="badge bg-light text-dark ms-2">F-0083</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                A kérelem benyújtásához az eljárási díj kiegyenlítése szükséges.
+                            </div>
+
+                            <div class="d-flex gap-3">
+                                <button class="btn btn-success" @click="bankkartyas_fizetes" :disabled="dijFizetve">
+                                    <i class="bi bi-credit-card-2-front"></i> Bankkártyás fizetés
+                                </button>
+                                <button class="btn btn-outline-secondary" @click="atutalas_fizetes" :disabled="dijFizetve">
+                                    <i class="bi bi-bank"></i> Átutalás
+                                </button>
+                            </div>
+
+                            <div v-if="dijFizetve" class="alert alert-success mt-3">
+                                <i class="bi bi-check-circle"></i>
+                                Díj sikeresen kiegyenlítve! Folytathatja a kérelem kitöltését.
+                            </div>
+
+                            <!-- Gyors teszt -->
+                            <div class="alert alert-info mt-3" v-if="!dijFizetve">
+                                <i class="bi bi-lightning-fill"></i> <strong>Teszt:</strong>
+                                <button class="btn btn-sm btn-outline-success ms-2" @click="gyorsFizetes">
+                                    Azonnali fizetés szimuláció
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. LÉPÉS: Mellékletek (F-0084, UCE-1772) -->
+                <div v-if="currentStep === 3" class="card shadow-sm fade-in">
+                    <div class="card-header bg-vasut text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-paperclip"></i> Mellékletek csatolása
+                            <span class="badge bg-light text-dark ms-2">F-0084</span>
+                            <span class="badge bg-info ms-1">UCE-1772</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            Csatolja az alábbi kötelező dokumentumokat a kérelemhez:
+                        </div>
+
+                        <!-- Kötelező mellékletek -->
+                        <h6 class="mt-3">Kötelező mellékletek</h6>
+                        <div class="list-group mb-4">
+                            <div class="list-group-item" v-for="(melleklet, index) in kotelezoMellekletek" :key="'kotelezo-' + index">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <i class="bi bi-file-earmark-medical text-danger"></i>
+                                        <strong>{{ melleklet.nev }}</strong>
+                                        <span class="badge bg-danger ms-2">Kötelező</span>
+                                        <br>
+                                        <small class="text-muted">{{ melleklet.leiras }}</small>
+                                        <div v-if="melleklet.feltoltve" class="mt-2">
+                                            <small class="text-success">
+                                                <i class="bi bi-file-check"></i> {{ melleklet.file?.name }} ({{ formatFileSize(melleklet.file?.size) }})
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="file" :id="'file-' + index" @change="feltoltMelleklet($event, melleklet)" class="d-none" accept=".pdf,.jpg,.jpeg,.png">
+                                        <button v-if="!melleklet.feltoltve" class="btn btn-sm btn-outline-primary" @click="document.getElementById('file-' + index).click()">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                        <button v-else class="btn btn-sm btn-outline-success" disabled>
+                                            <i class="bi bi-check-circle-fill"></i> Feltöltve
+                                        </button>
+                                        <button v-if="melleklet.feltoltve" class="btn btn-sm btn-outline-danger" @click="torolMelleklet(melleklet)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opcionális mellékletek -->
+                        <h6>Opcionális mellékletek</h6>
+                        <div class="list-group">
+                            <div class="list-group-item" v-for="(melleklet, index) in opcionalisMellekletek" :key="'opcionalis-' + index">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <i class="bi bi-file-earmark"></i>
+                                        <strong>{{ melleklet.nev }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ melleklet.leiras }}</small>
+                                        <div v-if="melleklet.feltoltve" class="mt-2">
+                                            <small class="text-success">
+                                                <i class="bi bi-file-check"></i> {{ melleklet.file?.name }} ({{ formatFileSize(melleklet.file?.size) }})
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="file" :id="'file-opt-' + index" @change="feltoltMelleklet($event, melleklet)" class="d-none" accept=".pdf,.jpg,.jpeg,.png">
+                                        <button v-if="!melleklet.feltoltve" class="btn btn-sm btn-outline-secondary" @click="document.getElementById('file-opt-' + index).click()">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                        <button v-else class="btn btn-sm btn-outline-success" disabled>
+                                            <i class="bi bi-check-circle-fill"></i> Feltöltve
+                                        </button>
+                                        <button v-if="melleklet.feltoltve" class="btn btn-sm btn-outline-danger" @click="torolMelleklet(melleklet)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gyors teszt gombok -->
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-lightning-fill"></i> <strong>Teszt funkciók:</strong>
+                            <button class="btn btn-sm btn-outline-primary ms-2" @click="osszMellekletFeltolt">
+                                Összes kötelező feltöltése (teszt)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. LÉPÉS: Véglegesítés (F-0085, F-0086, UCE-1776) -->
+                <div v-if="currentStep === 4" class="card shadow-sm fade-in">
+                    <div class="card-header bg-vasut text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clipboard-check"></i> Kérelem véglegesítése
+                            <span class="badge bg-light text-dark ms-2">F-0085</span>
+                            <span class="badge bg-info ms-1">UCE-1776</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Kérjük, ellenőrizze a megadott adatokat! A véglegesítés után módosítás csak hiánypótlás keretében lehetséges.
+                        </div>
+
+                        <!-- Összefoglaló -->
+                        <h6 class="border-bottom pb-2">Kérelem összefoglaló</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Kérelmező:</strong><br>
+                                {{ kerelem.vezeteknev }} {{ kerelem.keresztnev }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Születési idő:</strong><br>
+                                {{ kerelem.szuletesiDatum }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Vizsgálat típusa:</strong><br>
+                                {{ vizsgalatTipusaNev }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Kategóriák:</strong><br>
+                                {{ kerelem.jarmuvezetoi_kategoriak.join(', ') }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Fizetett díj:</strong><br>
+                                {{ osszesitettDij.toLocaleString() }} Ft
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Mellékletek száma:</strong><br>
+                                {{ feltoltottMelleketekSzama }} db
+                            </div>
+                        </div>
+
+                        <!-- F-0086 - PDF generálás -->
+                        <div class="mt-4">
+                            <h6 class="border-bottom pb-2">Kérelem előnézet</h6>
+                            <p>Véglegesítés előtt tekintse meg a kérelem PDF változatát:</p>
+                            <button class="btn btn-outline-vasut" @click="pdfElonezet">
+                                <i class="bi bi-file-pdf"></i> PDF előnézet
+                                <span class="badge bg-secondary ms-1">F-0086</span>
+                            </button>
+                        </div>
+
+                        <!-- Adatvédelmi nyilatkozat -->
+                        <div class="mt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="adatvedelmiElfogadva" id="adatvedelmiCheck" required>
+                                <label class="form-check-label" for="adatvedelmiCheck">
+                                    Elfogadom az <a href="#" @click.prevent="showAdatvedelmiNyilatkozat">adatvédelmi nyilatkozatot</a> és hozzájárulok személyes adataim kezeléséhez.
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- F-0085 - Véglegesítés gomb -->
+                        <div class="mt-4">
+                            <button class="btn btn-success btn-lg" @click="veglegesitKerelem" :disabled="!veglegesitheto">
+                                <i class="bi bi-check-circle"></i> Kérelem véglegesítése
+                                <span class="badge bg-light text-dark ms-1">F-0085</span>
+                            </button>
+                            <div v-if="!veglegesitheto" class="alert alert-warning mt-3">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                A véglegesítéshez el kell fogadnia az adatvédelmi nyilatkozatot!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. LÉPÉS: Benyújtás (F-0087, UCE-1771) -->
+                <div v-if="currentStep === 5" class="card shadow-sm fade-in">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-send-check"></i> Kérelem benyújtása
+                            <span class="badge bg-light text-dark ms-2">F-0087</span>
+                            <span class="badge bg-info ms-1">UCE-1771</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div v-if="!benyujtva">
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i>
+                                A kérelem véglegesítve! Készen áll a benyújtásra.
+                            </div>
+
+                            <p><strong>Mit jelent a benyújtás?</strong></p>
+                            <ul>
+                                <li>A kérelem beérkezik a hatósághoz</li>
+                                <li>Automatikus iktatás az EKEIDR rendszerben</li>
+                                <li>E-mail értesítést kap az iktatószámról</li>
+                                <li>A kérelem feldolgozása megkezdődik</li>
+                            </ul>
+
+                            <button class="btn btn-success btn-lg mt-3" @click="benyujtKerelem">
+                                <i class="bi bi-send-fill"></i> Kérelem hivatalos benyújtása
+                            </button>
+                        </div>
+
+                        <div v-else class="text-center">
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill fs-1"></i>
+                                <h4 class="mt-3">Sikeres benyújtás!</h4>
+                                <p>A kérelem sikeresen benyújtásra került.</p>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Ügyazonosító</h6>
+                                    <h3 class="text-vasut">{{ ugyazonosito }}</h3>
+
+                                    <hr>
+
+                                    <p><strong>Következő lépések:</strong></p>
+                                    <ul class="text-start">
+                                        <li>Értesítés e-mailben: {{ kerelem.email }}</li>
+                                        <li>Hatósági feldolgozás: 30 nap</li>
+                                        <li>Ügy követése: Munkalista menüpontban</li>
+                                    </ul>
+
+                                    <div class="d-flex gap-2 justify-content-center mt-4">
+                                        <button class="btn btn-outline-vasut" @click="letoltIgazolas">
+                                            <i class="bi bi-download"></i> Benyújtási igazolás letöltése
+                                        </button>
+                                        <a href="munkalista.html" class="btn btn-vasut">
+                                            <i class="bi bi-list-check"></i> Ugrás a Munkalistához
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Lábléc navigáció -->
+        <div class="border-top bg-light p-3">
+            <div class="container">
+                <!-- Állapot jelző -->
+                <div class="mb-2" v-if="currentStep < 5">
+                    <small class="text-muted">
+                        <strong>Lépés {{ currentStep }}/5:</strong>
+                        <span v-if="currentStep === 1">
+                            <i class="bi" :class="canProceed ? 'bi-check-circle text-success' : 'bi-circle'"></i>
+                            Adatok {{ canProceed ? 'kitöltve' : 'kitöltése' }}
+                        </span>
+                        <span v-if="currentStep === 2">
+                            <i class="bi" :class="dijFizetve ? 'bi-check-circle text-success' : 'bi-circle'"></i>
+                            Díj {{ dijFizetve ? 'fizetve' : 'fizetése' }}
+                        </span>
+                        <span v-if="currentStep === 3">
+                            <i class="bi" :class="canProceed ? 'bi-check-circle text-success' : 'bi-circle'"></i>
+                            Mellékletek {{ feltoltottMelleketekSzama }}/{{ kotelezoMellekletek.length }}
+                        </span>
+                        <span v-if="currentStep === 4">
+                            <i class="bi" :class="veglegesitve ? 'bi-check-circle text-success' : 'bi-circle'"></i>
+                            {{ veglegesitve ? 'Véglegesítve' : 'Véglegesítés' }}
+                        </span>
+                    </small>
+                </div>
+
+                <!-- Navigációs gombok -->
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary" @click="previousStep" :disabled="currentStep === 1 || benyujtva">
+                        <i class="bi bi-arrow-left"></i> Vissza
+                    </button>
+                    <button class="btn btn-vasut" @click="nextStep" :disabled="!canProceed" v-if="currentStep < 5">
+                        Tovább <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Mock adatok -->
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Közös funkciók -->
+    <script src="../../assets/js/vihar-common.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Wizard állapot
+                    currentStep: 1,
+
+                    // Ügyfél adatok
+                    ugyfel: {
+                        nev: "Teszt Felhasználó"
+                    },
+
+                    // Kérelem adatok (F-0069)
+                    kerelem: {
+                        vezeteknev: "",
+                        keresztnev: "",
+                        szuletesiNev: "",
+                        szuletesiHely: "",
+                        szuletesiDatum: "",
+                        anyaNeve: "",
+                        lakcim: {
+                            iranyitoszam: "",
+                            telepules: "",
+                            kozterulet: "",
+                            hazszam: "",
+                            emelet: "",
+                            ajto: ""
+                        },
+                        ertesitesiCim: {
+                            iranyitoszam: "",
+                            telepules: "",
+                            kozterulet: ""
+                        },
+                        telefonszam: "",
+                        email: "",
+                        vizsgalatTipusa: "",
+                        munkaltato: "",
+                        jarmuvezetoi_kategoriak: [],
+                        kezelo_orvos_neve: "",
+                        veszelyhelyzet_kapcsolattarto: "",
+                        veszelyhelyzet_telefon: ""
+                    },
+
+                    // Értesítési cím
+                    ertesitesiCimKulonbozo: false,
+
+                    // Díjak (F-0070, F-0082)
+                    dijak: {
+                        alapdij: 15000,
+                        kategoriak: []
+                    },
+                    dijFizetve: false,
+
+                    // Mellékletek (F-0084)
+                    kotelezoMellekletek: [
+                        { nev: "Személyi igazolvány", leiras: "Mindkét oldal másolata", feltoltve: false },
+                        { nev: "Lakcímkártya", leiras: "Mindkét oldal másolata", feltoltve: false },
+                        { nev: "Orvosi igazolás", leiras: "Előzetes egészségügyi vizsgálat eredménye", feltoltve: false }
+                    ],
+                    opcionalisMellekletek: [
+                        { nev: "Korábbi minősítés", leiras: "Ha van meglévő járművezető minősítés", feltoltve: false },
+                        { nev: "Munkáltatói igazolás", leiras: "Vasúti munkáltatótól", feltoltve: false }
+                    ],
+
+                    // Véglegesítés (F-0085, F-0086)
+                    adatvedelmiElfogadva: false,
+                    veglegesitve: false,
+
+                    // Benyújtás (F-0087)
+                    benyujtva: false,
+                    ugyazonosito: ""
+                };
+            },
+            computed: {
+                // Díj kalkuláció (F-0070)
+                osszesitettDij() {
+                    let osszeg = this.dijak.alapdij;
+                    this.dijak.kategoriak.forEach(k => osszeg += k.osszeg);
+                    return osszeg;
+                },
+
+                // Feltöltött mellékletek
+                feltoltottMelleketekSzama() {
+                    return [...this.kotelezoMellekletek, ...this.opcionalisMellekletek]
+                        .filter(m => m.feltoltve).length;
+                },
+
+                // Lépés átlépés ellenőrzés
+                canProceed() {
+                    if (this.currentStep === 1) {
+                        return this.kerelem.vezeteknev && this.kerelem.keresztnev &&
+                               this.kerelem.telefonszam && this.kerelem.email &&
+                               this.kerelem.vizsgalatTipusa && this.kerelem.jarmuvezetoi_kategoriak.length > 0;
+                    }
+                    if (this.currentStep === 2) {
+                        return this.dijFizetve;
+                    }
+                    if (this.currentStep === 3) {
+                        return this.kotelezoMellekletek.every(m => m.feltoltve);
+                    }
+                    if (this.currentStep === 4) {
+                        return this.veglegesitve;
+                    }
+                    return true;
+                },
+
+                // Véglegesítés ellenőrzés
+                veglegesitheto() {
+                    return this.adatvedelmiElfogadva && this.feltoltottMelleketekSzama >= 3;
+                },
+
+                // Vizsgálat típus megjelenítő név
+                vizsgalatTipusaNev() {
+                    const tipusok = {
+                        'elozetes': 'Előzetes alkalmassági vizsgálat',
+                        'megujitas': 'Meglévő minősítés megújítása',
+                        'kiegeszites': 'Kiegészítő vizsgálat'
+                    };
+                    return tipusok[this.kerelem.vizsgalatTipusa] || '';
+                }
+            },
+            watch: {
+                // Díjkalkuláció kategóriák alapján (F-0070)
+                'kerelem.jarmuvezetoi_kategoriak': {
+                    handler(ujKategoriak) {
+                        this.dijak.kategoriak = ujKategoriak.map(kat => ({
+                            nev: `Kategória ${kat}`,
+                            osszeg: 5000
+                        }));
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                // Navigáció
+                nextStep() {
+                    if (this.canProceed && this.currentStep < 5) {
+                        this.currentStep++;
+                        window.scrollTo(0, 0);
+                    }
+                },
+                previousStep() {
+                    if (this.currentStep > 1) {
+                        this.currentStep--;
+                        window.scrollTo(0, 0);
+                    }
+                },
+
+                // F-0082 - Díjbekérő letöltése
+                letoltDijbekero() {
+                    console.log('[F-0082] Díjbekérő PDF generálása...');
+                    // Mock: PDF generálás
+                    VahapCommon.notifications.show('Díjbekérő letöltése megkezdődött', 'success');
+                },
+
+                // F-0083 - Bankkártyás fizetés
+                bankkartyas_fizetes() {
+                    console.log('[F-0083] Bankkártyás fizetés indítása...');
+                    // Mock: Fizetési kapu
+                    setTimeout(() => {
+                        this.dijFizetve = true;
+                        VahapCommon.notifications.show('Fizetés sikeres!', 'success');
+                    }, 1000);
+                },
+
+                // F-0083 - Átutalás
+                atutalas_fizetes() {
+                    console.log('[F-0083] Átutalási adatok megjelenítése...');
+                    VahapCommon.notifications.show('Átutalási adatok elküldve e-mailben', 'info');
+                },
+
+                // Teszt: Gyors fizetés
+                gyorsFizetes() {
+                    console.log('[TESZT] Azonnali fizetés szimuláció');
+                    this.dijFizetve = true;
+                    VahapCommon.notifications.show('Díj fizetés szimulálva - folytathatja!', 'success');
+                },
+
+                // F-0084 - Melléklet feltöltés
+                feltoltMelleklet(event, melleklet) {
+                    console.log('[F-0084] Melléklet feltöltése:', melleklet.nev);
+                    const file = event.target.files[0];
+                    if (file) {
+                        // Fájl méret ellenőrzés (max 10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                            VahapCommon.notifications.show('A fájl túl nagy! Maximum 10MB lehet.', 'error');
+                            return;
+                        }
+
+                        // Fájl típus ellenőrzés
+                        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                        if (!allowedTypes.includes(file.type)) {
+                            VahapCommon.notifications.show('Csak PDF, JPG és PNG fájlok engedélyezettek!', 'error');
+                            return;
+                        }
+
+                        // Mock: Feltöltés szimuláció
+                        melleklet.file = file;
+                        melleklet.feltoltve = true;
+                        VahapCommon.notifications.show(`${melleklet.nev} feltöltve (${this.formatFileSize(file.size)})`, 'success');
+                    }
+                },
+
+                // Melléklet törlése
+                torolMelleklet(melleklet) {
+                    melleklet.feltoltve = false;
+                    melleklet.file = null;
+                    VahapCommon.notifications.show(`${melleklet.nev} törölve`, 'info');
+                },
+
+                // Fájlméret formázás
+                formatFileSize(bytes) {
+                    if (!bytes) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                },
+
+                // Teszt: Összes kötelező melléklet feltöltése
+                osszMellekletFeltolt() {
+                    console.log('[TESZT] Összes kötelező melléklet feltöltése...');
+
+                    // Mock fájl objektumok létrehozása
+                    this.kotelezoMellekletek.forEach((melleklet, index) => {
+                        const mockFile = new File(['mock content'], `${melleklet.nev}.pdf`, { type: 'application/pdf' });
+                        Object.defineProperty(mockFile, 'size', { value: 1024 * (index + 1) });
+                        melleklet.file = mockFile;
+                        melleklet.feltoltve = true;
+                    });
+
+                    VahapCommon.notifications.show('Összes kötelező melléklet feltöltve (teszt)', 'success');
+                },
+
+                // F-0086 - PDF előnézet
+                pdfElonezet() {
+                    console.log('[F-0086] PDF előnézet generálása...');
+                    VahapCommon.notifications.show('PDF előnézet megnyitása...', 'info');
+                },
+
+                // F-0085 - Véglegesítés
+                veglegesitKerelem() {
+                    console.log('[F-0085] Kérelem véglegesítése...');
+                    this.veglegesitve = true;
+                    this.currentStep = 5;
+                    VahapCommon.notifications.show('Kérelem véglegesítve!', 'success');
+                },
+
+                // F-0087 - Benyújtás
+                benyujtKerelem() {
+                    console.log('[F-0087] Kérelem benyújtása (UCE-1771)...');
+
+                    // Ügyazonosító generálása
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const randomNum = Math.floor(Math.random() * 900000) + 100000;
+                    this.ugyazonosito = `VAHAP-V-${year}-${randomNum}`;
+
+                    console.log('Generált ügyazonosító:', this.ugyazonosito);
+
+                    // Mock: EKEIDR integráció szimuláció
+                    setTimeout(() => {
+                        this.benyujtva = true;
+                        console.log('Benyújtás állapot:', this.benyujtva);
+
+                        VahapCommon.notifications.show('Kérelem sikeresen benyújtva!', 'success');
+
+                        // LocalStorage mentés
+                        const ugyek = JSON.parse(localStorage.getItem('vahap_ugyek_kulso_vasut') || '[]');
+                        ugyek.push({
+                            ugyazonosito: this.ugyazonosito,
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezetők előzetes alkalmassági vizsgálata',
+                            statusz: 'folyamatban',
+                            statuszClass: 'pending',
+                            benyujtasDatum: now.toISOString().split('T')[0],
+                            hatarido: new Date(now.getTime() + 30*24*60*60*1000).toISOString().split('T')[0],
+                            ugyfel: this.kerelem.vezeteknev + ' ' + this.kerelem.keresztnev,
+                            kerelem: this.kerelem,
+                            datum: now.toISOString()
+                        });
+                        localStorage.setItem('vahap_ugyek_kulso_vasut', JSON.stringify(ugyek));
+
+                        console.log('Ügy elmentve LocalStorage-ba');
+                    }, 1000);
+                },
+
+                // Letöltés
+                letoltIgazolas() {
+                    console.log('Benyújtási igazolás letöltése...');
+                    VahapCommon.notifications.show('Igazolás letöltése...', 'info');
+                },
+
+                // Piszkozat mentés
+                saveDraft() {
+                    localStorage.setItem('vahap_draft_vasut', JSON.stringify(this.kerelem));
+                    VahapCommon.notifications.show('Piszkozat mentve', 'success');
+                },
+
+                // Adatvédelmi nyilatkozat
+                showAdatvedelmiNyilatkozat() {
+                    VahapCommon.notifications.show('Adatvédelmi nyilatkozat megnyitása...', 'info');
+                },
+
+                // Súgó
+                showHelp() {
+                    VahapCommon.notifications.show('Súgó megnyitása...', 'info');
+                },
+
+                // Példaadatok kitöltése
+                toltsPeldaAdatokkal() {
+                    console.log('[VAHAP] Példaadatok betöltése...');
+
+                    this.kerelem.vezeteknev = "Kovács";
+                    this.kerelem.keresztnev = "János";
+                    this.kerelem.szuletesiNev = "Kovács János";
+                    this.kerelem.szuletesiHely = "Budapest";
+                    this.kerelem.szuletesiDatum = "1985-03-15";
+                    this.kerelem.anyaNeve = "Nagy Mária";
+
+                    this.kerelem.lakcim.iranyitoszam = "1052";
+                    this.kerelem.lakcim.telepules = "Budapest";
+                    this.kerelem.lakcim.kozterulet = "Váci utca";
+                    this.kerelem.lakcim.hazszam = "12";
+                    this.kerelem.lakcim.emelet = "2";
+                    this.kerelem.lakcim.ajto = "5";
+
+                    this.kerelem.telefonszam = "+36301234567";
+                    this.kerelem.email = "kovacs.janos@example.hu";
+
+                    this.kerelem.vizsgalatTipusa = "elozetes";
+                    this.kerelem.munkaltato = "MÁV-START Zrt.";
+                    this.kerelem.jarmuvezetoi_kategoriak = ["A", "B"];
+
+                    this.kerelem.kezelo_orvos_neve = "Dr. Szabó Péter";
+                    this.kerelem.veszelyhelyzet_kapcsolattarto = "Nagy Anna";
+                    this.kerelem.veszelyhelyzet_telefon = "+36309876543";
+
+                    VahapCommon.notifications.show('Példaadatok betöltve!', 'success');
+                },
+
+                // Vissza a dashboardra
+                visszaADashboardra() {
+                    // Ellenőrzi, hogy van-e nem mentett változás
+                    const vanKitoltottAdat = this.kerelem.vezeteknev || this.kerelem.keresztnev || this.kerelem.email;
+
+                    if (vanKitoltottAdat && !this.benyujtva) {
+                        if (confirm('Van kitöltött adat! Biztosan vissza szeretne lépni a munkalistára?\n\nTipp: Használja a "Mentés piszkozatként" gombot!')) {
+                            window.location.href = 'munkalista.html';
+                        }
+                    } else {
+                        window.location.href = 'munkalista.html';
+                    }
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Vasúti Kérelem Wizard betöltve');
+                console.log('Funkciók: F-0069, F-0070, F-0082, F-0083, F-0084, F-0085, F-0086, F-0087');
+                console.log('Use Cases: UCE-1761, UCE-1762, UCE-1763, UCE-1772, UCE-1776, UCE-1771');
+
+                // Piszkozat betöltés
+                const draft = localStorage.getItem('vahap_draft_vasut');
+                if (draft) {
+                    this.kerelem = JSON.parse(draft);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

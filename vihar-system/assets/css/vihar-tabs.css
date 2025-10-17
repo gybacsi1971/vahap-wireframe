@@ -1,0 +1,193 @@
+/*
+ * VAHAP - Tab Rendszer CSS
+ * Középső oszlop tab megjelenítések
+ */
+
+/* ========================================
+   ÜGYFEJLÉC (CASE HEADER)
+   ======================================== */
+
+.case-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.case-info-item {
+    padding: 0.5rem;
+    border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+.case-info-item:last-child {
+    border-right: none;
+}
+
+.case-info-label {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin-bottom: 0.25rem;
+}
+
+.case-info-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ========================================
+   TAB PANE ANIMÁCIÓ
+   ======================================== */
+
+.tab-pane {
+    /* NE használjunk display: none-t, mert a Vue v-show használja a display tulajdonságot! */
+}
+
+.tab-pane.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========================================
+   TAB FEJLÉC
+   ======================================== */
+
+.tab-header {
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+    padding: 1.5rem;
+    border-left: 4px solid var(--vasut-color);
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tab-header h5 {
+    color: var(--vasut-color);
+    margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   STÁTUSZ ALERT
+   ======================================== */
+
+.alert-statusz {
+    border-left: 4px solid;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.alert-statusz.alert-warning {
+    border-left-color: var(--vahap-warning);
+    background-color: #fff3cd;
+}
+
+.alert-statusz.alert-secondary {
+    border-left-color: var(--vahap-secondary);
+}
+
+/* ========================================
+   ELLENŐRZÉSI LISTA (CHECKLIST)
+   ======================================== */
+
+.checklist-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.checklist-card .card-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.checklist-item {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item:hover {
+    background-color: #f8f9fa;
+}
+
+.checklist-item.checked {
+    background-color: #d4edda;
+}
+
+.checklist-item.checked .form-check-label {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+.checklist-item .form-check-input:checked {
+    background-color: var(--vahap-success);
+    border-color: var(--vahap-success);
+}
+
+/* ========================================
+   MEGJEGYZÉS / TEXTAREA
+   ======================================== */
+
+.form-label.fw-bold {
+    color: var(--vasut-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+    border-color: var(--vasut-color);
+    box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.25);
+}
+
+/* ========================================
+   DÖNTÉS GOMBOK
+   ======================================== */
+
+.decision-button {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+}
+
+.decision-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.decision-button .badge {
+    font-size: 0.75rem;
+}
+
+/* ========================================
+   DOKUMENTUM KÁRTYÁK
+   ======================================== */
+
+.card.h-100 {
+    transition: all 0.2s ease;
+}
+
+.card.h-100:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card.h-100 i {
+    transition: color 0.2s ease;
+}
+
+.card.h-100:hover i {
+    transform: scale(1.1);
+}

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ügy részletei | VAHAP Vasúti Modul</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css?v=2">
+</head>
+<body>
+    <div id="app" class="container-fluid vh-100 d-flex flex-column p-0">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-light bg-light border-bottom">
+            <div class="container-fluid px-4">
+                <span class="navbar-brand mb-0">
+                    <i class="bi bi-train-front text-vasut"></i>
+                    <strong>VAHAP - Vasúti Modul</strong>
+                    <span class="badge bg-vasut ms-2">V-044</span>
+                </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i> {{ ugyfel.nev }}
+                    </span>
+                    <a href="munkalista.html" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Vissza a munkalistához
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Fő tartalom -->
+        <div class="flex-grow-1 overflow-auto">
+            <div class="container py-4">
+
+                <!-- Ügyfejléc -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-vasut text-white">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-folder"></i> {{ ugy.ugyazonosito }}
+                                </h5>
+                                <small>{{ ugy.megnevezes }}</small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge badge-status" :class="'badge-' + ugy.statuszClass">
+                                    {{ ugy.statusz }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Benyújtás dátuma:</strong><br>
+                                {{ ugy.benyujtasDatum }}
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Határidő:</strong><br>
+                                {{ ugy.hatarido }}
+                            </div>
+                            <div class="col-md-3" v-if="ugy.dontesDatum">
+                                <strong>Döntés dátuma:</strong><br>
+                                {{ ugy.dontesDatum }}
+                            </div>
+                            <div class="col-md-3" v-if="ugy.hianypotlasHatarido">
+                                <strong>Hiánypótlás határidő:</strong><br>
+                                <span class="badge bg-warning text-dark">{{ ugy.hianypotlasHatarido }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ügyfél műveletek - Ha van teendő -->
+                <div v-if="ugy.ugyfelMuvelet" class="card shadow-sm mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-exclamation-triangle"></i> Intézkedés szükséges!
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hiánypótlás (F-0101) -->
+                        <div v-if="ugy.ugyfelMuvelet === 'hianypotlas'">
+                            <p><strong>Hiánypótlási felszólítás érkezett!</strong></p>
+                            <p>Kérjük, pótolja a hiányzó dokumentumokat és adatokat a megadott határidőig.</p>
+                            <p><strong>Határidő:</strong> <span class="badge bg-danger">{{ ugy.hianypotlasHatarido }}</span></p>
+                            <a :href="'hianypotlas.html?ugy=' + ugy.ugyazonosito" class="btn btn-warning">
+                                <i class="bi bi-pencil-square"></i> Hiánypótlás benyújtása
+                                <span class="badge bg-dark ms-1">F-0101</span>
+                            </a>
+                        </div>
+
+                        <!-- Tényállás tisztázás (F-0104) -->
+                        <div v-if="ugy.ugyfelMuvelet === 'tenyallas_tisztazas'">
+                            <p><strong>Tényállás tisztázás kérés érkezett!</strong></p>
+                            <p>A hatóság további információkat kér az ügy elbírálásához.</p>
+                            <p><strong>Határidő:</strong> <span class="badge bg-info">{{ ugy.tenyallasHatarido }}</span></p>
+                            <a :href="'tenyallas-tisztazas.html?ugy=' + ugy.ugyazonosito" class="btn btn-info text-white">
+                                <i class="bi bi-chat-left-text"></i> Tényállás tisztázás benyújtása
+                                <span class="badge bg-dark ms-1">F-0104</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dokumentumok (F-0107) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-file-text"></i> Dokumentumok
+                            <span class="badge bg-secondary ms-2">F-0107</span>
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <div class="list-group-item" v-for="(dok, index) in ugy.dokumentumok" :key="index">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="bi" :class="getDokumentumIkon(dok.tipus)"></i>
+                                        <strong>{{ dok.nev }}</strong>
+                                        <span v-if="dok.funkció" class="badge bg-info ms-2">{{ dok.funkció }}</span>
+                                    </div>
+                                    <button v-if="dok.letoltheto" class="btn btn-sm btn-outline-primary" @click="letoltDokumentum(dok)">
+                                        <i class="bi bi-download"></i> Letöltés
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="!ugy.dokumentumok || ugy.dokumentumok.length === 0" class="text-muted text-center py-3">
+                            <i class="bi bi-inbox"></i> Nincs elérhető dokumentum
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ügy előzmények -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-clock-history"></i> Ügy előzmények
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-date">{{ ugy.benyujtasDatum }}</div>
+                                <div class="timeline-content">
+                                    <strong>Kérelem benyújtva</strong><br>
+                                    <small>Kérelmező: {{ ugy.ugyfel }}</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item" v-if="ugy.statusz === 'hiánypótlás'">
+                                <div class="timeline-date">{{ getElozmenyDatum(5) }}</div>
+                                <div class="timeline-content">
+                                    <strong>Hiánypótlási felszólítás</strong><br>
+                                    <small>Határidő: {{ ugy.hianypotlasHatarido }}</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item" v-if="ugy.statusz === 'tényállás tisztázás'">
+                                <div class="timeline-date">{{ getElozmenyDatum(3) }}</div>
+                                <div class="timeline-content">
+                                    <strong>Tényállás tisztázás kérés</strong><br>
+                                    <small>Határidő: {{ ugy.tenyallasHatarido }}</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item" v-if="ugy.dontesDatum">
+                                <div class="timeline-date">{{ ugy.dontesDatum }}</div>
+                                <div class="timeline-content">
+                                    <strong>Döntés született</strong><br>
+                                    <small>Státusz: {{ ugy.statusz }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Mock adatok -->
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Közös funkciók -->
+    <script src="../../assets/js/vihar-common.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Ügyfél
+                    ugyfel: {
+                        nev: "Kovács János"
+                    },
+
+                    // Ügy adatok
+                    ugy: {}
+                };
+            },
+            methods: {
+                // Ügy betöltése
+                loadUgy(ugyazonosito) {
+                    console.log('[VAHAP] Ügy betöltése:', ugyazonosito);
+
+                    // Először a mock adatokból keresés
+                    let talalat = VahapMockData.vasut.ugyek_kulso.find(u => u.ugyazonosito === ugyazonosito);
+
+                    // Ha nincs mock, akkor LocalStorage
+                    if (!talalat) {
+                        const ugyek = JSON.parse(localStorage.getItem('vahap_ugyek_kulso_vasut') || '[]');
+                        talalat = ugyek.find(u => u.ugyazonosito === ugyazonosito);
+                    }
+
+                    if (talalat) {
+                        this.ugy = talalat;
+                        console.log('Ügy betöltve:', this.ugy);
+                    } else {
+                        console.error('Ügy nem található:', ugyazonosito);
+                        VahapCommon.notifications.show('Ügy nem található!', 'error');
+                    }
+                },
+
+                // F-0107 - Dokumentum letöltés
+                letoltDokumentum(dokumentum) {
+                    console.log('[F-0107] Dokumentum letöltése:', dokumentum.nev);
+                    VahapCommon.notifications.show(`${dokumentum.nev} letöltése...`, 'info');
+
+                    // Mock: PDF generálás/letöltés
+                    setTimeout(() => {
+                        VahapCommon.notifications.show(`${dokumentum.nev} letöltve`, 'success');
+                    }, 500);
+                },
+
+                // Dokumentum ikon
+                getDokumentumIkon(tipus) {
+                    const ikonok = {
+                        'pdf': 'bi-file-pdf text-danger',
+                        'doc': 'bi-file-word text-primary',
+                        'jpg': 'bi-file-image text-success',
+                        'png': 'bi-file-image text-success'
+                    };
+                    return ikonok[tipus] || 'bi-file-earmark';
+                },
+
+                // Előzmény dátum kalkuláció
+                getElozmenyDatum(napokElott) {
+                    const datum = new Date();
+                    datum.setDate(datum.getDate() - napokElott);
+                    return datum.toISOString().split('T')[0];
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Ügy részletek oldal betöltve');
+                console.log('Funkciók: F-0107 (Kérelem adatlap letöltés)');
+
+                // URL paraméter: ügyazonosító
+                const urlParams = new URLSearchParams(window.location.search);
+                const ugyId = urlParams.get('ugy');
+
+                if (ugyId) {
+                    this.loadUgy(ugyId);
+                } else {
+                    console.error('Nincs ügyazonosító az URL-ben');
+                    VahapCommon.notifications.show('Hiányzó ügyazonosító!', 'error');
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

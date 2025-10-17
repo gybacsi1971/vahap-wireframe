@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Díjtételek Paraméterezés</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP Közös Stílusok -->
+    <link rel="stylesheet" href="../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <param-header
+            title="Díjtételek Paraméterezés"
+            subtitle="F-0070 Díjkalkulátor | F-0082 Díjbekérő előállítása"
+            :breadcrumbs="breadcrumbs"
+            :show-save="hasChanges"
+            :show-back="true"
+            admin-user="Rendszergazda"
+            admin-role="VHF_ADMIN"
+            @save="saveDijak"
+            @back="navigateBack">
+        </param-header>
+
+        <!-- Tartalom -->
+        <div class="container-fluid py-4">
+            <div class="row">
+                <!-- Bal oldali menü -->
+                <div class="col-md-3">
+                    <div class="card sticky-top" style="top: 1rem;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-gear"></i> Paraméterek
+                            </h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="../index.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-house"></i> Főoldal
+                            </a>
+                            <a href="index.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-sliders"></i> Paraméterező Dashboard
+                            </a>
+                            <hr class="my-0">
+                            <a href="ellenorzesi-listak.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-list-check"></i> Ellenőrzési Listák
+                            </a>
+                            <a href="hataridok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-calendar-event"></i> Határidők
+                            </a>
+                            <a href="dijtetelek.html" class="list-group-item list-group-item-action active">
+                                <i class="bi bi-cash-stack"></i> Díjtételek
+                                <span class="badge bg-success float-end">Aktív</span>
+                            </a>
+                            <a href="dokumentum-sablonok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-file-earmark-text"></i> Dokumentum Sablonok
+                            </a>
+                            <a href="workflow-sablonok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-diagram-3"></i> Workflow Sablonok
+                            </a>
+                            <a href="alfolyamatok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-diagram-2"></i> Alfolyamatok
+                            </a>
+                            <a href="nyilvantartasok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-database"></i> Nyilvántartások
+                            </a>
+                            <a href="felhasznalok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-people"></i> Felhasználók
+                            </a>
+                            <a href="szerepkorok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-shield-check"></i> Szerepkörök
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fő tartalom -->
+                <div class="col-md-9">
+                    <!-- Ügytípus választó -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label mb-0">
+                                        <i class="bi bi-filter"></i> Ügytípus szűrő
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" v-model="ugytipus">
+                                        <option value="V-044">V-044 - Vasúti járművezetők</option>
+                                        <option value="H-052">H-052 - Hajózási létesítmények</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Díjkalkulátor gomb -->
+                    <div class="mb-3 text-end">
+                        <button class="btn btn-primary" @click="showCalculator = true">
+                            <i class="bi bi-calculator"></i> Díjkalkulátor teszt
+                        </button>
+                    </div>
+
+                    <!-- Díjtételek komponens -->
+                    <param-dijtetelek
+                        :ugytipus="ugytipus"
+                        @save="handleSave"
+                        @change="handleChange">
+                    </param-dijtetelek>
+                </div>
+            </div>
+        </div>
+
+        <!-- Díjkalkulátor modal -->
+        <div v-if="showCalculator" class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-calculator"></i> Díjkalkulátor - {{ ugytipus }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="showCalculator = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>{{ currentDijak?.megnevezes }}</strong><br>
+                            <small>{{ currentDijak?.jogszabaly }}</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="border-bottom pb-2">1. Válassza ki a díjtételeket:</h6>
+                            <div v-for="dij in currentDijak?.dijak.filter(d => d.aktiv)" :key="dij.id" class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox"
+                                       :id="'calc_' + dij.id"
+                                       :value="dij"
+                                       :checked="dij.kotelezo"
+                                       :disabled="dij.kotelezo"
+                                       v-model="calculatorSelectedDijak">
+                                <label class="form-check-label d-flex justify-content-between align-items-center w-100"
+                                       :for="'calc_' + dij.id">
+                                    <span>
+                                        {{ dij.megnevezes }}
+                                        <span v-if="dij.kotelezo" class="badge bg-danger ms-1">Kötelező</span>
+                                        <span v-if="dij.tipus === 'alapdij'" class="badge bg-success ms-1">Alapdíj</span>
+                                        <span v-else class="badge bg-info ms-1">Pótdíj</span>
+                                    </span>
+                                    <strong class="text-primary">{{ formatCurrency(dij.osszeg) }}</strong>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4" v-if="currentDijak?.kedvezmenyek.length > 0">
+                            <h6 class="border-bottom pb-2">2. Válasszon kedvezményt (opcionális):</h6>
+                            <select class="form-select form-select-lg" v-model="calculatorKedvezmeny">
+                                <option :value="null">Nincs kedvezmény</option>
+                                <option v-for="kedv in currentDijak.kedvezmenyek.filter(k => k.aktiv)"
+                                        :key="kedv.id" :value="kedv">
+                                    {{ kedv.megnevezes }} (-{{ kedv.szazalek }}%)
+                                </option>
+                            </select>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">
+                                    <i class="bi bi-receipt"></i> Díjkalkuláció összesítő
+                                </h6>
+                                <div class="row mb-2">
+                                    <div class="col-8"><strong>Alapdíj:</strong></div>
+                                    <div class="col-4 text-end">{{ formatCurrency(calculatorAlapdij) }}</div>
+                                </div>
+                                <div class="row mb-2" v-if="calculatorPotdij > 0">
+                                    <div class="col-8"><strong>Pótdíjak összesen:</strong></div>
+                                    <div class="col-4 text-end">{{ formatCurrency(calculatorPotdij) }}</div>
+                                </div>
+                                <div class="row mb-2" v-if="calculatorKedvezmeny">
+                                    <div class="col-8">
+                                        <strong>Kedvezmény ({{ calculatorKedvezmeny.megnevezes }}, {{ calculatorKedvezmeny.szazalek }}%):</strong>
+                                    </div>
+                                    <div class="col-4 text-end text-success">
+                                        -{{ formatCurrency(calculatorKedvezmenyOsszeg) }}
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-8"><h5>Fizetendő összeg:</h5></div>
+                                    <div class="col-4 text-end">
+                                        <h4 class="text-primary mb-0">{{ formatCurrency(calculatorVegosszeg) }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Figyelem:</strong> Ez egy teszt kalkuláció. Az éles rendszerben a díjbekérő automatikusan generálódik.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="showCalculator = false">Bezárás</button>
+                        <button type="button" class="btn btn-primary" @click="generateDijbekero">
+                            <i class="bi bi-file-earmark-pdf"></i> Díjbekérő generálása (F-0082)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Paraméterező komponensek -->
+    <script src="../assets/js/components/parameterezo/param-header.js"></script>
+    <script src="../assets/js/components/parameterezo/param-tabla.js"></script>
+    <script src="../assets/js/components/parameterezo/param-dijtetelek.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            components: {
+                'param-header': ParamHeader,
+                'param-dijtetelek': ParamDijtetelek
+            },
+            data() {
+                return {
+                    ugytipus: 'V-044',
+                    hasChanges: false,
+                    showCalculator: false,
+                    calculatorSelectedDijak: [],
+                    calculatorKedvezmeny: null,
+                    breadcrumbs: [
+                        { label: 'Főoldal', url: '../index.html' },
+                        { label: 'Paraméterező', url: 'index.html' },
+                        { label: 'Díjtételek', url: '' }
+                    ]
+                };
+            },
+            computed: {
+                currentDijak() {
+                    if (!VIHARMockData?.parameterezo?.dijtetelek) return null;
+                    const key = this.ugytipus.replace('-', '_');
+                    return VIHARMockData.parameterezo.dijtetelek[key];
+                },
+                calculatorAlapdij() {
+                    return this.calculatorSelectedDijak
+                        .filter(d => d.tipus === 'alapdij')
+                        .reduce((sum, d) => sum + d.osszeg, 0);
+                },
+                calculatorPotdij() {
+                    return this.calculatorSelectedDijak
+                        .filter(d => d.tipus === 'potdij')
+                        .reduce((sum, d) => sum + d.osszeg, 0);
+                },
+                calculatorKedvezmenyOsszeg() {
+                    if (!this.calculatorKedvezmeny) return 0;
+                    const osszeg = this.calculatorAlapdij + this.calculatorPotdij;
+                    return Math.round(osszeg * this.calculatorKedvezmeny.szazalek / 100);
+                },
+                calculatorVegosszeg() {
+                    return this.calculatorAlapdij + this.calculatorPotdij - this.calculatorKedvezmenyOsszeg;
+                }
+            },
+            methods: {
+                navigateBack() {
+                    window.location.href = 'index.html';
+                },
+                saveDijak() {
+                    console.log('✅ Díjtételek mentve');
+                    alert('Díjtételek sikeresen mentve!');
+                    this.hasChanges = false;
+                },
+                handleSave(data) {
+                    console.log('✅ Díjtételek mentve:', data);
+                    alert('Díjtételek sikeresen mentve!');
+                    this.hasChanges = false;
+                },
+                handleChange(data) {
+                    console.log('📝 Változás észlelve:', data);
+                    this.hasChanges = true;
+                },
+                formatCurrency(value) {
+                    return new Intl.NumberFormat('hu-HU', {
+                        style: 'currency',
+                        currency: 'HUF',
+                        maximumFractionDigits: 0
+                    }).format(value);
+                },
+                generateDijbekero() {
+                    alert('F-0082 - Díjbekérő generálása funkció\n\n' +
+                          'Fizetendő összeg: ' + this.formatCurrency(this.calculatorVegosszeg) + '\n\n' +
+                          'A valós rendszerben itt egy PDF díjbekérő generálódna.');
+                }
+            },
+            watch: {
+                ugytipus() {
+                    // Reset calculator when switching case type
+                    this.calculatorSelectedDijak = [];
+                    this.calculatorKedvezmeny = null;
+                    // Select mandatory items by default
+                    if (this.currentDijak) {
+                        this.calculatorSelectedDijak = this.currentDijak.dijak.filter(d => d.kotelezo && d.aktiv);
+                    }
+                },
+                showCalculator(newVal) {
+                    if (newVal && this.currentDijak) {
+                        // Initialize calculator with mandatory items
+                        this.calculatorSelectedDijak = this.currentDijak.dijak.filter(d => d.kotelezo && d.aktiv);
+                    }
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Díjtételek paraméterezés betöltve');
+                // Initialize calculator with mandatory items
+                if (this.currentDijak) {
+                    this.calculatorSelectedDijak = this.currentDijak.dijak.filter(d => d.kotelezo && d.aktiv);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

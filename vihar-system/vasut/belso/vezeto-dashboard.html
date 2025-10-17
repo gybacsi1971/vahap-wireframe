@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vezető Dashboard - VAHAP Vasúti Modul</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Közös CSS -->
+    <link href="../../assets/css/vihar-common.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #004b87 0%, #0066aa 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border-left: 4px solid;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.new-cases {
+            border-left-color: #dc3545;
+        }
+
+        .stat-card.in-progress {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card.pending-decision {
+            border-left-color: #17a2b8;
+        }
+
+        .stat-card.completed {
+            border-left-color: #28a745;
+        }
+
+        .ugy-card {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .ugy-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <div class="dashboard-header">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 class="mb-0">
+                            <i class="bi bi-speedometer2"></i> Vezető Dashboard
+                            <span class="badge bg-light text-dark ms-2">V-044</span>
+                        </h3>
+                        <p class="mb-0 mt-2">
+                            <i class="bi bi-person-badge"></i> {{ currentUser.nev }} | {{ currentUser.beosztas }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <p class="mb-0">
+                            <i class="bi bi-calendar3"></i> {{ currentDate }}<br>
+                            <i class="bi bi-clock"></i> {{ currentTime }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statisztikai kártyák -->
+        <div class="container-fluid mb-4">
+            <div class="row g-3">
+                <!-- Új ügyek -->
+                <div class="col-md-3">
+                    <div class="card stat-card new-cases" @click="filterByStatus('új')">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">ÚJ ÜGYEK</h6>
+                                    <h2 class="mb-0">{{ stats.uj }}</h2>
+                                    <small class="text-muted">Kiosz tásra várnak</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-inbox-fill text-danger" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Folyamatban -->
+                <div class="col-md-3">
+                    <div class="card stat-card in-progress" @click="filterByStatus('folyamatban')">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">FOLYAMATBAN</h6>
+                                    <h2 class="mb-0">{{ stats.folyamatban }}</h2>
+                                    <small class="text-muted">Aktív feldolgozás</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-gear-fill text-warning" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Döntésre vár -->
+                <div class="col-md-3">
+                    <div class="card stat-card pending-decision" @click="filterByStatus('döntés előkészítése')">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">DÖNTÉSRE VÁR</h6>
+                                    <h2 class="mb-0">{{ stats.dontesre_var }}</h2>
+                                    <small class="text-muted">Jóváhagyásra</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-check-circle-fill text-info" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lezárt ügyek (havi) -->
+                <div class="col-md-3">
+                    <div class="card stat-card completed">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">LEZÁRVA (HÓNAP)</h6>
+                                    <h2 class="mb-0">{{ stats.lezart_honap }}</h2>
+                                    <small class="text-muted">Ez hónap</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-check2-all text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Főtartalom -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Bal oldal: Ügylista -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-folder2-open"></i> Ügyek áttekintése
+                                    <span class="badge bg-secondary ms-2">{{ filteredUgyek.length }}</span>
+                                </h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" @click="statusFilter = ''">
+                                        <i class="bi bi-x-circle"></i> Szűrő törlése
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Lista/csempe nézet komponens -->
+                            <vihar-lista-csempe
+                                :items="filteredUgyek"
+                                :view-mode="viewMode"
+                                item-type="ugy"
+                                :show-actions="true"
+                                :show-filters="true"
+                                @view-change="viewMode = $event"
+                                @item-click="openUgyDetails"
+                                @action-click="handleUgyAction">
+                            </vihar-lista-csempe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobb oldal: Gyors műveletek és értesítések -->
+                <div class="col-md-4">
+                    <!-- Gyors műveletek -->
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightning-charge"></i> Gyors műveletek
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-primary" @click="filterByStatus('új')">
+                                    <i class="bi bi-inbox"></i> Új ügyek megtekintése
+                                </button>
+                                <button class="btn btn-outline-warning" @click="filterHatarido()">
+                                    <i class="bi bi-alarm"></i> Lejáró határidők
+                                </button>
+                                <button class="btn btn-outline-info" @click="showReports = true">
+                                    <i class="bi bi-bar-chart"></i> Jelentések
+                                </button>
+                                <button class="btn btn-outline-secondary" @click="showSettings = true">
+                                    <i class="bi bi-gear"></i> Beállítások
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Értesítések / Feladatok -->
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0">
+                                <i class="bi bi-bell"></i> Értesítések
+                                <span class="badge bg-danger ms-2">{{ ertesitesek.length }}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a v-for="(ert, idx) in ertesitesek"
+                                   :key="idx"
+                                   href="#"
+                                   class="list-group-item list-group-item-action"
+                                   @click.prevent="handleErtesites(ert)">
+                                    <div class="d-flex align-items-start">
+                                        <i :class="ert.ikon" class="me-2 mt-1"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">{{ ert.cim }}</div>
+                                            <small class="text-muted">{{ ert.leiras }}</small>
+                                        </div>
+                                        <span :class="'badge bg-' + ert.prioritas + ' ms-2'">{{ ert.prioritas }}</span>
+                                    </div>
+                                </a>
+
+                                <div v-if="ertesitesek.length === 0" class="list-group-item text-muted text-center">
+                                    <i class="bi bi-check-circle"></i> Nincs új értesítés
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ügyintézők terhelése -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-people"></i> Ügyintézők terhelése
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div v-for="ui in ugyintezok" :key="ui.id" class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small>{{ ui.nev }}</small>
+                                    <small class="text-muted">{{ ui.aktiv_ugyek }} / {{ ui.max_kapacitas }}</small>
+                                </div>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar"
+                                         :class="'bg-' + terheltségSzín(ui)"
+                                         :style="{ width: terheltségSzázalék(ui) + '%' }">
+                                        {{ terheltségSzázalék(ui) }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feladatkiosztó modal komponens -->
+        <vihar-feladat-kioszt
+            v-if="selectedUgyForAssign"
+            :ugy="selectedUgyForAssign"
+            :mode="'modal'"
+            :show-button="false"
+            :ugyintezok="ugyintezok"
+            @feladat-kiosztva="handleFeladatKiosztva"
+            @modal-closed="selectedUgyForAssign = null">
+        </vihar-feladat-kioszt>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../../assets/js/vihar-config.js"></script>
+    <script src="../../assets/js/vihar-common.js"></script>
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- VAHAP Komponensek -->
+    <script src="../../assets/js/components/vihar-lista-csempe.js"></script>
+    <script src="../../assets/js/components/vihar-feladat-kioszt.js"></script>
+
+    <!-- Oldal specifikus Vue App -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            components: {
+                'vihar-lista-csempe': ViharListaCsempe,
+                'vihar-feladat-kioszt': ViharFeladatKioszt
+            },
+
+            data() {
+                return {
+                    currentUser: {
+                        nev: 'Dr. Nagy Andrea',
+                        beosztas: 'Osztályvezető',
+                        szerepkor: 'vezeto'
+                    },
+                    currentDate: new Date().toLocaleDateString('hu-HU'),
+                    currentTime: new Date().toLocaleTimeString('hu-HU'),
+
+                    viewMode: 'csempe',
+                    statusFilter: '',
+
+                    ugyek: [],
+                    ugyintezok: [],
+
+                    selectedUgyForAssign: null,
+
+                    ertesitesek: [
+                        {
+                            cim: 'Új ügy érkezett',
+                            leiras: 'VAHAP-V-2024-001240 - Sürgős elbírálás szükséges',
+                            ikon: 'bi bi-inbox-fill text-danger',
+                            prioritas: 'danger'
+                        },
+                        {
+                            cim: 'Határidő közeledik',
+                            leiras: '3 ügy határideje 3 napon belül lejár',
+                            ikon: 'bi bi-alarm-fill text-warning',
+                            prioritas: 'warning'
+                        },
+                        {
+                            cim: 'Véleményezésre vár',
+                            leiras: '2 határozat-tervezet vár jóváhagyásra',
+                            ikon: 'bi bi-file-earmark-text text-info',
+                            prioritas: 'info'
+                        }
+                    ],
+
+                    showReports: false,
+                    showSettings: false
+                };
+            },
+
+            computed: {
+                stats() {
+                    return {
+                        uj: this.ugyek.filter(u => u.statusz === 'új').length,
+                        folyamatban: this.ugyek.filter(u => u.statusz === 'folyamatban').length,
+                        dontesre_var: this.ugyek.filter(u => u.statusz === 'döntés előkészítése').length,
+                        lezart_honap: this.ugyek.filter(u => u.statusz === 'lezárt' && this.isThisMonth(u.lezarasDatum)).length
+                    };
+                },
+
+                filteredUgyek() {
+                    if (!this.statusFilter) return this.ugyek;
+                    return this.ugyek.filter(u => u.statusz === this.statusFilter);
+                }
+            },
+
+            methods: {
+                loadData() {
+                    // Mock ügyek betöltése
+                    this.ugyek = [
+                        {
+                            id: 1,
+                            ugyazonosito: 'VAHAP-V-2024-001234',
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                            ugyfel: { nev: 'Minta János' },
+                            statusz: 'új',
+                            benyujtasDatum: '2024-10-20',
+                            hatarido: '2024-11-20',
+                            prioritas: 'normal',
+                            ugyintezo: null
+                        },
+                        {
+                            id: 2,
+                            ugyazonosito: 'VAHAP-V-2024-001235',
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                            ugyfel: { nev: 'Teszt Erika' },
+                            statusz: 'folyamatban',
+                            benyujtasDatum: '2024-10-15',
+                            hatarido: '2024-11-15',
+                            prioritas: 'normal',
+                            ugyintezo: 'Dr. Szabó Péter'
+                        },
+                        {
+                            id: 3,
+                            ugyazonosito: 'VAHAP-V-2024-001236',
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                            ugyfel: { nev: 'Kovács Anna' },
+                            statusz: 'döntés előkészítése',
+                            benyujtasDatum: '2024-10-10',
+                            hatarido: '2024-11-10',
+                            prioritas: 'magas',
+                            ugyintezo: 'Nagy Andrea'
+                        },
+                        {
+                            id: 4,
+                            ugyazonosito: 'VAHAP-V-2024-001237',
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                            ugyfel: { nev: 'Nagy Péter' },
+                            statusz: 'új',
+                            benyujtasDatum: '2024-10-22',
+                            hatarido: '2024-11-22',
+                            prioritas: 'suergo',
+                            ugyintezo: null
+                        }
+                    ];
+
+                    // Mock ügyintézők betöltése
+                    this.ugyintezok = [
+                        { id: 'UI001', nev: 'Dr. Szabó Péter', aktiv_ugyek: 12, max_kapacitas: 20 },
+                        { id: 'UI002', nev: 'Nagy Andrea', aktiv_ugyek: 8, max_kapacitas: 15 },
+                        { id: 'UI003', nev: 'Kiss Gábor', aktiv_ugyek: 15, max_kapacitas: 18 }
+                    ];
+                },
+
+                filterByStatus(status) {
+                    this.statusFilter = status;
+                },
+
+                filterHatarido() {
+                    // Szűrés 7 napon belül lejáró ügyekre
+                    const today = new Date();
+                    const sevenDaysLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+                    this.ugyek = this.ugyek.filter(u => {
+                        const hatarido = new Date(u.hatarido);
+                        return hatarido >= today && hatarido <= sevenDaysLater;
+                    });
+                },
+
+                openUgyDetails(ugy) {
+                    // Ügy részleteinek megnyitása
+                    window.location.href = `ugy-munkalap-v3.html?ugyazonosito=${ugy.ugyazonosito}`;
+                },
+
+                handleUgyAction(event) {
+                    if (event.action === 'open') {
+                        this.openUgyDetails(event.item);
+                    }
+                },
+
+                handleFeladatKiosztva(kiosztas) {
+                    console.log('[Vezető Dashboard] Feladat kiosztva:', kiosztas);
+
+                    // Ügy státusz frissítése
+                    const ugy = this.ugyek.find(u => u.ugyazonosito === kiosztas.ugy.ugyazonosito);
+                    if (ugy) {
+                        ugy.statusz = 'folyamatban';
+                        ugy.ugyintezo = kiosztas.ugyintezo.nev;
+                    }
+
+                    this.selectedUgyForAssign = null;
+                },
+
+                handleErtesites(ert) {
+                    alert(`Értesítés: ${ert.cim}\n${ert.leiras}`);
+                },
+
+                terheltségSzín(ui) {
+                    const szazalek = (ui.aktiv_ugyek / ui.max_kapacitas) * 100;
+                    if (szazalek > 90) return 'danger';
+                    if (szazalek > 70) return 'warning';
+                    if (szazalek > 50) return 'info';
+                    return 'success';
+                },
+
+                terheltségSzázalék(ui) {
+                    return Math.round((ui.aktiv_ugyek / ui.max_kapacitas) * 100);
+                },
+
+                isThisMonth(datum) {
+                    if (!datum) return false;
+                    const d = new Date(datum);
+                    const now = new Date();
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                },
+
+                updateClock() {
+                    this.currentTime = new Date().toLocaleTimeString('hu-HU');
+                }
+            },
+
+            mounted() {
+                console.log('[VAHAP] Vezető Dashboard betöltve');
+                this.loadData();
+
+                // Óra frissítése minden másodpercben
+                setInterval(() => {
+                    this.updateClock();
+                }, 1000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

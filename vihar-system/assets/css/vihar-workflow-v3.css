@@ -1,0 +1,688 @@
+/* VAHAP Workflow v3 - 2 oszlopos layout stílusok */
+
+:root {
+    /* Workflow színek */
+    --wf-pending: #6c757d;
+    --wf-active: #2196F3;
+    --wf-completed: #4CAF50;
+    --wf-error: #f44336;
+    --wf-warning: #ff9800;
+
+    /* Komponens színek */
+    --comp-header: linear-gradient(90deg, #f8f9fa 0%, white 100%);
+    --comp-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --comp-border: #e9ecef;
+}
+
+/* ========================================
+   WORKFLOW KOMPONENSEK
+   ======================================== */
+
+/* Szignálás komponens */
+.szignalas-component {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.szignalas-header {
+    background: var(--comp-header);
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--comp-border);
+}
+
+.szignalas-target-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.szignalas-target-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.szignalas-target-item:hover {
+    background: #f8f9fa;
+    border-color: #2196F3;
+}
+
+.szignalas-target-item.selected {
+    background: #e3f2fd;
+    border-color: #2196F3;
+}
+
+/* Checklist komponens */
+.checklist-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.checklist-progress {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.checklist-progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.checklist-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+    transition: width 0.3s ease;
+}
+
+.checklist-group {
+    margin-bottom: 1.5rem;
+}
+
+.checklist-group-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s;
+}
+
+.checklist-item:hover {
+    background: #e9ecef;
+}
+
+.checklist-item.checked {
+    background: #e8f5e9;
+    border: 1px solid #4CAF50;
+}
+
+.checklist-item-checkbox {
+    width: 20px;
+    height: 20px;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+.checklist-item-content {
+    flex: 1;
+}
+
+.checklist-item-title {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.checklist-item-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+.checklist-item-code {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: #e9ecef;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    margin-left: 0.5rem;
+}
+
+/* Dokumentum gyártás komponens */
+.dokgyartas-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.dokgyartas-template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dokgyartas-template-card {
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dokgyartas-template-card:hover {
+    background: white;
+    border-color: #2196F3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dokgyartas-template-card.selected {
+    background: #e3f2fd;
+    border-color: #2196F3;
+}
+
+.dokgyartas-template-icon {
+    font-size: 2rem;
+    color: #2196F3;
+    margin-bottom: 0.5rem;
+}
+
+.dokgyartas-template-name {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.dokgyartas-template-code {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.dokgyartas-preview {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dokgyartas-fields {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.dokgyartas-field-group {
+    margin-bottom: 1.25rem;
+}
+
+.dokgyartas-field-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+/* Döntés komponens */
+.dontes-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.dontes-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dontes-option-card {
+    padding: 1.5rem;
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.dontes-option-card:hover {
+    border-color: #2196F3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dontes-option-card.selected {
+    border-color: #2196F3;
+    background: #e3f2fd;
+}
+
+.dontes-option-card.success {
+    border-left: 4px solid #4CAF50;
+}
+
+.dontes-option-card.warning {
+    border-left: 4px solid #ff9800;
+}
+
+.dontes-option-card.danger {
+    border-left: 4px solid #f44336;
+}
+
+.dontes-option-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.dontes-option-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+.dontes-option-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+}
+
+.dontes-option-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+/* Véleményezés komponens */
+.velemenyezes-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.velemenyezes-recipient-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.velemenyezes-recipient {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.velemenyezes-recipient:hover {
+    background: #f8f9fa;
+}
+
+.velemenyezes-recipient.selected {
+    background: #e3f2fd;
+}
+
+.velemenyezes-recipient-avatar {
+    width: 32px;
+    height: 32px;
+    background: #6c757d;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 0.75rem;
+}
+
+.velemenyezes-recipient-info {
+    flex: 1;
+}
+
+.velemenyezes-recipient-name {
+    font-weight: 500;
+    color: #212529;
+}
+
+.velemenyezes-recipient-role {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.velemenyezes-message {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 1rem;
+    min-height: 120px;
+}
+
+/* Kiadmányozás komponens */
+.kiadmanyozas-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.kiadmanyozas-document-preview {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    min-height: 300px;
+    margin-bottom: 1.5rem;
+}
+
+.kiadmanyozas-signature-area {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.kiadmanyozas-signature-canvas {
+    width: 100%;
+    height: 150px;
+    border: 1px dashed #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.kiadmanyozas-approval-options {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Expediálás komponens */
+.expedialas-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.expedialas-method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.expedialas-method-card {
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.expedialas-method-card:hover {
+    background: white;
+    border-color: #2196F3;
+}
+
+.expedialas-method-card.selected {
+    background: #e3f2fd;
+    border-color: #2196F3;
+}
+
+.expedialas-method-icon {
+    font-size: 2rem;
+    color: #2196F3;
+    margin-bottom: 0.5rem;
+}
+
+.expedialas-method-name {
+    font-weight: 500;
+    color: #212529;
+}
+
+.expedialas-recipient-details {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Rugalmas workflow komponens */
+.rugalmas-workflow-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.rugalmas-workflow-canvas {
+    min-height: 400px;
+    background: #fafafa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+}
+
+.rugalmas-workflow-node {
+    position: absolute;
+    background: white;
+    border: 2px solid #2196F3;
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 180px;
+    cursor: move;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.rugalmas-workflow-node-title {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
+.rugalmas-workflow-node-status {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.rugalmas-workflow-toolbar {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rugalmas-workflow-tool-btn {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rugalmas-workflow-tool-btn:hover {
+    background: #e3f2fd;
+    border-color: #2196F3;
+}
+
+/* Iktatás komponens */
+.iktatas-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.iktatas-form-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.iktatas-form-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+/* Nyilvántartás komponens */
+.nyilvantartas-component {
+    background: white;
+    border-radius: 8px;
+}
+
+.nyilvantartas-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.nyilvantartas-tab {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nyilvantartas-tab:hover {
+    color: #495057;
+}
+
+.nyilvantartas-tab.active {
+    color: #2196F3;
+    border-bottom-color: #2196F3;
+}
+
+.nyilvantartas-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.nyilvantartas-result-item {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nyilvantartas-result-item:hover {
+    background: #e9ecef;
+}
+
+.nyilvantartas-result-item.selected {
+    background: #e3f2fd;
+    border: 1px solid #2196F3;
+}
+
+/* ========================================
+   ANIMÁCIÓK
+   ======================================== */
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.component-enter {
+    animation: slideIn 0.3s ease-out;
+}
+
+.component-fade {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* ========================================
+   UTILITY OSZTÁLYOK
+   ======================================== */
+
+.wf-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.wf-badge-pending {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.wf-badge-active {
+    background: #e3f2fd;
+    color: #2196F3;
+}
+
+.wf-badge-completed {
+    background: #e8f5e9;
+    color: #4CAF50;
+}
+
+.wf-badge-error {
+    background: #ffebee;
+    color: #f44336;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .dokgyartas-template-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .dontes-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .component-card {
+        margin-bottom: 1rem;
+    }
+
+    .component-card-body {
+        padding: 1rem;
+    }
+
+    .dokgyartas-template-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .expedialas-method-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

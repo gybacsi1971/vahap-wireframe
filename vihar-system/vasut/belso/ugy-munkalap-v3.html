@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Vasúti Ügyintézői Munkalap (v3)</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP CSS Fájlok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-arculat.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-workflow-v3.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-wizard.css">
+
+    <style>
+        /* 3 oszlopos layout specifikus stílusok */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 60px);
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .main-content-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* BAL OLDALI WORKFLOW PANEL */
+        .workflow-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            border-right: 2px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .workflow-sidebar.collapsed {
+            width: 60px;
+        }
+
+        .workflow-sidebar-header {
+            padding: 1rem;
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Munkaterület (középen) */
+        .workspace-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fa;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Tab navigáció */
+        .workspace-tabs {
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            padding: 0 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .workspace-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .workspace-tab:hover {
+            color: #212529;
+            background: #f8f9fa;
+        }
+
+        .workspace-tab.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+            background: transparent;
+        }
+
+        .workspace-tab i {
+            font-size: 1.25rem;
+        }
+
+        /* Fejléc sáv */
+        .app-header {
+            height: 60px;
+            background: linear-gradient(135deg, #004b87 0%, #0066b3 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Ügy információs sáv - TELJES SZÉLESSÉGBEN */
+        .case-info-bar {
+            background: white;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .case-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .case-info-label {
+            font-size: 0.65rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .case-info-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #212529;
+            line-height: 1.2;
+        }
+
+        .case-info-value .badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            font-weight: 600;
+        }
+
+        /* Workflow lépések lista (függőleges) */
+        .workflow-steps-list {
+            padding: 1rem 0.5rem;
+            position: relative;
+        }
+
+        .workflow-step-wrapper {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .workflow-step-wrapper:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 26px;
+            top: 52px;
+            width: 2px;
+            height: calc(100% - 22px);
+            background: #dee2e6;
+            z-index: 0;
+        }
+
+        .workflow-step-wrapper.completed:not(:last-child)::after {
+            background: #4CAF50;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .workflow-step:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .workflow-step-icon {
+            width: 36px;
+            height: 36px;
+            background: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .workflow-step-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .workflow-step-name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .workflow-step-code {
+            font-size: 0.75rem;
+        }
+
+        /* Aktív állapot */
+        .workflow-step.active {
+            background: white;
+            border-color: #2196F3;
+            border-width: 3px;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+        }
+
+        .workflow-step.active .workflow-step-icon {
+            background: #2196F3;
+            color: white;
+        }
+
+        .workflow-step.active .workflow-step-name {
+            color: #2196F3;
+            font-weight: 700;
+        }
+
+        /* Befejezett állapot */
+        .workflow-step.completed {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-color: #4CAF50;
+        }
+
+        .workflow-step.completed .workflow-step-icon {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .workflow-step.completed .workflow-step-name {
+            color: #2E7D32;
+        }
+
+        /* Pending állapot */
+        .workflow-step.pending {
+            opacity: 0.7;
+        }
+
+        .workflow-step.pending .workflow-step-icon {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        /* Munkaterület tartalom */
+        .workspace-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            background: #f8f9fa;
+        }
+
+        /* Komponens kártyák */
+        .component-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .component-card-header {
+            background: linear-gradient(90deg, #f8f9fa 0%, white 100%);
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .component-card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .component-card-body {
+            padding: 1.5rem;
+        }
+
+        /* Jobb panel szakaszok */
+        .sidebar-section {
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Műveletgombok */
+        .action-buttons {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            margin-top: auto;
+        }
+
+        /* Dokumentumok tab tartalom */
+        .documents-section {
+            padding: 2rem;
+        }
+
+        .document-category {
+            margin-bottom: 2.5rem;
+        }
+
+        .document-category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+            border-left: 4px solid #2196F3;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .document-category-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .document-category-title {
+            flex: 1;
+            font-size: 1rem;
+        }
+
+        .document-category-count {
+            background: #2196F3;
+            color: white;
+            padding: 0.375rem 0.875rem;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .documents-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Dokumentum sor */
+        .document-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .document-row:hover {
+            background: #f8f9fa;
+            border-left: 3px solid #2196F3;
+            padding-left: calc(1.25rem - 3px);
+        }
+
+        .document-row-icon {
+            width: 40px;
+            height: 40px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #2196F3;
+            flex-shrink: 0;
+        }
+
+        .document-row-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .document-row-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #212529;
+            min-width: 250px;
+        }
+
+        .document-row-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .document-row-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .document-row-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .document-row-actions .btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        /* History Timeline */
+        .history-section {
+            padding: 2rem;
+        }
+
+        .history-timeline {
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .history-timeline::before {
+            content: '';
+            position: absolute;
+            left: 22px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #2196F3 0%, #4CAF50 100%);
+        }
+
+        .history-event {
+            position: relative;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .history-event-marker {
+            position: absolute;
+            left: -3rem;
+            top: 0;
+        }
+
+        .history-event-dot {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            border: 4px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 10;
+        }
+
+        .history-event-dot.status-completed {
+            background: #4CAF50;
+        }
+
+        .history-event-dot.status-inprogress {
+            background: #2196F3;
+        }
+
+        .history-event-dot.status-pending {
+            background: #6c757d;
+        }
+
+        .history-event-content {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .history-event-content:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            border-left-color: #2196F3;
+        }
+
+        .history-event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .history-event-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #212529;
+            margin: 0;
+        }
+
+        .history-event-time {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .history-event-description {
+            font-size: 0.875rem;
+            color: #495057;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .history-event-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .history-event-meta .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .history-event-meta .meta-item i {
+            font-size: 1rem;
+        }
+
+        /* Összekötő vonalak collapsed állapotban elrejtése */
+        .workflow-sidebar.collapsed .workflow-steps-list {
+            display: none;
+        }
+
+        .workflow-sidebar.collapsed .workflow-sidebar-header {
+            justify-content: center;
+        }
+
+        .workflow-sidebar.collapsed .workflow-sidebar-header span,
+        .workflow-sidebar.collapsed .workflow-sidebar-header button {
+            display: none;
+        }
+
+        /* Összekötő vonalak finomhangolása */
+        .workflow-step-wrapper:first-child .workflow-step {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .workflow-sidebar {
+                width: 240px;
+            }
+            .sidebar-column {
+                width: 320px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .workflow-sidebar {
+                width: 200px;
+            }
+            .sidebar-column {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .workflow-sidebar {
+                width: 60px;
+            }
+            .workflow-sidebar.collapsed {
+                width: 60px;
+            }
+            .workflow-steps-list {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .workflow-sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 2px solid #dee2e6;
+            }
+            .sidebar-column {
+                width: 100%;
+                height: 40vh;
+                border-left: none;
+                border-top: 1px solid #dee2e6;
+            }
+            .workflow-steps-list {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 1rem;
+            }
+            .workflow-step-wrapper {
+                min-width: 200px;
+                margin-right: 0.5rem;
+                margin-bottom: 0;
+            }
+            .workflow-step-wrapper::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <div class="app-header">
+            <h5>
+                <i class="bi bi-train-front me-2"></i>
+                VAHAP Vasúti Ügyintézői Felület
+            </h5>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span>{{ ugyintezo.nev }}</span>
+                <button class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-question-circle"></i> Súgó
+                </button>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <!-- Ügy információs sáv - TELJES SZÉLESSÉGBEN -->
+                <div class="case-info-bar">
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="case-info-item" style="width: 130px;">
+                            <span class="case-info-label">Ügyszám</span>
+                            <span class="case-info-value">{{ ugy.ugyszam }}</span>
+                        </div>
+                        <div class="case-info-item" style="flex: 1;">
+                            <span class="case-info-label">Tárgy</span>
+                            <span class="case-info-value">{{ ugy.targy }}</span>
+                        </div>
+                        <div class="case-info-item" style="width: 120px;">
+                            <span class="case-info-label">Kérelmező</span>
+                            <span class="case-info-value">{{ ugy.kerelmező }}</span>
+                        </div>
+                        <div class="case-info-item" style="width: 110px;">
+                            <span class="case-info-label">Beérkezés</span>
+                            <span class="case-info-value">{{ ugy.beerkezesDatum }}</span>
+                        </div>
+                        <div class="case-info-item" style="width: 110px;">
+                            <span class="case-info-label">Határidő</span>
+                            <span class="case-info-value text-danger">{{ ugy.hatarido }}</span>
+                        </div>
+                        <div class="case-info-item" style="width: 120px;">
+                            <span class="case-info-label">Ügyintéző</span>
+                            <span class="case-info-value">{{ ugy.ugyintezo }}</span>
+                        </div>
+                        <div class="case-info-item" style="width: 100px;">
+                            <span class="case-info-label">Prioritás</span>
+                            <span class="case-info-value">
+                                <span class="badge badge-sm" :class="{
+                                    'bg-success': ugy.prioritas === 'Normál',
+                                    'bg-warning': ugy.prioritas === 'Sürgős',
+                                    'bg-danger': ugy.prioritas === 'Azonnali'
+                                }">{{ ugy.prioritas }}</span>
+                            </span>
+                        </div>
+                        <div class="case-info-item" style="flex: 1;">
+                            <span class="case-info-label">Állapot</span>
+                            <span class="case-info-value">
+                                <span class="badge badge-sm bg-info">{{ ugy.allapot }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- ALSÓ RÉSZ: workflow sidebar + munkaterület -->
+            <div class="main-content-wrapper">
+                <!-- BAL OLDALI WORKFLOW PANEL -->
+                <div class="workflow-sidebar" :class="{ collapsed: workflowCollapsed }">
+                    <div class="workflow-sidebar-header">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span v-show="!workflowCollapsed">WORKFLOW LÉPÉSEK</span>
+                        <button class="btn btn-sm btn-link ms-auto p-0" @click="workflowCollapsed = !workflowCollapsed">
+                            <i class="bi" :class="workflowCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+                        </button>
+                    </div>
+
+                    <div v-show="!workflowCollapsed" class="workflow-steps-list">
+                        <div v-for="(step, index) in workflowSteps" :key="step.id"
+                             class="workflow-step-wrapper"
+                             :class="{
+                                 'completed': step.completed
+                             }">
+                            <div class="workflow-step"
+                                 :class="{
+                                     'active': step.id === currentStep,
+                                     'completed': step.completed,
+                                     'pending': !step.completed && step.id !== currentStep
+                                 }"
+                                 @click="selectWorkflowStep(step)">
+                                <div class="workflow-step-icon">
+                                    <i :class="step.icon"></i>
+                                </div>
+                                <div class="workflow-step-content">
+                                    <div class="workflow-step-name">{{ step.name }}</div>
+                                </div>
+                                <div v-if="step.completed" class="ms-auto">
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KÖZÉPSŐ MUNKATERÜLET -->
+                <div class="workspace-column">
+                    <!-- Tab navigáció -->
+                <div class="workspace-tabs">
+                    <button class="workspace-tab"
+                            :class="{ active: activeTab === 'workflow' }"
+                            @click="activeTab = 'workflow'">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>{{ currentStepName }}</span>
+                    </button>
+                    <button class="workspace-tab"
+                            :class="{ active: activeTab === 'documents' }"
+                            @click="activeTab = 'documents'">
+                        <i class="bi bi-file-text"></i>
+                        <span>Dokumentumok</span>
+                        <span class="badge bg-primary ms-2">{{ totalDocuments }}</span>
+                    </button>
+                    <button class="workspace-tab"
+                            :class="{ active: activeTab === 'history' }"
+                            @click="activeTab = 'history'">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Ügy előzmények</span>
+                        <span class="badge bg-secondary ms-2">{{ workflowHistory.length }}</span>
+                    </button>
+                </div>
+
+                <!-- Munkaterület tartalom -->
+                <div class="workspace-content">
+                    <!-- Workflow tab -->
+                    <div v-show="activeTab === 'workflow'">
+                        <component :is="activeComponent"
+                                   :ugy="ugy"
+                                   :step-data="currentStepData"
+                                   @action="handleComponentAction"
+                                   @complete="completeCurrentStep">
+                        </component>
+                    </div>
+
+                    <!-- Dokumentumok tab -->
+                    <div v-show="activeTab === 'documents'" class="documents-section">
+                        <div v-for="category in documentsByWorkflow" :key="category.stepId" class="document-category">
+                            <div class="document-category-header">
+                                <div class="document-category-icon">
+                                    <i :class="category.icon"></i>
+                                </div>
+                                <div class="document-category-title">
+                                    {{ category.stepName }}
+                                    <small class="text-muted d-block">{{ category.code }}</small>
+                                </div>
+                                <span class="document-category-count">{{ category.documents.length }}</span>
+                            </div>
+
+                            <div class="documents-list">
+                                <div v-for="doc in category.documents" :key="doc.id" class="document-row" @click="openDocument(doc)">
+                                    <div class="document-row-icon">
+                                        <i :class="getDocumentIcon(doc.tipus)"></i>
+                                    </div>
+                                    <div class="document-row-info">
+                                        <div class="document-row-title">{{ doc.nev }}</div>
+                                        <div class="document-row-meta">
+                                            <div class="document-row-meta-item">
+                                                <i class="bi bi-calendar3"></i>
+                                                <span>{{ doc.datum }}</span>
+                                            </div>
+                                            <div class="document-row-meta-item">
+                                                <i class="bi bi-file-earmark"></i>
+                                                <span>{{ doc.tipus }}</span>
+                                            </div>
+                                            <div v-if="doc.meret" class="document-row-meta-item">
+                                                <i class="bi bi-hdd"></i>
+                                                <span>{{ doc.meret }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="document-row-actions">
+                                        <button class="btn btn-outline-primary" @click.stop="downloadDocument(doc)" title="Letöltés">
+                                            <i class="bi bi-download"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary" @click.stop="previewDocument(doc)" title="Előnézet">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ha nincs dokumentum -->
+                        <div v-if="totalDocuments === 0" class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                            <p class="text-muted mt-3">Még nincsenek dokumentumok ehhez az ügyhöz</p>
+                        </div>
+                    </div>
+
+                    <!-- History tab -->
+                    <div v-show="activeTab === 'history'" class="history-section">
+                        <div class="history-timeline">
+                            <div v-for="(event, index) in workflowHistory" :key="index" class="history-event">
+                                <div class="history-event-marker">
+                                    <div class="history-event-dot" :class="'status-' + event.status">
+                                        <i :class="event.icon"></i>
+                                    </div>
+                                </div>
+                                <div class="history-event-content">
+                                    <div class="history-event-header">
+                                        <h6 class="history-event-title">{{ event.title }}</h6>
+                                        <span class="history-event-time">{{ event.timestamp }}</span>
+                                    </div>
+                                    <div class="history-event-body">
+                                        <p class="history-event-description">{{ event.description }}</p>
+                                        <div class="history-event-meta">
+                                            <span class="meta-item">
+                                                <i class="bi bi-person-badge"></i>
+                                                {{ event.user }}
+                                            </span>
+                                            <span v-if="event.result" class="meta-item">
+                                                <i class="bi bi-check-circle"></i>
+                                                Eredmény: <strong>{{ event.result }}</strong>
+                                            </span>
+                                            <span v-if="event.duration" class="meta-item">
+                                                <i class="bi bi-stopwatch"></i>
+                                                {{ event.duration }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../../assets/js/vihar-config.js"></script>
+    <script src="../../assets/js/vihar-common.js"></script>
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Workflow Komponensek -->
+    <!-- Wizard komponensek (ÚJ) -->
+    <script src="../../assets/js/components/workflow/wf-szignalas-wizard.js"></script>
+    <script src="../../assets/js/components/workflow/wf-hataskor-wizard.js"></script>
+    <script src="../../assets/js/components/workflow/wf-formai-wizard.js"></script>
+    <script src="../../assets/js/components/workflow/wf-tartalmi-wizard.js"></script>
+
+    <!-- Eredeti komponensek -->
+    <script src="../../assets/js/components/workflow/wf-szignalas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-checklist.js"></script>
+    <script src="../../assets/js/components/workflow/wf-dokumentum-gyartas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-iktatas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-nyilvantartas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-dontes.js"></script>
+    <script src="../../assets/js/components/workflow/wf-velemenyezes.js"></script>
+    <script src="../../assets/js/components/workflow/wf-kiadmanyozas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-expedialas.js"></script>
+    <script src="../../assets/js/components/workflow/wf-rugalmas-workflow.js"></script>
+
+    <!-- Főalkalmazás -->
+    <script src="../../assets/js/apps/vihar-munkalap-v3-app.js"></script>
+
+    <!-- Debug és fallback inicializálás -->
+    <script>
+        console.log('=== VAHAP v3 Debug Info ===');
+        console.log('Vue betöltve:', typeof Vue !== 'undefined');
+        console.log('VahapMunkalapV3App létezik:', typeof VahapMunkalapV3App !== 'undefined');
+        console.log('WfChecklist létezik:', typeof WfChecklist !== 'undefined');
+        console.log('WfSzignalas létezik:', typeof WfSzignalas !== 'undefined');
+        console.log('WfDokumentumGyartas létezik:', typeof WfDokumentumGyartas !== 'undefined');
+        console.log('WfDontes létezik:', typeof WfDontes !== 'undefined');
+        console.log('=========================');
+    </script>
+</body>
+</html>

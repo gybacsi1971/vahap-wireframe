@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Hiánypótlás benyújtása</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP CSS -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-arculat.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #004b87 0%, #0066b3 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .hianypotlas-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .hianypotlas-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-badge {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .kritikus-hatarido {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .dokumentum-feltoltes {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dokumentum-feltoltes:hover {
+            border-color: var(--vahap-primary);
+            background-color: #f8f9fa;
+        }
+
+        .hiany-lista {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .hiany-item {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--vahap-warning);
+        }
+
+        .hiany-item.teljesitett {
+            border-left-color: var(--vahap-success);
+            opacity: 0.7;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-preview i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .progress-step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: -1;
+        }
+
+        .progress-step:last-child::after {
+            display: none;
+        }
+
+        .progress-step.active .step-icon {
+            background: var(--vahap-primary);
+            color: white;
+        }
+
+        .progress-step.completed .step-icon {
+            background: var(--vahap-success);
+            color: white;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigáció -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="munkalista.html">
+                    <i class="bi bi-train-front"></i> VAHAP - Ügyfél Portál
+                </a>
+                <div class="d-flex align-items-center">
+                    <span class="text-white me-3">
+                        <i class="bi bi-person-circle"></i> {{ ugyfel.nev }}
+                    </span>
+                    <button class="btn btn-outline-light btn-sm" @click="showSugo = true">
+                        <i class="bi bi-question-circle"></i> Súgó
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container py-4">
+            <div class="main-container">
+                <!-- Fejléc -->
+                <div class="header-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h3 mb-3">
+                                <i class="bi bi-exclamation-triangle"></i> Hiánypótlási felszólítás
+                            </h1>
+                            <p class="mb-0">
+                                Az eljárás folytatásához az alábbi dokumentumokat és információkat kell pótolnia.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="mb-2">
+                                <small class="d-block text-white-50">Ügyazonosító</small>
+                                <strong>{{ ugy.ugyazonosito }}</strong>
+                            </div>
+                            <div :class="{'kritikus-hatarido': napokHatraVan <= 3}">
+                                <small class="d-block text-white-50">Határidő</small>
+                                <strong>{{ ugy.hianypotlas_hatarido }}</strong>
+                                <span v-if="napokHatraVan > 0" class="badge bg-warning ms-2">
+                                    {{ napokHatraVan }} nap van hátra
+                                </span>
+                                <span v-else class="badge bg-danger ms-2">
+                                    Lejárt!
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress indicator -->
+                <div class="p-4">
+                    <div class="progress-indicator">
+                        <div class="progress-step" :class="{active: activeStep === 1, completed: activeStep > 1}">
+                            <div class="step-icon">1</div>
+                            <div class="small">Hiányok áttekintése</div>
+                        </div>
+                        <div class="progress-step" :class="{active: activeStep === 2, completed: activeStep > 2}">
+                            <div class="step-icon">2</div>
+                            <div class="small">Dokumentumok feltöltése</div>
+                        </div>
+                        <div class="progress-step" :class="{active: activeStep === 3, completed: activeStep > 3}">
+                            <div class="step-icon">3</div>
+                            <div class="small">Ellenőrzés és beküldés</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tartalom -->
+                <div class="p-4">
+                    <!-- 1. lépés: Hiányok áttekintése -->
+                    <div v-show="activeStep === 1">
+                        <h5 class="mb-4">
+                            <i class="bi bi-list-check"></i> Pótlandó dokumentumok és információk
+                        </h5>
+
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Fontos!</strong> Az összes kötelező elem pótlása szükséges az ügy folytatásához.
+                            A hiánypótlás határideje: <strong>{{ ugy.hianypotlas_hatarido }}</strong>
+                        </div>
+
+                        <div class="hiany-lista">
+                            <div v-for="hiany in hianyok" :key="hiany.id"
+                                 class="hiany-item"
+                                 :class="{teljesitett: hiany.teljesitett}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <span v-if="hiany.kotelezo" class="text-danger">*</span>
+                                            {{ hiany.megnevezes }}
+                                        </h6>
+                                        <p class="text-muted small mb-2">{{ hiany.leiras }}</p>
+                                        <div v-if="hiany.megjegyzes" class="alert alert-info small mb-0">
+                                            <i class="bi bi-chat-left-text"></i>
+                                            Ügyintézői megjegyzés: {{ hiany.megjegyzes }}
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <span v-if="hiany.teljesitett" class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Teljesítve
+                                        </span>
+                                        <span v-else-if="hiany.kotelezo" class="badge bg-danger">
+                                            Kötelező
+                                        </span>
+                                        <span v-else class="badge bg-secondary">
+                                            Opcionális
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button class="btn btn-secondary" @click="goBack">
+                                <i class="bi bi-arrow-left"></i> Vissza az ügyeimhez
+                            </button>
+                            <button class="btn btn-primary" @click="activeStep = 2">
+                                Tovább a feltöltéshez
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. lépés: Dokumentumok feltöltése -->
+                    <div v-show="activeStep === 2">
+                        <h5 class="mb-4">
+                            <i class="bi bi-cloud-upload"></i> Dokumentumok feltöltése
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Feltöltési terület -->
+                                <div class="dokumentum-feltoltes" @click="triggerFileInput">
+                                    <i class="bi bi-cloud-arrow-up" style="font-size: 3rem; color: #6c757d;"></i>
+                                    <h6 class="mt-3">Húzza ide a fájlokat vagy kattintson a tallózáshoz</h6>
+                                    <p class="text-muted small">
+                                        Támogatott formátumok: PDF, JPG, PNG, DOC, DOCX<br>
+                                        Maximális fájlméret: 10 MB
+                                    </p>
+                                    <input type="file" ref="fileInput"
+                                           @change="handleFileSelect"
+                                           multiple
+                                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                           style="display: none;">
+                                </div>
+
+                                <!-- Feltöltött fájlok -->
+                                <div v-if="feltoltottFajlok.length > 0" class="mt-4">
+                                    <h6>Feltöltött dokumentumok:</h6>
+                                    <div v-for="(fajl, index) in feltoltottFajlok" :key="index" class="file-preview">
+                                        <i class="bi" :class="getFileIcon(fajl.tipus)"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold">{{ fajl.nev }}</div>
+                                            <small class="text-muted">{{ formatFileSize(fajl.meret) }}</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger" @click="removeFajl(index)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Megjegyzés -->
+                                <div class="mt-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-chat-left-text"></i> Megjegyzés (opcionális)
+                                    </label>
+                                    <textarea v-model="megjegyzes"
+                                              class="form-control"
+                                              rows="3"
+                                              placeholder="Itt adhat meg kiegészítő információkat..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <!-- Dokumentum hozzárendelés -->
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-link-45deg"></i> Dokumentum hozzárendelése
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted">
+                                            Válassza ki, hogy melyik hiánypótlási ponthoz tartozik a feltöltött dokumentum:
+                                        </p>
+                                        <div v-for="hiany in kotelezoHianyok" :key="hiany.id" class="form-check mb-2">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   :id="'hiany_' + hiany.id"
+                                                   v-model="dokumentumHozzarendeles[hiany.id]">
+                                            <label class="form-check-label small" :for="'hiany_' + hiany.id">
+                                                {{ hiany.megnevezes }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Státusz összefoglaló -->
+                                <div class="card mt-3">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-check2-square"></i> Teljesítési státusz
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="progress mb-3" style="height: 25px;">
+                                            <div class="progress-bar bg-success"
+                                                 :style="{width: teljesitesSzazalek + '%'}">
+                                                {{ teljesitesSzazalek }}%
+                                            </div>
+                                        </div>
+                                        <ul class="small list-unstyled mb-0">
+                                            <li><i class="bi bi-check-circle text-success"></i>
+                                                Teljesített: {{ teljesitettDb }} db
+                                            </li>
+                                            <li><i class="bi bi-x-circle text-danger"></i>
+                                                Hiányzik: {{ hianyzoDb }} db
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button class="btn btn-secondary" @click="activeStep = 1">
+                                <i class="bi bi-arrow-left"></i> Vissza
+                            </button>
+                            <button class="btn btn-primary"
+                                    @click="activeStep = 3"
+                                    :disabled="!canProceed">
+                                Tovább az ellenőrzéshez
+                                <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. lépés: Ellenőrzés és beküldés -->
+                    <div v-show="activeStep === 3">
+                        <h5 class="mb-4">
+                            <i class="bi bi-clipboard-check"></i> Összefoglaló és beküldés
+                        </h5>
+
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">Hiánypótlás összefoglalója</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Ügyazonosító:</small>
+                                        <div class="fw-bold">{{ ugy.ugyazonosito }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Beküldés dátuma:</small>
+                                        <div class="fw-bold">{{ getCurrentDate() }}</div>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <h6>Pótolt dokumentumok:</h6>
+                                <ul>
+                                    <li v-for="fajl in feltoltottFajlok" :key="fajl.nev">
+                                        {{ fajl.nev }} ({{ formatFileSize(fajl.meret) }})
+                                    </li>
+                                </ul>
+
+                                <div v-if="megjegyzes" class="alert alert-info">
+                                    <strong>Megjegyzés:</strong> {{ megjegyzes }}
+                                </div>
+
+                                <div v-if="vanHianyzoKotelezo" class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    <strong>Figyelmeztetés!</strong>
+                                    Nem minden kötelező dokumentum került feltöltésre.
+                                    A hiányos beküldés az ügy elutasítását eredményezheti.
+                                </div>
+
+                                <!-- Nyilatkozatok -->
+                                <div class="mt-4">
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="nyilatkozat1"
+                                               v-model="nyilatkozat1">
+                                        <label class="form-check-label" for="nyilatkozat1">
+                                            Kijelentem, hogy a feltöltött dokumentumok valósak és hitelesek
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="nyilatkozat2"
+                                               v-model="nyilatkozat2">
+                                        <label class="form-check-label" for="nyilatkozat2">
+                                            Tudomásul veszem, hogy hiányos vagy hamis adatok megadása az ügy elutasítását eredményezheti
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-secondary" @click="activeStep = 2">
+                                <i class="bi bi-arrow-left"></i> Vissza
+                            </button>
+                            <div>
+                                <button class="btn btn-outline-primary me-2" @click="saveDraft">
+                                    <i class="bi bi-save"></i> Piszkozat mentése
+                                </button>
+                                <button class="btn btn-success"
+                                        @click="submitHianypotlas"
+                                        :disabled="!canSubmit">
+                                    <i class="bi bi-send"></i> Hiánypótlás beküldése
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Súgó Modal -->
+        <div v-if="showSugo" class="modal show d-block" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-question-circle"></i> Hiánypótlás - Súgó
+                        </h5>
+                        <button class="btn-close btn-close-white" @click="showSugo = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h6>Mi a hiánypótlás?</h6>
+                        <p>
+                            A hiánypótlás az ügyintézési folyamat része, amikor a hatóság további dokumentumokat
+                            vagy információkat kér Öntől az ügy elbírálásához.
+                        </p>
+
+                        <h6>Hogyan töltsem fel a dokumentumokat?</h6>
+                        <ol>
+                            <li>Tekintse át a hiánypótlási felszólításban szereplő dokumentumokat</li>
+                            <li>Készítse elő a szükséges fájlokat (PDF, JPG, PNG, DOC formátumban)</li>
+                            <li>Kattintson a feltöltési területre vagy húzza oda a fájlokat</li>
+                            <li>Rendelje hozzá a dokumentumokat a megfelelő hiánypótlási pontokhoz</li>
+                            <li>Ellenőrizze az összefoglalót és küldje be</li>
+                        </ol>
+
+                        <h6>Mi történik a beküldés után?</h6>
+                        <p>
+                            A beküldött dokumentumokat az ügyintéző ellenőrzi. Ha minden rendben van,
+                            folytatódik az ügyintézés. Ha további hiányosságok vannak, újabb felszólítást kaphat.
+                        </p>
+
+                        <div class="alert alert-warning">
+                            <strong>Fontos!</strong> A hiánypótlás határidejének elmulasztása az ügy megszüntetését
+                            eredményezheti!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sikeres beküldés modal -->
+        <div v-if="showSuccessModal" class="modal show d-block" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-check-circle"></i> Sikeres beküldés
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center py-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3">Hiánypótlás sikeresen beküldve!</h5>
+                            <p class="text-muted">
+                                A dokumentumok feldolgozása megkezdődött.<br>
+                                Értesítést küldünk az ügy további menetéről.
+                            </p>
+                            <div class="alert alert-info">
+                                <strong>Iktatószám:</strong> HP-{{ ugy.ugyazonosito }}-001
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" @click="goBack">
+                            <i class="bi bi-arrow-left"></i> Vissza az ügyeimhez
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeStep: 1,
+                    showSugo: false,
+                    showSuccessModal: false,
+
+                    ugyfel: {
+                        nev: 'Minta János'
+                    },
+
+                    ugy: {
+                        ugyazonosito: 'VAHAP-V-2024-001234',
+                        hianypotlas_hatarido: '2024.11.25',
+                        statusz: 'hiánypótlás'
+                    },
+
+                    hianyok: [
+                        {
+                            id: 1,
+                            megnevezes: 'Orvosi alkalmassági igazolás',
+                            leiras: 'Vasútegészségügyi vizsgálaton kiállított alkalmassági igazolás',
+                            megjegyzes: 'Az igazolásnak 30 napnál nem régebbinek kell lennie',
+                            kotelezo: true,
+                            teljesitett: false
+                        },
+                        {
+                            id: 2,
+                            megnevezes: 'Szakmai végzettséget igazoló dokumentum',
+                            leiras: 'Érettségi bizonyítvány vagy felsőfokú végzettség másolata',
+                            megjegyzes: null,
+                            kotelezo: true,
+                            teljesitett: false
+                        },
+                        {
+                            id: 3,
+                            megnevezes: 'Munkahelyi igazolás',
+                            leiras: 'Munkáltató által kiállított igazolás a munkaviszonyról',
+                            megjegyzes: 'Csak akkor szükséges, ha már vasúti munkakörben dolgozik',
+                            kotelezo: false,
+                            teljesitett: false
+                        },
+                        {
+                            id: 4,
+                            megnevezes: 'Igazgatási szolgáltatási díj befizetését igazoló bizonylat',
+                            leiras: 'A 12.000 Ft díj befizetését igazoló dokumentum',
+                            megjegyzes: 'Átutalási bizonylat vagy befizetési igazolás',
+                            kotelezo: true,
+                            teljesitett: false
+                        }
+                    ],
+
+                    feltoltottFajlok: [],
+                    dokumentumHozzarendeles: {},
+                    megjegyzes: '',
+                    nyilatkozat1: false,
+                    nyilatkozat2: false
+                };
+            },
+
+            computed: {
+                napokHatraVan() {
+                    const hatarido = new Date(this.ugy.hianypotlas_hatarido.replace(/\./g, '-'));
+                    const ma = new Date();
+                    const diff = Math.ceil((hatarido - ma) / (1000 * 60 * 60 * 24));
+                    return diff;
+                },
+
+                kotelezoHianyok() {
+                    return this.hianyok.filter(h => h.kotelezo && !h.teljesitett);
+                },
+
+                teljesitettDb() {
+                    return this.hianyok.filter(h => h.teljesitett).length;
+                },
+
+                hianyzoDb() {
+                    return this.hianyok.filter(h => h.kotelezo && !h.teljesitett).length;
+                },
+
+                teljesitesSzazalek() {
+                    const kotelezo = this.hianyok.filter(h => h.kotelezo).length;
+                    const teljesitett = this.hianyok.filter(h => h.kotelezo && h.teljesitett).length;
+                    return kotelezo ? Math.round((teljesitett / kotelezo) * 100) : 0;
+                },
+
+                vanHianyzoKotelezo() {
+                    return this.hianyok.some(h => h.kotelezo && !h.teljesitett);
+                },
+
+                canProceed() {
+                    return this.feltoltottFajlok.length > 0;
+                },
+
+                canSubmit() {
+                    return this.nyilatkozat1 && this.nyilatkozat2;
+                }
+            },
+
+            methods: {
+                triggerFileInput() {
+                    this.$refs.fileInput.click();
+                },
+
+                handleFileSelect(event) {
+                    const files = event.target.files;
+                    for (let file of files) {
+                        // Mock fájl hozzáadása
+                        this.feltoltottFajlok.push({
+                            nev: file.name,
+                            meret: file.size,
+                            tipus: file.type || this.getFileType(file.name)
+                        });
+
+                        // Mock: automatikus teljesítés jelölés
+                        if (file.name.includes('orvosi') || file.name.includes('alkalmassag')) {
+                            const hiany = this.hianyok.find(h => h.id === 1);
+                            if (hiany) hiany.teljesitett = true;
+                        }
+                    }
+                },
+
+                getFileType(filename) {
+                    const ext = filename.split('.').pop().toLowerCase();
+                    const types = {
+                        'pdf': 'application/pdf',
+                        'jpg': 'image/jpeg',
+                        'jpeg': 'image/jpeg',
+                        'png': 'image/png',
+                        'doc': 'application/msword',
+                        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    };
+                    return types[ext] || 'application/octet-stream';
+                },
+
+                getFileIcon(tipus) {
+                    if (tipus.includes('pdf')) return 'bi-file-pdf text-danger';
+                    if (tipus.includes('image')) return 'bi-file-image text-primary';
+                    if (tipus.includes('word')) return 'bi-file-word text-info';
+                    return 'bi-file-earmark text-secondary';
+                },
+
+                formatFileSize(bytes) {
+                    if (bytes < 1024) return bytes + ' B';
+                    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+                    return Math.round(bytes / (1024 * 1024) * 10) / 10 + ' MB';
+                },
+
+                removeFajl(index) {
+                    this.feltoltottFajlok.splice(index, 1);
+                },
+
+                getCurrentDate() {
+                    return new Date().toLocaleDateString('hu-HU');
+                },
+
+                saveDraft() {
+                    alert('Piszkozat elmentve! Később folytathatja a hiánypótlás beküldését.');
+                },
+
+                submitHianypotlas() {
+                    // Mock beküldés
+                    console.log('Hiánypótlás beküldve:', {
+                        ugyazonosito: this.ugy.ugyazonosito,
+                        fajlok: this.feltoltottFajlok,
+                        megjegyzes: this.megjegyzes,
+                        bekuldve: new Date().toISOString()
+                    });
+
+                    this.showSuccessModal = true;
+                },
+
+                goBack() {
+                    window.location.href = 'munkalista.html';
+                }
+            },
+
+            mounted() {
+                console.log('[VAHAP] Hiánypótlás oldal betöltve');
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

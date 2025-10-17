@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vasúti Modul - Ügyintézői felület | VAHAP</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css?v=2">
+
+    <style>
+        /* Becsukott állapot - eredeti tartalom elrejtése */
+        .collapsible-sidebar.collapsed .sidebar-full-content {
+            display: none !important;
+        }
+        .collapsible-sidebar:not(.collapsed) .sidebar-collapsed-content {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container-fluid p-0">
+        <div class="row g-0 vh-100">
+            <!-- 1. BAL OSZLOP - Navigáció (összecsukható) -->
+            <div class="collapsible-sidebar left-panel bg-light border-end p-0" :class="{'collapsed': leftCollapsed}">
+                <!-- Toggle gomb -->
+                <button class="sidebar-toggle left" @click="leftCollapsed = !leftCollapsed">
+                    <i class="bi" :class="leftCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+                </button>
+
+                <!-- Teljes tartalom (nyitott állapot) -->
+                <div class="sidebar-full-content d-flex flex-column h-100">
+                    <!-- Modul fejléc -->
+                    <div class="p-3 border-bottom bg-vasut text-white">
+                        <h6 class="mb-1">
+                            <i class="bi bi-train-front"></i> Vasúti Modul
+                        </h6>
+                        <span class="badge bg-light text-dark">V-044</span>
+                    </div>
+
+                    <!-- Ügyintéző info -->
+                    <div class="p-3 border-bottom">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-person-circle fs-4 me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">Ügyintéző</small>
+                                <strong style="font-size: 0.85em;">{{ ugyintezo }}</strong>
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="bi bi-building"></i> VHF<br>
+                            <span class="badge bg-secondary mt-1">{{ szerepkor }}</span>
+                        </small>
+                    </div>
+
+                    <!-- Navigációs menü -->
+                    <div class="flex-grow-1 overflow-auto p-2">
+                        <small class="text-muted px-2">WORKFLOW LÉPÉSEK</small>
+                        <div class="nav flex-column mt-2">
+                            <a class="nav-link" :class="{'active': activeTab === 'hataskort'}" @click="activeTab = 'hataskort'">
+                                <span class="badge bg-info me-1">UCE-1793</span>
+                                Hatáskör vizsgálat
+                            </a>
+                            <a class="nav-link" :class="{'active': activeTab === 'formai'}" @click="activeTab = 'formai'">
+                                <span class="badge bg-info me-1">UCE-1799</span>
+                                Formai ellenőrzés
+                            </a>
+                            <a class="nav-link" :class="{'active': activeTab === 'tartalmi'}" @click="activeTab = 'tartalmi'">
+                                <span class="badge bg-info me-1">UCE-1794</span>
+                                Tartalmi vizsgálat
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Vissza gomb -->
+                    <div class="p-3 border-top">
+                        <a href="munkalista.html" class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-arrow-left"></i> Munkalista
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Becsukott tartalom -->
+                <div class="sidebar-collapsed-content bg-light">
+                    <div class="collapsed-icon text-vasut mb-3">
+                        <i class="bi bi-train-front"></i>
+                    </div>
+                    <div class="collapsed-stats">
+                        <div class="stat-item">
+                            <i class="bi bi-list-task"></i>
+                            <span class="stat-number">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. KÖZÉPSŐ OSZLOP - Munkaterület -->
+            <div class="work-area p-0 d-flex flex-column"
+                 :class="{
+                     'left-collapsed': leftCollapsed && !rightCollapsed,
+                     'right-collapsed': rightCollapsed && !leftCollapsed,
+                     'both-collapsed': leftCollapsed && rightCollapsed
+                 }">
+
+                <!-- Ügyfejléc -->
+                <div class="bg-vasut text-white p-3">
+                    <div class="row">
+                        <div class="col">
+                            <small>Ügyazonosító</small>
+                            <h6 class="mb-0">{{ ugyazonosito }}</h6>
+                        </div>
+                        <div class="col">
+                            <small>Ügyfél</small>
+                            <h6 class="mb-0">{{ ugyfel }}</h6>
+                        </div>
+                        <div class="col">
+                            <small>Határidő</small>
+                            <h6 class="mb-0">{{ hatarido }}</h6>
+                        </div>
+                        <div class="col">
+                            <small>Állapot</small>
+                            <h6 class="mb-0">
+                                <span class="badge badge-pending">{{ statusz }}</span>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Munka fülek -->
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active">
+                            Vizsgálat
+                            <span class="badge bg-secondary ms-1">F-0064</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Munkaterület -->
+                <div class="flex-grow-1 overflow-auto p-3 bg-light">
+                    <div v-if="activeTab === 'hataskort'">
+                        <h5><i class="bi bi-shield-check"></i> Hatáskör és illetékesség vizsgálata</h5>
+                        <p class="text-muted">
+                            <span class="badge bg-info">UCE-1793</span>
+                            <span class="badge bg-secondary">F-0064</span>
+                        </p>
+
+                        <!-- Ellenőrző lista -->
+                        <div class="checklist">
+                            <div class="checklist-item" :class="{'checked': checks.hataskort1}">
+                                <div class="form-check">
+                                    <input class="form-check-input checklist-checkbox" type="checkbox"
+                                           v-model="checks.hataskort1" id="check1">
+                                    <label class="form-check-label" for="check1">
+                                        <strong>Hatáskör biztosított</strong><br>
+                                        <small class="text-muted">A hatóság hatáskörébe tartozik az ügy</small>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checklist-item" :class="{'checked': checks.hataskort2}">
+                                <div class="form-check">
+                                    <input class="form-check-input checklist-checkbox" type="checkbox"
+                                           v-model="checks.hataskort2" id="check2">
+                                    <label class="form-check-label" for="check2">
+                                        <strong>Illetékesség rendben</strong><br>
+                                        <small class="text-muted">Területi illetékesség megfelelő</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="activeTab === 'formai'">
+                        <h5><i class="bi bi-file-earmark-check"></i> Formai megfelelőség vizsgálata</h5>
+                        <p class="text-muted">
+                            <span class="badge bg-info">UCE-1799</span>
+                            <span class="badge bg-secondary">F-0065</span>
+                        </p>
+                        <p>Formai ellenőrzés tartalma...</p>
+                    </div>
+
+                    <div v-if="activeTab === 'tartalmi'">
+                        <h5><i class="bi bi-file-text"></i> Tartalmi megfelelőség vizsgálat</h5>
+                        <p class="text-muted">
+                            <span class="badge bg-info">UCE-1794</span>
+                            <span class="badge bg-secondary">F-0066</span>
+                        </p>
+                        <p>Tartalmi vizsgálat...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. JOBB OSZLOP - Döntési panel (összecsukható) -->
+            <div class="collapsible-sidebar right-panel bg-light border-start p-0" :class="{'collapsed': rightCollapsed}">
+                <!-- Toggle gomb -->
+                <button class="sidebar-toggle right" @click="rightCollapsed = !rightCollapsed">
+                    <i class="bi" :class="rightCollapsed ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
+                </button>
+
+                <!-- Teljes tartalom (nyitott állapot) -->
+                <div class="sidebar-full-content d-flex flex-column h-100 overflow-auto">
+                    <!-- Döntési pontok -->
+                    <div class="border-bottom p-3">
+                        <h6 class="mb-3">
+                            <i class="bi bi-check-circle"></i> Döntési pontok
+                            <span class="badge bg-dark ms-2">F-0088</span>
+                        </h6>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-sm">
+                                <span class="badge bg-light text-dark">UCE-1800</span>
+                                Sommás eljárás
+                            </button>
+                            <button class="btn btn-warning btn-sm">
+                                <span class="badge bg-light text-dark">UCE-2000</span>
+                                Hiánypótlás
+                            </button>
+                            <button class="btn btn-danger btn-sm">
+                                Elutasítás
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Előzmények -->
+                    <div class="border-bottom p-3">
+                        <h6 class="mb-3">
+                            <i class="bi bi-clock-history"></i> Előzmények
+                        </h6>
+                        <div class="timeline">
+                            <div class="timeline-item timeline-item-small">
+                                <div class="timeline-date">2024.10.15 14:32</div>
+                                <div class="timeline-content">
+                                    <strong>Kérelem benyújtva</strong><br>
+                                    <small>Ügyfél: {{ ugyfel }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dokumentumok -->
+                    <div class="border-bottom p-3">
+                        <h6 class="mb-3">
+                            <i class="bi bi-file-text"></i> Dokumentumok
+                        </h6>
+                        <div class="document-link">
+                            <i class="bi bi-file-pdf text-danger"></i>
+                            Kérelem adatlap
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Becsukott tartalom -->
+                <div class="sidebar-collapsed-content bg-light">
+                    <div class="collapsed-icon text-vasut mb-3">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div class="collapsed-stats">
+                        <div class="stat-item">
+                            <i class="bi bi-file-text"></i>
+                            <span class="stat-number">1</span>
+                        </div>
+                        <div class="stat-item mt-3">
+                            <i class="bi bi-clock"></i>
+                            <span class="stat-number">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Panel állapotok
+                    leftCollapsed: false,
+                    rightCollapsed: false,
+
+                    // Ügy adatok
+                    ugyazonosito: 'VAHAP-V-2024-001234',
+                    ugyfel: 'Minta János',
+                    hatarido: '2024-11-15',
+                    statusz: 'Folyamatban',
+                    ugyintezo: 'Dr. Szabó Péter',
+                    szerepkor: 'VHF_UGYINTEZO',
+
+                    // Aktív fül
+                    activeTab: 'hataskort',
+
+                    // Ellenőrző lista
+                    checks: {
+                        hataskort1: false,
+                        hataskort2: false
+                    }
+                };
+            },
+            mounted() {
+                console.log('[VAHAP] Vasúti Belső Ügyintézői Felület (Összecsukható) betöltve');
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

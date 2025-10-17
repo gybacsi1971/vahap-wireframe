@@ -1,0 +1,633 @@
+/**
+ * VAHAP - Arculati CSS
+ * Magyar kormányzati arculat szerinti stílusok
+ * Építési és Közlekedési Minisztérium (ÉKM) arculat
+ */
+
+/* ============================================
+   SZÍNPALETTA - Magyar kormányzati arculat
+   ============================================ */
+
+:root {
+    /* Elsődleges színek */
+    --vahap-primary: #004b87;           /* Sötétkék - kormányzati */
+    --vahap-primary-dark: #003260;      /* Sötétebb kék */
+    --vahap-primary-light: #0066aa;     /* Világosabb kék */
+
+    /* Másodlagos színek */
+    --vahap-secondary: #6c757d;         /* Szürke */
+    --vahap-secondary-light: #e9ecef;   /* Világosszürke */
+
+    /* Modul specifikus színek */
+    --vahap-vasut: #8B4513;             /* Barna - vasút */
+    --vahap-hajozas: #006994;           /* Tengerkék - hajózás */
+
+    /* Státusz színek */
+    --vahap-success: #28a745;           /* Zöld - sikeres */
+    --vahap-warning: #ffc107;           /* Sárga - figyelmeztetés */
+    --vahap-danger: #dc3545;            /* Piros - hiba/elutasítás */
+    --vahap-info: #17a2b8;              /* Világoskék - információ */
+
+    /* Semleges színek */
+    --vahap-white: #ffffff;
+    --vahap-light-bg: #f8f9fa;
+    --vahap-dark: #212529;
+    --vahap-text: #212529;
+    --vahap-text-muted: #6c757d;
+
+    /* Árnyékok */
+    --vahap-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --vahap-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+    --vahap-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+    /* Border radius */
+    --vahap-border-radius: 8px;
+    --vahap-border-radius-sm: 4px;
+    --vahap-border-radius-lg: 12px;
+}
+
+/* ============================================
+   TIPOGRÁFIA
+   ============================================ */
+
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--vahap-text);
+    background-color: var(--vahap-light-bg);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--vahap-primary);
+}
+
+.text-vahap-primary {
+    color: var(--vahap-primary) !important;
+}
+
+.text-vahap-vasut {
+    color: var(--vahap-vasut) !important;
+}
+
+.text-vahap-hajozas {
+    color: var(--vahap-hajozas) !important;
+}
+
+/* ============================================
+   GOMBOK - Kormányzati stílus
+   ============================================ */
+
+.btn-vahap-primary {
+    background-color: var(--vahap-primary);
+    border-color: var(--vahap-primary);
+    color: var(--vahap-white);
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--vahap-border-radius-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-vahap-primary:hover {
+    background-color: var(--vahap-primary-dark);
+    border-color: var(--vahap-primary-dark);
+    color: var(--vahap-white);
+    box-shadow: var(--vahap-shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn-vahap-secondary {
+    background-color: var(--vahap-secondary);
+    border-color: var(--vahap-secondary);
+    color: var(--vahap-white);
+}
+
+.btn-vahap-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+/* Vasúti modul gomb */
+.btn-vahap-vasut {
+    background-color: var(--vahap-vasut);
+    border-color: var(--vahap-vasut);
+    color: var(--vahap-white);
+}
+
+.btn-vahap-vasut:hover {
+    background-color: #6f3410;
+    border-color: #6f3410;
+    color: var(--vahap-white);
+}
+
+/* Hajózási modul gomb */
+.btn-vahap-hajozas {
+    background-color: var(--vahap-hajozas);
+    border-color: var(--vahap-hajozas);
+    color: var(--vahap-white);
+}
+
+.btn-vahap-hajozas:hover {
+    background-color: #005075;
+    border-color: #005075;
+    color: var(--vahap-white);
+}
+
+/* ============================================
+   KÁRTYÁK
+   ============================================ */
+
+.card-vahap {
+    border: none;
+    border-radius: var(--vahap-border-radius);
+    box-shadow: var(--vahap-shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.card-vahap:hover {
+    box-shadow: var(--vahap-shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-vahap-primary {
+    border-left: 4px solid var(--vahap-primary);
+}
+
+.card-vahap-vasut {
+    border-left: 4px solid var(--vahap-vasut);
+}
+
+.card-vahap-hajozas {
+    border-left: 4px solid var(--vahap-hajozas);
+}
+
+/* ============================================
+   BADGE-EK - Státusz jelzők
+   ============================================ */
+
+.badge-vahap {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    border-radius: var(--vahap-border-radius-sm);
+}
+
+.badge-vahap-uj {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-vahap-folyamatban {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-vahap-hianypotlas {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.badge-vahap-dontes-elokeszites {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-vahap-engedelyezve {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-vahap-elutasitva {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-vahap-lezart {
+    background-color: #343a40;
+    color: white;
+}
+
+/* ============================================
+   FEJLÉCEK - Hivatalos stílus
+   ============================================ */
+
+.vahap-header-primary {
+    background: linear-gradient(135deg, var(--vahap-primary) 0%, var(--vahap-primary-light) 100%);
+    color: var(--vahap-white);
+    padding: 2rem 1rem;
+    border-bottom: 3px solid var(--vahap-primary-dark);
+    box-shadow: var(--vahap-shadow-md);
+}
+
+.vahap-header-vasut {
+    background: linear-gradient(135deg, var(--vahap-vasut) 0%, #a0522d 100%);
+    color: var(--vahap-white);
+    padding: 2rem 1rem;
+    border-bottom: 3px solid #6f3410;
+}
+
+.vahap-header-hajozas {
+    background: linear-gradient(135deg, var(--vahap-hajozas) 0%, #0088b8 100%);
+    color: var(--vahap-white);
+    padding: 2rem 1rem;
+    border-bottom: 3px solid #005075;
+}
+
+/* ============================================
+   LOGÓK
+   ============================================ */
+
+.vahap-logo-ekm {
+    height: 60px;
+    width: auto;
+    margin-right: 1rem;
+}
+
+.vahap-logo-magyarorszag {
+    height: 50px;
+    width: auto;
+}
+
+.vahap-logo-container {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--vahap-white);
+    border-bottom: 2px solid var(--vahap-secondary-light);
+}
+
+/* Placeholder logó (ha nincs kép) */
+.vahap-logo-placeholder {
+    width: 120px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--vahap-primary) 0%, var(--vahap-primary-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: var(--vahap-border-radius-sm);
+}
+
+/* ============================================
+   TÁBLÁZATOK - Hivatalos stílus
+   ============================================ */
+
+.table-vahap {
+    background-color: var(--vahap-white);
+    border-radius: var(--vahap-border-radius);
+    overflow: hidden;
+}
+
+.table-vahap thead {
+    background-color: var(--vahap-primary);
+    color: var(--vahap-white);
+}
+
+.table-vahap thead th {
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+}
+
+.table-vahap tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-vahap tbody tr:hover {
+    background-color: rgba(0, 75, 135, 0.05);
+}
+
+.table-vahap tbody td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+/* ============================================
+   ŰRLAPOK - Hivatalos stílus
+   ============================================ */
+
+.form-vahap .form-label {
+    font-weight: 600;
+    color: var(--vahap-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-vahap .form-control,
+.form-vahap .form-select {
+    border: 2px solid var(--vahap-secondary-light);
+    border-radius: var(--vahap-border-radius-sm);
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.form-vahap .form-control:focus,
+.form-vahap .form-select:focus {
+    border-color: var(--vahap-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 75, 135, 0.15);
+}
+
+.form-vahap .form-control.is-invalid {
+    border-color: var(--vahap-danger);
+}
+
+.form-vahap .form-control.is-valid {
+    border-color: var(--vahap-success);
+}
+
+/* Kötelező mező jelölés */
+.form-vahap .form-label.required::after {
+    content: " *";
+    color: var(--vahap-danger);
+    font-weight: bold;
+}
+
+/* ============================================
+   LÁBLÉC - Hivatalos
+   ============================================ */
+
+.vahap-footer {
+    background-color: var(--vahap-primary-dark);
+    color: var(--vahap-white);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    border-top: 4px solid var(--vahap-primary);
+}
+
+.vahap-footer a {
+    color: var(--vahap-white);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.vahap-footer a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.vahap-footer-logo {
+    opacity: 0.7;
+    max-height: 40px;
+}
+
+/* ============================================
+   BREADCRUMB - Navigációs nyomvonal
+   ============================================ */
+
+.breadcrumb-vahap {
+    background-color: transparent;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-vahap .breadcrumb-item {
+    font-size: 0.875rem;
+}
+
+.breadcrumb-vahap .breadcrumb-item a {
+    color: var(--vahap-primary);
+    text-decoration: none;
+}
+
+.breadcrumb-vahap .breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-vahap .breadcrumb-item.active {
+    color: var(--vahap-text-muted);
+    font-weight: 600;
+}
+
+/* ============================================
+   ALERT - Értesítések
+   ============================================ */
+
+.alert-vahap-primary {
+    background-color: rgba(0, 75, 135, 0.1);
+    border-left: 4px solid var(--vahap-primary);
+    color: var(--vahap-primary-dark);
+}
+
+.alert-vahap-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-left: 4px solid var(--vahap-info);
+    color: #0c525d;
+}
+
+.alert-vahap-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid var(--vahap-warning);
+    color: #856404;
+}
+
+.alert-vahap-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid var(--vahap-danger);
+    color: #721c24;
+}
+
+.alert-vahap-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    border-left: 4px solid var(--vahap-success);
+    color: #155724;
+}
+
+/* ============================================
+   PROGRESS BAR - Előrehaladás jelző
+   ============================================ */
+
+.progress-vahap {
+    height: 1.5rem;
+    background-color: var(--vahap-secondary-light);
+    border-radius: var(--vahap-border-radius);
+    overflow: hidden;
+}
+
+.progress-vahap .progress-bar {
+    background-color: var(--vahap-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: width 0.6s ease;
+}
+
+/* ============================================
+   MODAL - Párbeszédablakok
+   ============================================ */
+
+.modal-vahap .modal-header {
+    background-color: var(--vahap-primary);
+    color: var(--vahap-white);
+    border-bottom: none;
+}
+
+.modal-vahap .modal-title {
+    font-weight: 600;
+}
+
+.modal-vahap .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-vahap .modal-footer {
+    border-top: 1px solid var(--vahap-secondary-light);
+    padding: 1rem 1.5rem;
+}
+
+/* ============================================
+   NYOMTATÁS - PDF generáláshoz
+   ============================================ */
+
+@media print {
+    .vahap-no-print {
+        display: none !important;
+    }
+
+    body {
+        background-color: white;
+        color: black;
+    }
+
+    .vahap-header-primary,
+    .vahap-header-vasut,
+    .vahap-header-hajozas {
+        background: white !important;
+        color: black !important;
+        border-bottom: 2px solid black;
+    }
+
+    .card-vahap {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* ============================================
+   RESPONSIVE - Mobilra optimalizált
+   ============================================ */
+
+@media (max-width: 768px) {
+    .vahap-header-primary,
+    .vahap-header-vasut,
+    .vahap-header-hajozas {
+        padding: 1rem 0.5rem;
+    }
+
+    .vahap-logo-ekm {
+        height: 40px;
+    }
+
+    .table-vahap {
+        font-size: 0.875rem;
+    }
+
+    .btn-vahap-primary {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ============================================
+   ANIMÁCIÓK
+   ============================================ */
+
+@keyframes vahap-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vahap-fade-in {
+    animation: vahap-fade-in 0.3s ease-out;
+}
+
+@keyframes vahap-slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.vahap-slide-in-right {
+    animation: vahap-slide-in-right 0.3s ease-out;
+}
+
+/* ============================================
+   UTILITY OSZTÁLYOK
+   ============================================ */
+
+.bg-vahap-primary {
+    background-color: var(--vahap-primary) !important;
+    color: var(--vahap-white) !important;
+}
+
+.bg-vahap-vasut {
+    background-color: var(--vahap-vasut) !important;
+    color: var(--vahap-white) !important;
+}
+
+.bg-vahap-hajozas {
+    background-color: var(--vahap-hajozas) !important;
+    color: var(--vahap-white) !important;
+}
+
+.border-vahap-primary {
+    border-color: var(--vahap-primary) !important;
+}
+
+.shadow-vahap-sm {
+    box-shadow: var(--vahap-shadow-sm) !important;
+}
+
+.shadow-vahap-md {
+    box-shadow: var(--vahap-shadow-md) !important;
+}
+
+.shadow-vahap-lg {
+    box-shadow: var(--vahap-shadow-lg) !important;
+}
+
+/* ============================================
+   ACCESSIBILITY - Akadálymentesség
+   ============================================ */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Fokusz kiemelés */
+*:focus {
+    outline: 2px solid var(--vahap-primary);
+    outline-offset: 2px;
+}
+
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--vahap-primary);
+    outline-offset: 2px;
+}

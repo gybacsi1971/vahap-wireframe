@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Szerepkörök Kezelése</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app">
+        <param-header
+            title="Szerepkörök"
+            subtitle="Szerepkörök és jogosultsági mátrix kezelése"
+            :breadcrumbs="breadcrumbs"
+            :show-save="false"
+            :show-back="true"
+            @back="navigateBack">
+        </param-header>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card sticky-top" style="top: 1rem;">
+                        <div class="card-header bg-light"><h6 class="mb-0"><i class="bi bi-gear"></i> Paraméterek</h6></div>
+                        <div class="list-group list-group-flush">
+                            <a href="../index.html" class="list-group-item list-group-item-action"><i class="bi bi-house"></i> Főoldal</a>
+                            <a href="index.html" class="list-group-item list-group-item-action"><i class="bi bi-sliders"></i> Paraméterező Dashboard</a>
+                            <hr class="my-0">
+                            <a href="ellenorzesi-listak.html" class="list-group-item list-group-item-action"><i class="bi bi-list-check"></i> Ellenőrzési Listák</a>
+                            <a href="hataridok.html" class="list-group-item list-group-item-action"><i class="bi bi-calendar-event"></i> Határidők</a>
+                            <a href="dijtetelek.html" class="list-group-item list-group-item-action"><i class="bi bi-cash-stack"></i> Díjtételek</a>
+                            <a href="dokumentum-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text"></i> Dokumentum Sablonok</a>
+                            <a href="workflow-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-3"></i> Workflow Sablonok</a>
+                            <a href="alfolyamatok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-2"></i> Alfolyamatok</a>
+                            <a href="nyilvantartasok.html" class="list-group-item list-group-item-action"><i class="bi bi-database"></i> Nyilvántartások</a>
+                            <a href="felhasznalok.html" class="list-group-item list-group-item-action"><i class="bi bi-people"></i> Felhasználók</a>
+                            <a href="szerepkorok.html" class="list-group-item list-group-item-action active"><i class="bi bi-shield-check"></i> Szerepkörök <span class="badge bg-success float-end">Aktív</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-shield-check"></i> Szerepkörök listája</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div v-for="szerepkor in szerepkorok" :key="szerepkor.kod" class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-primary text-white">
+                                            <strong>{{ szerepkor.nev }}</strong>
+                                            <span class="badge bg-light text-dark float-end">{{ szerepkor.kod }}</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted small mb-3">{{ szerepkor.leiras }}</p>
+                                            <h6 class="small">Jogosultságok:</h6>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                <span v-for="jog in szerepkor.jogosultsagok.slice(0, 6)" :key="jog" class="badge bg-secondary">{{ jog }}</span>
+                                                <span v-if="szerepkor.jogosultsagok.length > 6" class="badge bg-dark">+{{ szerepkor.jogosultsagok.length - 6 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Szerkesztés</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-table"></i> Jogosultsági Mátrix</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Funkció</th>
+                                            <th class="text-center">VHF_ADMIN</th>
+                                            <th class="text-center">VHF_UGYINTEZO</th>
+                                            <th class="text-center">VHF_DONTESHOZO</th>
+                                            <th class="text-center">UGYFEL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Ellenőrzési listák megtekintése</td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Döntéshozatal</td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Paraméterezés</td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                            <td class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Kérelem benyújtása</td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                            <td class="text-center"><i class="bi bi-check-circle text-success"></i></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+    <script src="../assets/js/components/parameterezo/param-header.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            components: { 'param-header': ParamHeader },
+            data() {
+                return {
+                    breadcrumbs: [
+                        { label: 'Főoldal', url: '../index.html' },
+                        { label: 'Paraméterező', url: 'index.html' },
+                        { label: 'Szerepkörök', url: '' }
+                    ],
+                    szerepkorok: []
+                };
+            },
+            methods: {
+                navigateBack() { window.location.href = 'index.html'; }
+            },
+            mounted() {
+                if (typeof VIHARMockData !== 'undefined' && VIHARMockData.parameterezo && VIHARMockData.parameterezo.szerepkorok) {
+                    this.szerepkorok = VIHARMockData.parameterezo.szerepkorok;
+                }
+                console.log('[VAHAP] Szerepkörök betöltve:', this.szerepkorok.length);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

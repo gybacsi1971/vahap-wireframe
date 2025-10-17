@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Véleményezés - VAHAP Vasúti Modul</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Közös CSS -->
+    <link href="../../assets/css/vihar-common.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .dokumentum-card {
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .dokumentum-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .dokumentum-card.uj {
+            border-left-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .dokumentum-card.elolvasva {
+            border-left-color: #ffc107;
+        }
+
+        .dokumentum-card.valaszolt {
+            border-left-color: #28a745;
+        }
+
+        .velemeny-form {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .action-button {
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <div class="page-header">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 class="mb-0">
+                            <i class="bi bi-chat-square-text"></i> Véleményezésre váró dokumentumok
+                            <span class="badge bg-light text-dark ms-2">{{ currentUser.szerepkor }}</span>
+                        </h3>
+                        <p class="mb-0 mt-2">
+                            <i class="bi bi-person-badge"></i> {{ currentUser.nev }} | {{ currentUser.beosztas }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-light" @click="goBack">
+                            <i class="bi bi-arrow-left"></i> Vissza
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statisztika -->
+        <div class="container-fluid mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card border-danger">
+                        <div class="card-body text-center">
+                            <h2 class="text-danger mb-0">{{ stats.uj }}</h2>
+                            <small class="text-muted">Új dokumentum</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h2 class="text-warning mb-0">{{ stats.folyamatban }}</h2>
+                            <small class="text-muted">Folyamatban</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <h2 class="text-success mb-0">{{ stats.valaszolt }}</h2>
+                            <small class="text-muted">Véleményezve</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-secondary">
+                        <div class="card-body text-center">
+                            <h2 class="text-secondary mb-0">{{ dokumentumok.length }}</h2>
+                            <small class="text-muted">Összes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Főtartalom -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Bal oldal: Dokumentumok listája -->
+                <div class="col-md-5">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-folder2-open"></i> Véleményezésre váró dokumentumok
+                                <span class="badge bg-secondary ms-2">{{ dokumentumok.length }}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <a v-for="dok in dokumentumok"
+                                   :key="dok.id"
+                                   href="#"
+                                   class="list-group-item list-group-item-action dokumentum-card"
+                                   :class="[dok.statusz, { active: selectedDokumentum?.id === dok.id }]"
+                                   @click.prevent="selectDokumentum(dok)">
+
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <!-- Státusz badge -->
+                                            <div class="mb-2">
+                                                <span class="badge" :class="getStatuszBadge(dok.statusz)">
+                                                    {{ getStatuszLabel(dok.statusz) }}
+                                                </span>
+                                                <span v-if="dok.prioritas === 'suergo'" class="badge bg-danger ms-1">
+                                                    <i class="bi bi-exclamation-triangle"></i> Sürgős
+                                                </span>
+                                            </div>
+
+                                            <!-- Dokumentum típus és azonosító -->
+                                            <div class="fw-bold mb-1">
+                                                {{ dok.tipus_cim }}
+                                            </div>
+                                            <div class="small text-muted mb-2">
+                                                <i class="bi bi-file-earmark-text"></i> {{ dok.ugyazonosito }}
+                                            </div>
+
+                                            <!-- Ügyintéző aki küldte -->
+                                            <div class="small mb-2">
+                                                <i class="bi bi-person"></i> <strong>Előterjesztő:</strong> {{ dok.eloterjeszto }}
+                                            </div>
+
+                                            <!-- Dátumok -->
+                                            <div class="small text-muted">
+                                                <i class="bi bi-calendar"></i> Küldve: {{ formatDate(dok.kuldve) }}
+                                                <br>
+                                                <i class="bi bi-alarm"></i> Határidő:
+                                                <span :class="{ 'text-danger fw-bold': isExpiring(dok.hatarido) }">
+                                                    {{ formatDate(dok.hatarido) }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Státusz ikon -->
+                                        <div>
+                                            <i v-if="dok.statusz === 'uj'"
+                                               class="bi bi-envelope-fill text-danger fs-4"></i>
+                                            <i v-else-if="dok.statusz === 'elolvasva'"
+                                               class="bi bi-envelope-open-fill text-warning fs-4"></i>
+                                            <i v-else-if="dok.statusz === 'valaszolt'"
+                                               class="bi bi-check-circle-fill text-success fs-4"></i>
+                                        </div>
+                                    </div>
+                                </a>
+
+                                <!-- Nincs dokumentum -->
+                                <div v-if="dokumentumok.length === 0" class="list-group-item text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                    <p class="mt-3 mb-0">Nincs véleményezésre váró dokumentum</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobb oldal: Dokumentum részletei és véleményezés -->
+                <div class="col-md-7">
+                    <!-- Ha nincs kiválasztva -->
+                    <div v-if="!selectedDokumentum" class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-arrow-left-circle fs-1 text-muted"></i>
+                            <p class="text-muted mt-3">Válasszon ki egy dokumentumot a bal oldali listából</p>
+                        </div>
+                    </div>
+
+                    <!-- Kiválasztott dokumentum -->
+                    <div v-else class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-file-earmark-text"></i> {{ selectedDokumentum.tipus_cim }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Dokumentum metaadatok -->
+                            <div class="mb-3">
+                                <table class="table table-sm table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold" style="width: 40%;">Ügyazonosító:</td>
+                                            <td>{{ selectedDokumentum.ugyazonosito }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Előterjesztő:</td>
+                                            <td>{{ selectedDokumentum.eloterjeszto }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Dokumentum típus:</td>
+                                            <td>{{ selectedDokumentum.tipus_cim }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Küldve:</td>
+                                            <td>{{ formatDate(selectedDokumentum.kuldve) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">Határidő:</td>
+                                            <td>
+                                                <span :class="{ 'text-danger fw-bold': isExpiring(selectedDokumentum.hatarido) }">
+                                                    {{ formatDate(selectedDokumentum.hatarido) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <hr>
+
+                            <!-- Kísérő üzenet -->
+                            <div v-if="selectedDokumentum.kisero_uzenet" class="alert alert-info mb-3">
+                                <strong><i class="bi bi-chat-left-text"></i> Kísérő üzenet:</strong>
+                                <p class="mb-0 mt-2">{{ selectedDokumentum.kisero_uzenet }}</p>
+                            </div>
+
+                            <!-- Dokumentum tartalom -->
+                            <div class="mb-3">
+                                <h6><i class="bi bi-file-text"></i> Dokumentum tartalma:</h6>
+                                <div class="border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
+                                    <pre class="mb-0" style="white-space: pre-wrap;">{{ selectedDokumentum.tartalom }}</pre>
+                                </div>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" @click="downloadPDF(selectedDokumentum)">
+                                        <i class="bi bi-download"></i> PDF letöltés
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Véleményezés komponens -->
+                            <div v-if="selectedDokumentum.statusz !== 'valaszolt'">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-pencil-square"></i> Véleményezés
+                                </h6>
+
+                                <vihar-velemenyezes
+                                    :dokumentum="selectedDokumentum"
+                                    mode="velemenyez"
+                                    :current-user="currentUser"
+                                    @velemeny-rogzitve="handleVelemenyRogzitve">
+                                </vihar-velemenyezes>
+                            </div>
+
+                            <!-- Már véleményezett -->
+                            <div v-else class="alert alert-success">
+                                <h6><i class="bi bi-check-circle"></i> Véleménye elküldve</h6>
+                                <p class="mb-2"><strong>Állapot:</strong> {{ selectedDokumentum.velemeny?.allapot }}</p>
+                                <p class="mb-2"><strong>Időpont:</strong> {{ formatDate(selectedDokumentum.velemeny?.datum) }}</p>
+                                <div v-if="selectedDokumentum.velemeny?.szoveg">
+                                    <strong>Vélemény:</strong>
+                                    <p class="mb-0 mt-1">{{ selectedDokumentum.velemeny.szoveg }}</p>
+                                </div>
+                                <hr>
+                                <button class="btn btn-sm btn-outline-secondary" @click="editVelemeny">
+                                    <i class="bi bi-pencil"></i> Vélemény módosítása
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../../assets/js/vihar-config.js"></script>
+    <script src="../../assets/js/vihar-common.js"></script>
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- VAHAP Komponensek -->
+    <script src="../../assets/js/components/vihar-velemenyezes.js"></script>
+
+    <!-- Oldal specifikus Vue App -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            components: {
+                'vihar-velemenyezes': ViharVelemenyezes
+            },
+
+            data() {
+                return {
+                    currentUser: {
+                        nev: 'Dr. Nagy Andrea',
+                        beosztas: 'Osztályvezető',
+                        szerepkor: 'vezeto'
+                    },
+
+                    selectedDokumentum: null,
+
+                    dokumentumok: []
+                };
+            },
+
+            computed: {
+                stats() {
+                    return {
+                        uj: this.dokumentumok.filter(d => d.statusz === 'uj').length,
+                        folyamatban: this.dokumentumok.filter(d => d.statusz === 'elolvasva').length,
+                        valaszolt: this.dokumentumok.filter(d => d.statusz === 'valaszolt').length
+                    };
+                }
+            },
+
+            methods: {
+                loadDokumentumok() {
+                    // Mock dokumentumok betöltése
+                    this.dokumentumok = [
+                        {
+                            id: 1,
+                            ugyazonosito: 'VAHAP-V-2024-001234',
+                            tipus: 'határozat',
+                            tipus_cim: 'Határozat tervezet - Alkalmassági vizsgálat engedélyezése',
+                            eloterjeszto: 'Dr. Szabó Péter',
+                            statusz: 'uj',
+                            prioritas: 'suergo',
+                            kuldve: '2024-10-25T10:30:00',
+                            hatarido: '2024-10-27T23:59:59',
+                            kisero_uzenet: 'Kérem sürgős véleményezését, mivel a kérelmező határideje közeleg. A dokumentum jogi szempontból ellenőrzésre került.',
+                            tartalom: `HATÁROZAT
+
+Ügyazonosító: VAHAP-V-2024-001234
+
+RENDELKEZŐ RÉSZ:
+
+A benyújtott kérelem alapján engedélyezem Minta János (szül.: 1985.03.15.) részére a vasúti járművezető előzetes alkalmassági vizsgálatát.
+
+Az engedély hatálya: 2024.11.01 - 2029.10.31 (5 év)
+
+INDOKOLÁS:
+
+A kérelmező megfelelt a 123/2023. (XII. 15.) Korm. rendelet szerinti előírásoknak...
+
+JOGORVOSLAT:
+
+Ezen határozat ellen 15 napon belül fellebbezés nyújtható be...`,
+                            velemeny: null
+                        },
+                        {
+                            id: 2,
+                            ugyazonosito: 'VAHAP-V-2024-001235',
+                            tipus: 'vegzes',
+                            tipus_cim: 'Végzés tervezet - Hiánypótlási felszólítás',
+                            eloterjeszto: 'Nagy Andrea',
+                            statusz: 'elolvasva',
+                            prioritas: 'normal',
+                            kuldve: '2024-10-24T14:20:00',
+                            hatarido: '2024-10-28T23:59:59',
+                            kisero_uzenet: 'A hiánypótlási lista véglegesítésre került, kérem véleményét.',
+                            tartalom: `VÉGZÉS - Hiánypótlási felszólítás
+
+Ügyazonosító: VAHAP-V-2024-001235
+
+RENDELKEZÉS:
+
+Felhívom Teszt Erika kérelmezőt, hogy az alábbi hiányosságokat 15 napon belül pótolja:
+
+1. Orvosi alkalmassági igazolás hiányzik
+2. Képzési igazolás nem megfelelő formátumú
+3. Személyi igazolvány másolat nem olvasható
+
+FIGYELMEZTETÉS:
+
+Hiánypótlás elmulasztása esetén a kérelem érdemi vizsgálat nélkül elutasításra kerül.`,
+                            velemeny: null
+                        },
+                        {
+                            id: 3,
+                            ugyazonosito: 'VAHAP-V-2024-001236',
+                            tipus: 'határozat',
+                            tipus_cim: 'Határozat tervezet - Kérelem elutasítása',
+                            eloterjeszto: 'Kiss Gábor',
+                            statusz: 'valaszolt',
+                            prioritas: 'normal',
+                            kuldve: '2024-10-20T09:00:00',
+                            hatarido: '2024-10-26T23:59:59',
+                            kisero_uzenet: 'Elutasító határozat véleményezése szükséges.',
+                            tartalom: `HATÁROZAT - Elutasítás
+
+Ügyazonosító: VAHAP-V-2024-001236
+
+RENDELKEZŐ RÉSZ:
+
+Kovács Anna kérelmét ELUTASÍTOM.
+
+INDOKOLÁS:
+
+A kérelmező nem felelt meg az orvosi alkalmassági követelményeknek...`,
+                            velemeny: {
+                                allapot: 'elfogad',
+                                szoveg: 'Az elutasítás jogszerű, az indokolás megfelelő. Jóváhagyom.',
+                                datum: '2024-10-21T15:30:00'
+                            }
+                        }
+                    ];
+
+                    console.log('[VAHAP] Dokumentumok betöltve:', this.dokumentumok.length);
+                },
+
+                selectDokumentum(dok) {
+                    this.selectedDokumentum = dok;
+
+                    // Státusz frissítés: ha új, akkor elolvasva
+                    if (dok.statusz === 'uj') {
+                        dok.statusz = 'elolvasva';
+                    }
+                },
+
+                handleVelemenyRogzitve(velemeny) {
+                    console.log('[Véleményezés] Vélemény rögzítve:', velemeny);
+
+                    // Dokumentum frissítése
+                    if (this.selectedDokumentum) {
+                        this.selectedDokumentum.statusz = 'valaszolt';
+                        this.selectedDokumentum.velemeny = {
+                            allapot: velemeny.allapot,
+                            szoveg: velemeny.szoveg,
+                            datum: new Date().toISOString()
+                        };
+                    }
+
+                    alert('✓ Vélemény sikeresen rögzítve!');
+                },
+
+                editVelemeny() {
+                    if (this.selectedDokumentum) {
+                        this.selectedDokumentum.statusz = 'elolvasva';
+                        this.selectedDokumentum.velemeny = null;
+                    }
+                },
+
+                downloadPDF(dok) {
+                    alert(`PDF letöltés: ${dok.tipus_cim}\n\n(Mock funkció - éles környezetben PDF generálás történne)`);
+                },
+
+                getStatuszBadge(statusz) {
+                    const badges = {
+                        'uj': 'bg-danger',
+                        'elolvasva': 'bg-warning',
+                        'valaszolt': 'bg-success'
+                    };
+                    return badges[statusz] || 'bg-secondary';
+                },
+
+                getStatuszLabel(statusz) {
+                    const labels = {
+                        'uj': 'Új',
+                        'elolvasva': 'Elolvasva',
+                        'valaszolt': 'Véleményezve'
+                    };
+                    return labels[statusz] || statusz;
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return 'N/A';
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('hu-HU', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                isExpiring(hatarido) {
+                    if (!hatarido) return false;
+                    const deadline = new Date(hatarido);
+                    const now = new Date();
+                    const diff = deadline - now;
+                    const daysLeft = diff / (1000 * 60 * 60 * 24);
+                    return daysLeft <= 2;
+                },
+
+                goBack() {
+                    window.history.back();
+                }
+            },
+
+            mounted() {
+                console.log('[VAHAP] Véleményező felület betöltve');
+                this.loadDokumentumok();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

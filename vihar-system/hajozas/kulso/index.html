@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hajózási Modul - Kérelem benyújtása | VAHAP</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app" class="container-fluid vh-100 d-flex flex-column">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-light bg-light border-bottom">
+            <div class="container">
+                <span class="navbar-brand">
+                    <i class="bi bi-water text-hajozas"></i>
+                    <strong>VAHAP - Hajózási Modul</strong>
+                    <span class="badge bg-hajozas ms-2">H-052</span>
+                </span>
+                <div class="ms-auto">
+                    <span class="me-3">
+                        <i class="bi bi-person-circle"></i> Üdvözöljük!
+                    </span>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-question-circle"></i> Súgó
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tartalom -->
+        <div class="flex-grow-1 overflow-auto">
+            <div class="container py-4">
+                <!-- Előrehaladás jelző -->
+                <div class="progress-wizard mb-4">
+                    <div class="progress-step" :class="{'completed': currentStep > 1, 'active': currentStep === 1}">
+                        <div class="progress-step-circle">
+                            <i class="bi" :class="currentStep > 1 ? 'bi-check-lg' : 'bi-1-circle'"></i>
+                        </div>
+                        <div class="progress-step-label">
+                            <small>UCE-1955</small><br>
+                            Adatrögzítés
+                        </div>
+                    </div>
+                    <div class="progress-step" :class="{'completed': currentStep > 2, 'active': currentStep === 2}">
+                        <div class="progress-step-circle">
+                            <i class="bi" :class="currentStep > 2 ? 'bi-check-lg' : 'bi-2-circle'"></i>
+                        </div>
+                        <div class="progress-step-label">
+                            <small>UCE-1967</small><br>
+                            Adatok kitöltése
+                        </div>
+                    </div>
+                    <div class="progress-step" :class="{'completed': currentStep > 3, 'active': currentStep === 3}">
+                        <div class="progress-step-circle">
+                            <i class="bi" :class="currentStep > 3 ? 'bi-check-lg' : 'bi-3-circle'"></i>
+                        </div>
+                        <div class="progress-step-label">
+                            <small>UCE-1966</small><br>
+                            Mellékletek
+                        </div>
+                    </div>
+                    <div class="progress-step" :class="{'completed': currentStep > 4, 'active': currentStep === 4}">
+                        <div class="progress-step-circle">
+                            <i class="bi" :class="currentStep > 4 ? 'bi-check-lg' : 'bi-4-circle'"></i>
+                        </div>
+                        <div class="progress-step-label">
+                            <small>UCE-1970</small><br>
+                            Véglegesítés
+                        </div>
+                    </div>
+                    <div class="progress-step" :class="{'completed': currentStep > 5, 'active': currentStep === 5}">
+                        <div class="progress-step-circle">
+                            <i class="bi" :class="currentStep > 5 ? 'bi-check-lg' : 'bi-5-circle'"></i>
+                        </div>
+                        <div class="progress-step-label">
+                            <small>UCE-1965</small><br>
+                            Benyújtás
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Űrlap terület -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-hajozas text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-water"></i>
+                            Országos közforgalmú kikötő létesítésének engedélyezése
+                            <span class="badge bg-light text-dark float-end">F-0069</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 1. lépés: Adatrögzítés megkezdése -->
+                        <div v-if="currentStep === 1" class="fade-in">
+                            <h5 class="mb-4">
+                                <span class="badge bg-info">UCE-1955</span>
+                                Kérelem adatrögzítés megkezdése
+                            </h5>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Üdvözöljük a VAHAP rendszerben!</strong>
+                                <p class="mb-0 mt-2">
+                                    Ezen az űrlapon országos közforgalmú vagy határkikötő létesítésének engedélyét kérelmezheti.
+                                    Kérjük, töltse ki gondosan az összes szükséges mezőt.
+                                </p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold">
+                                                <i class="bi bi-clock"></i> Ügyintézési határidő
+                                            </h6>
+                                            <p class="mb-0">Sommás eljárás: <strong>8 nap</strong></p>
+                                            <p class="mb-0">Teljes eljárás: <strong>60 nap</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold">
+                                                <i class="bi bi-building"></i> Illetékes hatóság
+                                            </h6>
+                                            <p class="mb-0">Hajózási Hatósági Főosztály</p>
+                                            <p class="mb-0 small text-muted">Építési és Közlekedési Minisztérium</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" v-model="acceptTerms" id="acceptTerms">
+                                <label class="form-check-label" for="acceptTerms">
+                                    Elfogadom az adatkezelési tájékoztatót és a felhasználási feltételeket
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2. lépés: Kérelem adatainak kitöltése -->
+                        <div v-if="currentStep === 2" class="fade-in">
+                            <h5 class="mb-4">
+                                <span class="badge bg-info">UCE-1967</span>
+                                Kérelem adatainak kitöltése
+                                <span class="badge bg-secondary">F-0069</span>
+                            </h5>
+
+                            <!-- Kérelmező adatok -->
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-building"></i> Kérelmező (cég) adatai
+                            </h6>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-8">
+                                    <label class="form-label required">Cégnév</label>
+                                    <input type="text" class="form-control" v-model="formData.cegnev" placeholder="Teljes cégnév">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label required">Cégjegyzékszám</label>
+                                    <input type="text" class="form-control" v-model="formData.cegjegyzekszam">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Adószám</label>
+                                    <input type="text" class="form-control" v-model="formData.adoszam">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Képviselő neve</label>
+                                    <input type="text" class="form-control" v-model="formData.kepviselo">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">E-mail cím</label>
+                                    <input type="email" class="form-control" v-model="formData.email">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Telefonszám</label>
+                                    <input type="tel" class="form-control" v-model="formData.telefonszam">
+                                </div>
+                            </div>
+
+                            <!-- Székhely -->
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-geo-alt-fill"></i> Székhely
+                            </h6>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <label class="form-label required">Irányítószám</label>
+                                    <input type="text" class="form-control" v-model="formData.szekhely.iranyitoszam">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label required">Település</label>
+                                    <input type="text" class="form-control" v-model="formData.szekhely.telepules">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label required">Közterület neve</label>
+                                    <input type="text" class="form-control" v-model="formData.szekhely.kozterulet">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label required">Házszám</label>
+                                    <input type="text" class="form-control" v-model="formData.szekhely.hazszam">
+                                </div>
+                            </div>
+
+                            <!-- Hajózási létesítmény adatok -->
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-water"></i> Hajózási létesítmény adatok
+                            </h6>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Kikötő típusa</label>
+                                    <select class="form-select" v-model="formData.kikotoTipus">
+                                        <option value="">Válasszon...</option>
+                                        <option value="orszagos_kozforgalmu">Országos közforgalmú kikötő</option>
+                                        <option value="hatarkikoto">Határkikötő</option>
+                                        <option value="egyeb_letesitmeny">Egyéb hajózási létesítmény</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Víziút kategória</label>
+                                    <select class="form-select" v-model="formData.viziutKategoria">
+                                        <option value="">Válasszon...</option>
+                                        <option value="iv">IV. osztályú víziút</option>
+                                        <option value="v">V. osztályú víziút</option>
+                                        <option value="vi">VI. osztályú víziút</option>
+                                        <option value="vii">VII. osztályú víziút</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label required">Létesítmény pontos helye</label>
+                                    <input type="text" class="form-control" v-model="formData.letesitmenyHelye" placeholder="Település, víziút neve, km szelvény">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Tervezett kapacitás (tonna/év)</label>
+                                    <input type="number" class="form-control" v-model="formData.kapacitas">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Kikötői állóhelyek száma</label>
+                                    <input type="number" class="form-control" v-model="formData.allohelyekSzama">
+                                </div>
+                            </div>
+
+                            <!-- Tervező adatok -->
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-person-badge"></i> Tervező adatai
+                            </h6>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label required">Tervező neve</label>
+                                    <input type="text" class="form-control" v-model="formData.tervezo.nev">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label required">Tervezői jogosultság száma</label>
+                                    <input type="text" class="form-control" v-model="formData.tervezo.jogosultsag">
+                                </div>
+                            </div>
+
+                            <!-- Díjkalkulátor -->
+                            <div class="alert alert-warning">
+                                <h6 class="fw-bold">
+                                    <span class="badge bg-secondary">F-0070</span>
+                                    Díjkalkulátor
+                                </h6>
+                                <p class="mb-2">Becsült eljárási díj: <strong>250 000 Ft</strong></p>
+                                <small class="text-muted">Az eljárási díj a kikötő típusától és kapacitástól függ</small>
+                                <br>
+                                <button class="btn btn-sm btn-warning mt-2" @click="showDijbekero = true">
+                                    <span class="badge bg-secondary">F-0082</span>
+                                    Díjbekérő előállítása
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. lépés: Mellékletek -->
+                        <div v-if="currentStep === 3" class="fade-in">
+                            <h5 class="mb-4">
+                                <span class="badge bg-info">UCE-1966</span>
+                                Mellékletek csatolása
+                                <span class="badge bg-secondary">F-0084</span>
+                            </h5>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-paperclip"></i>
+                                Kérjük, csatolja az alábbi kötelező dokumentumokat
+                            </div>
+
+                            <div class="list-group mb-4">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Műszaki tervdokumentáció</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Jogerős építési engedély</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Jogerős vízjogi engedély</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Tulajdonjogi okirat</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Tervezői jogosultság igazolása</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
+                                            <strong>Üzemeltetési nyilatkozat</strong>
+                                            <span class="badge bg-danger ms-2">Kötelező</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-earmark-pdf text-secondary fs-4 me-2"></i>
+                                            <strong>Közművek helyzete</strong>
+                                            <span class="badge bg-secondary ms-2">Opcionális</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. lépés: Véglegesítés -->
+                        <div v-if="currentStep === 4" class="fade-in">
+                            <h5 class="mb-4">
+                                <span class="badge bg-info">UCE-1970</span>
+                                Kérelem véglegesítése
+                                <span class="badge bg-secondary">F-0085</span>
+                            </h5>
+
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i>
+                                <strong>Adatok ellenőrzése</strong>
+                                <p class="mb-0 mt-2">Kérjük, ellenőrizze a megadott adatokat a benyújtás előtt!</p>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Kérelmező adatai</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Cégnév:</strong> {{ formData.cegnev }}</p>
+                                    <p><strong>Cégjegyzékszám:</strong> {{ formData.cegjegyzekszam }}</p>
+                                    <p><strong>Képviselő:</strong> {{ formData.kepviselo }}</p>
+                                    <p><strong>Székhely:</strong> {{ formData.szekhely.iranyitoszam }} {{ formData.szekhely.telepules }}</p>
+                                    <p class="mb-0"><strong>E-mail:</strong> {{ formData.email }}</p>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Létesítmény adatai</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Kikötő típusa:</strong> {{ formData.kikotoTipus }}</p>
+                                    <p><strong>Víziút kategória:</strong> {{ formData.viziutKategoria }}</p>
+                                    <p><strong>Helye:</strong> {{ formData.letesitmenyHelye }}</p>
+                                    <p class="mb-0"><strong>Kapacitás:</strong> {{ formData.kapacitas }} tonna/év</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <button class="btn btn-outline-primary" @click="generatePDF">
+                                    <span class="badge bg-secondary">F-0086</span>
+                                    <i class="bi bi-file-pdf"></i> PDF kérelem megtekintése
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 5. lépés: Benyújtás -->
+                        <div v-if="currentStep === 5" class="fade-in text-center">
+                            <div class="py-5">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                                <h3 class="mt-4 mb-3">Kérelem sikeresen benyújtva!</h3>
+                                <p class="text-muted mb-4">
+                                    <span class="badge bg-info">UCE-1965</span>
+                                    <span class="badge bg-secondary">F-0087</span>
+                                </p>
+
+                                <div class="alert alert-success d-inline-block">
+                                    <h5>Ügyazonosító: <strong>VAHAP-H-2024-005678</strong></h5>
+                                    <p class="mb-0">Kérelmét rögzítettük a rendszerben.</p>
+                                </div>
+
+                                <div class="mt-4">
+                                    <p>A kérelem feldolgozása megkezdődött.</p>
+                                    <p>E-mailben értesítést küldünk a további lépésekről.</p>
+                                    <p class="small text-muted">Az eljárás várható időtartama: 60 nap</p>
+                                </div>
+
+                                <button class="btn btn-primary mt-3" onclick="window.location.href='../../index.html'">
+                                    <i class="bi bi-house"></i> Vissza a főoldalra
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lábléc műveletsáv -->
+        <div class="border-top bg-light p-3">
+            <div class="container d-flex justify-content-between">
+                <button class="btn btn-secondary" @click="previousStep" :disabled="currentStep === 1">
+                    <i class="bi bi-arrow-left"></i> Vissza
+                </button>
+                <button class="btn btn-hajozas" @click="nextStep" :disabled="!canProceed" v-if="currentStep < 5">
+                    Tovább <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentStep: 1,
+                    acceptTerms: false,
+                    showDijbekero: false,
+                    formData: {
+                        cegnev: 'Duna Kikötő Kft.',
+                        cegjegyzekszam: '01-09-123456',
+                        adoszam: '12345678-2-41',
+                        kepviselo: 'Kovács István',
+                        email: 'info@dunakikoto.hu',
+                        telefonszam: '+36301234567',
+                        szekhely: {
+                            iranyitoszam: '1095',
+                            telepules: 'Budapest',
+                            kozterulet: 'Lechner Ödön fasor',
+                            hazszam: '4'
+                        },
+                        kikotoTipus: 'orszagos_kozforgalmu',
+                        viziutKategoria: 'vi',
+                        letesitmenyHelye: 'Budapest, Duna 1640 fkm',
+                        kapacitas: 500000,
+                        allohelyekSzama: 12,
+                        tervezo: {
+                            nev: 'Tervező Iroda Kft.',
+                            jogosultsag: 'TJ-2023-0456'
+                        }
+                    }
+                }
+            },
+            computed: {
+                canProceed() {
+                    if (this.currentStep === 1) return this.acceptTerms;
+                    if (this.currentStep === 2) return this.formData.cegnev && this.formData.email;
+                    return true;
+                }
+            },
+            methods: {
+                nextStep() {
+                    if (this.currentStep < 5 && this.canProceed) {
+                        this.currentStep++;
+                    }
+                },
+                previousStep() {
+                    if (this.currentStep > 1) {
+                        this.currentStep--;
+                    }
+                },
+                generatePDF() {
+                    alert('F-0086: PDF generálás - Mock funkció');
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

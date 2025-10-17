@@ -1,0 +1,223 @@
+/*
+ * VAHAP - 3 Oszlopos Layout CSS
+ * Belső (ügyintézői) rendszer alapstruktúra
+ * KRITIKUS: Ez a layout NEM módosítható a CLAUDE.md útmutató szerint!
+ */
+
+/* ========================================
+   VIEWPORT ÉS CONTAINER BEÁLLÍTÁSOK
+   ======================================== */
+
+html {
+    overflow-x: hidden !important;
+}
+
+body {
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+.vh-100.row {
+    flex-wrap: nowrap !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+}
+
+/* ========================================
+   3 OSZLOPOS LAYOUT - ALAPSTRUKTÚRA
+   ======================================== */
+
+/* Bal és jobb sidebar alapok */
+.sidebar-left, .sidebar-right {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: width 0.3s ease, flex 0.3s ease, max-width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Sidebar tartalom scrollozás */
+.sidebar-left .sidebar-content,
+.sidebar-right .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* Középső oszlop */
+.middle-column {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Középső oszlop fejléc fix */
+.middle-column .case-header {
+    flex-shrink: 0;
+}
+
+/* Középső oszlop munkaterület scrollozás */
+.middle-column .flex-grow-1.overflow-auto {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* ========================================
+   KOLLAPSZ FUNKCIÓ
+   ======================================== */
+
+/* Bal sidebar collapsed állapot */
+.sidebar-left.collapsed {
+    max-width: 50px !important;
+    min-width: 50px !important;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    box-sizing: border-box !important;
+    border-right: none !important;
+}
+
+/* Jobb sidebar collapsed állapot */
+.sidebar-right.collapsed {
+    max-width: 50px !important;
+    min-width: 50px !important;
+    flex: 0 0 50px !important;
+    width: 50px !important;
+    box-sizing: border-box !important;
+    border-left: none !important;
+}
+
+/* Collapsed állapotban border eltávolítása */
+.sidebar-right.collapsed {
+    padding-left: 0 !important;
+}
+
+.sidebar-left.collapsed {
+    padding-right: 0 !important;
+}
+
+/* Bootstrap col override collapsed állapotban */
+.row .col-md-3.sidebar-right.collapsed,
+div.col-md-3.sidebar-right.collapsed {
+    flex: 0 0 50px !important;
+    max-width: 50px !important;
+    width: 50px !important;
+}
+
+.row .col-md-2.sidebar-left.collapsed,
+div.col-md-2.sidebar-left.collapsed {
+    flex: 0 0 50px !important;
+    max-width: 50px !important;
+    width: 50px !important;
+}
+
+/* Normál tartalom elrejtése collapsed állapotban */
+.sidebar-content {
+    transition: opacity 0.2s ease;
+}
+
+.collapsed .sidebar-content {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+/* Collapsed ikon sáv */
+.collapsed-icon-bar {
+    display: none;
+    padding: 1rem 0;
+    height: 100%;
+    width: 100%;
+}
+
+.collapsed .collapsed-icon-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 50px;
+    padding: 1rem 0;
+    overflow: hidden;
+    border: none !important;
+}
+
+/* Collapsed ikonok méretezése */
+.collapsed-icon-bar i {
+    font-size: 1.2rem !important;
+}
+
+.collapsed-icon-bar .badge {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.4rem !important;
+}
+
+.sidebar-left .collapsed-icon-bar {
+    justify-content: flex-start;
+}
+
+.sidebar-right .collapsed-icon-bar {
+    justify-content: flex-start;
+}
+
+/* ========================================
+   TOGGLE GOMBOK
+   ======================================== */
+
+.toggle-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    background: var(--vasut-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background: #6d3410;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.toggle-btn-left {
+    right: -15px;
+}
+
+.toggle-btn-right {
+    left: -15px;
+}
+
+/* ========================================
+   SEGÉDOSZTÁLYOK
+   ======================================== */
+
+.overflow-auto-sidebar {
+    overflow-y: auto;
+    overflow-x: auto;
+    height: 100%;
+}
+
+/* Row flexbox fix */
+.vh-100.row {
+    flex-wrap: nowrap !important;
+}

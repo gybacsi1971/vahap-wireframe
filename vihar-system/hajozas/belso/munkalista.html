@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Hajózási Modul - Ügyintézői Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP Közös Stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #006994 0%, #004d6b 100%);">
+            <div class="container-fluid px-4">
+                <span class="navbar-brand">
+                    <i class="bi bi-water"></i> VAHAP - Hajózási Hatósági Modul
+                    <span class="badge bg-light text-dark ms-2">H-052</span>
+                </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-white">
+                        <i class="bi bi-person-badge"></i> {{ ugyintezoNev }}
+                        <span class="badge bg-light text-dark ms-1">{{ szerepkor }}</span>
+                    </span>
+                    <button class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Kilépés
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tartalom -->
+        <div class="container-fluid py-4 px-4">
+            <!-- Oldal címsor -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4><i class="bi bi-clipboard-data"></i> Ügyintézői Munkalista</h4>
+                    <p class="text-muted mb-0">Hajózási létesítmény engedélyezési ügyek</p>
+                </div>
+                <div>
+                    <a href="../../index.html" class="btn btn-outline-secondary">
+                        <i class="bi bi-house"></i> Főoldal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dashboard statisztikák -->
+            <dashboard-stats :stats="statistics"></dashboard-stats>
+
+            <!-- Ügy érkeztetése EKEIDR rendszerből -->
+            <receive-case-button
+                module-type="hajozas"
+                @receive-case="receiveNewCase"
+            ></receive-case-button>
+
+            <!-- Szűrési opciók (kibővített ügyintézőknek) -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label small">Ügyintéző</label>
+                            <select class="form-select" v-model="ugyintezoFilter">
+                                <option value="all">Összes ügyintéző</option>
+                                <option value="sajat">Saját ügyek</option>
+                                <option value="Nagy Andrea">Nagy Andrea</option>
+                                <option value="Tóth Gábor">Tóth Gábor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Prioritás</label>
+                            <select class="form-select" v-model="prioritasFilter">
+                                <option value="all">Összes</option>
+                                <option value="surg">Sürgős (3 napon belül)</option>
+                                <option value="normal">Normál</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Szakhatósági állásfoglalás</label>
+                            <select class="form-select" v-model="szakhatosagiFilter">
+                                <option value="all">Mind</option>
+                                <option value="yes">Szakhatósági folyamatban</option>
+                                <option value="no">Nincs szakhatósági</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">Rendezés</label>
+                            <div class="btn-group w-100" role="group">
+                                <button
+                                    type="button"
+                                    class="btn btn-sm"
+                                    :class="sortByDeadline ? 'btn-primary' : 'btn-outline-primary'"
+                                    @click="sortByDeadline = true"
+                                >
+                                    <i class="bi bi-alarm"></i> Határidő
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm"
+                                    :class="!sortByDeadline ? 'btn-primary' : 'btn-outline-primary'"
+                                    @click="sortByDeadline = false"
+                                >
+                                    <i class="bi bi-calendar"></i> Benyújtás
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Munkalista -->
+            <case-list
+                :cases="filteredCases"
+                user-role="internal"
+                module-type="hajozas"
+                @case-select="openCase"
+            ></case-list>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../../assets/js/vihar-config.js"></script>
+    <script src="../../assets/js/vihar-common.js"></script>
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+    <script src="../../assets/js/vihar-components.js"></script>
+
+    <!-- Oldal-specifikus Vue App -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            components: VahapComponents,
+            data() {
+                return {
+                    ugyintezoNev: 'Nagy Andrea',
+                    szerepkor: 'HHF_UGYINTEZO',
+                    cases: VahapMockData.hajozas.ugyek_belso,
+                    statistics: VahapMockData.hajozas.stats_belso,
+                    ugyintezoFilter: 'all',
+                    prioritasFilter: 'all',
+                    szakhatosagiFilter: 'all',
+                    sortByDeadline: true
+                };
+            },
+            computed: {
+                filteredCases() {
+                    let filtered = [...this.cases];
+
+                    // Ügyintéző szűrés
+                    if (this.ugyintezoFilter === 'sajat') {
+                        filtered = filtered.filter(c => c.ugyintezo === this.ugyintezoNev);
+                    } else if (this.ugyintezoFilter !== 'all') {
+                        filtered = filtered.filter(c => c.ugyintezo === this.ugyintezoFilter);
+                    }
+
+                    // Prioritás szűrés
+                    if (this.prioritasFilter === 'surg') {
+                        filtered = filtered.filter(c => {
+                            const remaining = VahapCommon.deadlines.remainingDays(c.hatarido);
+                            return remaining <= 3 && remaining >= 0;
+                        });
+                    }
+
+                    // Szakhatósági szűrés
+                    if (this.szakhatosagiFilter === 'yes') {
+                        filtered = filtered.filter(c => c.statusz.includes('szakhatósági'));
+                    } else if (this.szakhatosagiFilter === 'no') {
+                        filtered = filtered.filter(c => !c.statusz.includes('szakhatósági'));
+                    }
+
+                    return filtered;
+                }
+            },
+            methods: {
+                receiveNewCase() {
+                    // F-0078 - VAHAP érkeztetés (EKEIDR interfész)
+                    // F-0079 - VAHAP bejövő iktatás
+                    // UC-HAJ-0302 - Érkeztetés
+                    console.log('[VAHAP] Új hajózási ügy érkeztetése EKEIDR rendszerből');
+
+                    // Mock: EKEIDR listából választás szimulálása
+                    const mockEkeidrList = [
+                        { iktatoszam: 'EKEIDR-22401/2024', ugyfel: 'Balaton Marina Kft.', datum: '2024-10-21', tipus: 'Kikötő létesítés' },
+                        { iktatoszam: 'EKEIDR-22402/2024', ugyfel: 'Duna Shipping Zrt.', datum: '2024-10-21', tipus: 'Határkikötő' },
+                        { iktatoszam: 'EKEIDR-22403/2024', ugyfel: 'Tisza Port Kft.', datum: '2024-10-22', tipus: 'Kikötő bővítés' }
+                    ];
+
+                    // Valós implementációban: EKEIDR interfész hívása
+                    // Itt mock adatokkal dolgozunk
+                    VahapCommon.notifications.info('EKEIDR érkeztetés funkció (mock)', 'F-0078, F-0079');
+
+                    // TODO: EKEIDR lista megjelenítése modal ablakban
+                    // TODO: Kiválasztott ügy átvétele és VAHAP ügyazonosító generálása
+                    // TODO: Átirányítás az érkeztetett ügy feldolgozására
+                },
+                openCase(caseItem) {
+                    // F-0064 - Hatáskör és illetékesség vizsgálat (első lépés)
+                    // UCE-1987 - Hatáskör vizsgálat
+                    console.log('[VAHAP] Ügy megnyitása:', caseItem.ugyazonosito);
+                    // Ügy adatainak mentése
+                    VahapCommon.storage.save('selected_case', caseItem);
+                    // Átirányítás az ügy részleteire
+                    window.location.href = `index.html?ugy=${caseItem.ugyazonosito}`;
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Hajózási Belső Munkalista betöltve');
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

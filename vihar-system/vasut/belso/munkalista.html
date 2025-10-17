@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Vasúti Modul - Ügyintézői Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP Közös Stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-arculat.css">
+
+    <style>
+        .stat-card {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .stat-card.new { border-left-color: #17a2b8; }
+        .stat-card.pending { border-left-color: #ffc107; }
+        .stat-card.decision { border-left-color: #6f42c1; }
+        .stat-card.urgent { border-left-color: #dc3545; }
+        .stat-card.completed { border-left-color: #28a745; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .workflow-badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .deadline-urgent {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .deadline-warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+
+        .deadline-ok {
+            color: #6c757d;
+        }
+
+        .role-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0.2;
+            font-size: 3rem;
+        }
+
+        /* Egyedi badge színek */
+        .bg-purple {
+            background-color: #6f42c1 !important;
+            color: white !important;
+        }
+
+        /* Badge státusz színek - olvashatóság javítása */
+        .badge-status {
+            background-color: #6c757d !important;
+            color: white !important;
+        }
+        .badge-status.badge-new {
+            background-color: #17a2b8 !important;
+            color: white !important;
+        }
+        .badge-status.badge-pending {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+        .badge-status.badge-info {
+            background-color: #0dcaf0 !important;
+            color: #000 !important;
+        }
+        .badge-status.badge-warning {
+            background-color: #ffc107 !important;
+            color: #000 !important;
+        }
+        .badge-status.badge-approved {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        .badge-status.badge-rejected {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+        .badge-status.badge-closed {
+            background-color: #6c757d !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #8B4513 0%, #654321 100%);">
+            <div class="container-fluid px-4">
+                <span class="navbar-brand">
+                    <i class="bi bi-train-front"></i> VAHAP - Vasúti Hatósági Modul
+                    <span class="badge bg-light text-dark ms-2">V-044</span>
+                </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-white">
+                        <i class="bi bi-person-badge"></i> {{ ugyintezoNev }}
+                        <span class="badge bg-light text-dark ms-1">{{ szerepkorCimke }}</span>
+                    </span>
+                    <a href="../../index.html" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-left"></i> Kilépés
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tartalom -->
+        <div class="container-fluid py-4 px-4">
+            <!-- Oldal címsor -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4><i class="bi bi-clipboard-data"></i> Ügyintézői Munkalista</h4>
+                    <p class="text-muted mb-0">Vasúti járművezetői alkalmassági vizsgálat ügyek</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <!-- Vezető Dashboard (csak vezető szerepkörnél) -->
+                    <a v-if="szerepkor === 'vezeto'" href="vezeto-dashboard.html" class="btn btn-primary">
+                        <i class="bi bi-speedometer2"></i> Vezető Dashboard
+                    </a>
+                    <!-- Véleményezési oldalak -->
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-chat-square-text"></i> Véleményezés
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="velemenyezes-eloterjesztes.html">
+                                <i class="bi bi-send"></i> Véleményezésre előterjesztés
+                            </a></li>
+                            <li><a class="dropdown-item" href="velemeny-ertekeles.html">
+                                <i class="bi bi-clipboard-check"></i> Vélemények értékelése
+                            </a></li>
+                            <li v-if="szerepkor === 'vezeto'"><hr class="dropdown-divider"></li>
+                            <li v-if="szerepkor === 'vezeto'"><a class="dropdown-item" href="vezeto-velemenyezes.html">
+                                <i class="bi bi-person-check"></i> Véleményezéseim
+                            </a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-primary" @click="showStatisztikak = !showStatisztikak">
+                        <i class="bi bi-graph-up"></i> Statisztikák
+                    </button>
+                    <a href="../../parameterezo/index.html" class="btn btn-outline-secondary">
+                        <i class="bi bi-gear"></i> Paraméterek
+                    </a>
+                </div>
+            </div>
+
+            <!-- Ügy érkeztetése EKEIDR rendszerből -->
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-inbox-fill"></i> EKEIDR Érkeztetés
+                        <span class="badge bg-light text-dark ms-2">F-0078</span>
+                        <span class="badge bg-light text-dark ms-1">F-0079</span>
+                        <span class="badge bg-light text-dark ms-1">UC-0302</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <i class="bi bi-info-circle"></i>
+                        Új ügy érkeztetése az EKEIDR rendszerből a VAHAP vasúti modulba
+                    </p>
+                    <button class="btn btn-primary" @click="receiveNewCase">
+                        <i class="bi bi-download"></i> Ügy érkeztetése EKEIDR-ből
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard statisztikák -->
+            <div v-if="showStatisztikak" class="row g-3 mb-4">
+                <!-- Új ügyek -->
+                <div class="col-md-2">
+                    <div class="card stat-card new h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-inbox role-indicator"></i>
+                            <small class="text-muted d-block">Új ügyek (érkeztetett)</small>
+                            <div class="stat-number text-info">{{ stats.uj_ugyek }}</div>
+                            <small class="text-muted">
+                                <span class="badge bg-info">UCE-1778</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vizsgálat alatt -->
+                <div class="col-md-2">
+                    <div class="card stat-card pending h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-hourglass-split role-indicator"></i>
+                            <small class="text-muted d-block">Vizsgálat alatt</small>
+                            <div class="stat-number text-warning">{{ stats.vizsgalat_alatt }}</div>
+                            <small class="text-muted">Formai/Tartalmi</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Döntésre vár -->
+                <div class="col-md-2">
+                    <div class="card stat-card decision h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-check-circle role-indicator"></i>
+                            <small class="text-muted d-block">Döntésre vár</small>
+                            <div class="stat-number text-purple">{{ stats.dontesre_var }}</div>
+                            <small class="text-muted">
+                                <span class="badge bg-secondary">F-0099</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ügyfél műveletre vár -->
+                <div class="col-md-2">
+                    <div class="card stat-card pending h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-person-check role-indicator"></i>
+                            <small class="text-muted d-block">Ügyfél műveletre vár</small>
+                            <div class="stat-number text-warning">{{ stats.ugyfel_muvelet }}</div>
+                            <small class="text-muted">Hiánypótlás/Tisztázás</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sürgős (határidő ≤3 nap) -->
+                <div class="col-md-2">
+                    <div class="card stat-card urgent h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-exclamation-triangle role-indicator"></i>
+                            <small class="text-muted d-block">Sürgős</small>
+                            <div class="stat-number text-danger">{{ stats.surgos }}</div>
+                            <small class="text-muted">≤ 3 nap határidő</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lezárt (ma) -->
+                <div class="col-md-2">
+                    <div class="card stat-card completed h-100">
+                        <div class="card-body position-relative">
+                            <i class="bi bi-check2-all role-indicator"></i>
+                            <small class="text-muted d-block">Ma lezárva</small>
+                            <div class="stat-number text-success">{{ stats.lezart_ma }}</div>
+                            <small class="text-muted">
+                                <span class="badge bg-success">F-0097</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Szerepkör-specifikus gyors műveletek -->
+            <div class="row g-3 mb-4">
+                <!-- VHF Ügyintéző műveletek -->
+                <div v-if="szerepkor === 'VHF_UGYINTEZO'" class="col-md-6">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightning"></i> Gyors műveletek - Ügyintéző
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm btn-outline-primary" @click="szuroRa('uj_ugyek')">
+                                    <i class="bi bi-inbox"></i> Új ügyek átvétele
+                                    <span class="badge bg-primary">{{ stats.uj_ugyek }}</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" @click="szuroRa('hatasko_vizsgalat')">
+                                    <i class="bi bi-shield-check"></i> Hatáskör vizsgálat
+                                    <span class="badge bg-secondary">F-0064</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" @click="szuroRa('formai_ellenorzes')">
+                                    <i class="bi bi-file-earmark-check"></i> Formai ellenőrzés
+                                    <span class="badge bg-secondary">F-0065</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" @click="szuroRa('tartalmi_ellenorzes')">
+                                    <i class="bi bi-clipboard-check"></i> Tartalmi vizsgálat
+                                    <span class="badge bg-secondary">F-0066</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" @click="szuroRa('hianypotlas_keszites')">
+                                    <i class="bi bi-exclamation-circle"></i> Hiánypótlás készítés
+                                    <span class="badge bg-secondary">F-0100</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VHF Döntéshozó műveletek -->
+                <div v-if="szerepkor === 'VHF_DONTESHOZO'" class="col-md-6">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-award"></i> Gyors műveletek - Döntéshozó
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm btn-outline-primary" @click="szuroRa('dontesre_var')">
+                                    <i class="bi bi-check-circle"></i> Döntésre váró ügyek
+                                    <span class="badge bg-primary">{{ stats.dontesre_var }}</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" @click="szuroRa('dontesi_javaslat')">
+                                    <i class="bi bi-file-text"></i> Döntési javaslatok
+                                    <span class="badge bg-secondary">F-0074</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" @click="szuroRa('velemenyezes')">
+                                    <i class="bi bi-chat-square-text"></i> Véleményezendő
+                                    <span class="badge bg-secondary">F-0096</span>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" @click="szuroRa('kiadmanyozas')">
+                                    <i class="bi bi-pen"></i> Kiadmányozásra vár
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VNY024 Nyilvántartás (vasút specifikus) -->
+                <div class="col-md-6">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-database"></i> VNY024 Vasútegészségügyi Nyilvántartás
+                                <span class="badge bg-light text-dark">F-0090</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Aktív vizsgálatok</small>
+                                    <h5>{{ vny024_stats.aktiv_vizsgalatok }}</h5>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Ma lejáró alkalmassági</small>
+                                    <h5 class="text-danger">{{ vny024_stats.lejaro_alkalmassag }}</h5>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-info mt-2" @click="megnyitVNY024">
+                                <i class="bi bi-box-arrow-up-right"></i> Nyilvántartás megnyitása
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Szűrési opciók -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="bi bi-funnel"></i> Szűrés és keresés</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label small">Keresés</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                v-model="searchQuery"
+                                placeholder="Ügyazonosító vagy ügyfél neve..."
+                            >
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Státusz</label>
+                            <select class="form-select" v-model="statusFilter">
+                                <option value="all">Összes</option>
+                                <option value="uj">Új (érkeztetett)</option>
+                                <option value="hatasko_vizsgalat">Hatáskör vizsgálat</option>
+                                <option value="formai_ellenorzes">Formai ellenőrzés</option>
+                                <option value="tartalmi_ellenorzes">Tartalmi ellenőrzés</option>
+                                <option value="hianypotlas_varasa">Hiánypótlásra vár</option>
+                                <option value="tenyallas_tisztazas">Tényállás tisztázás</option>
+                                <option value="dontesre_var">Döntésre vár</option>
+                                <option value="jovahagyva">Jóváhagyva</option>
+                                <option value="elutasitva">Elutasítva</option>
+                                <option value="lezart">Lezárt</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Ügyintéző</label>
+                            <select class="form-select" v-model="ugyintezoFilter">
+                                <option value="all">Összes</option>
+                                <option value="sajat">Saját ügyek</option>
+                                <option value="Dr. Szabó Péter">Dr. Szabó Péter</option>
+                                <option value="Nagy Andrea">Nagy Andrea</option>
+                                <option value="Kovács Béla">Kovács Béla</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Határidő</label>
+                            <select class="form-select" v-model="hatarideFilter">
+                                <option value="all">Összes</option>
+                                <option value="surgos">Sürgős (≤3 nap)</option>
+                                <option value="figyelmezteto">Figyelmeztetés (≤7 nap)</option>
+                                <option value="normal">Normál (>7 nap)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Eljárás típus</label>
+                            <select class="form-select" v-model="eljarasFilter">
+                                <option value="all">Összes</option>
+                                <option value="sommas">Sommás (8 nap)</option>
+                                <option value="teljes">Teljes (60 nap)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button class="btn btn-secondary w-100" @click="resetFilters">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mentett nézetek panel (P1-2) -->
+                    <div class="row g-2 mt-2">
+                        <div class="col-md-8">
+                            <div class="d-flex gap-2 align-items-center">
+                                <label class="form-label small mb-0">
+                                    <i class="bi bi-bookmark"></i> Mentett nézetek:
+                                </label>
+                                <div class="btn-group" role="group">
+                                    <button v-for="view in savedViews" :key="view.id"
+                                            class="btn btn-sm"
+                                            :class="currentViewName === view.name ? 'btn-primary' : 'btn-outline-secondary'"
+                                            @click="loadView(view.id)">
+                                        <i class="bi bi-eye"></i> {{ view.name }}
+                                        <span class="badge bg-light text-dark ms-1">{{ view.count }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex gap-2 justify-content-end">
+                            <button class="btn btn-sm btn-success" @click="showSaveViewDialog">
+                                <i class="bi bi-save"></i> Aktuális nézet mentése
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" @click="showViewManager = true">
+                                <i class="bi bi-gear"></i> Kezelés
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" @click="showColumnCustomizer = true">
+                                <i class="bi bi-columns"></i> Oszlopok
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tömeges műveletek panel -->
+            <div v-if="selectedUgyek.length > 0" class="card shadow-sm mb-3 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-check-square"></i> Kiválasztott ügyek: <strong>{{ selectedUgyek.length }}</strong>
+                        </div>
+                        <button class="btn btn-sm btn-outline-light" @click="clearSelection">
+                            <i class="bi bi-x-circle"></i> Kijelölés törlése
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-badge"></i> Ügyintéző átadás
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" @click="bulkAssign('Dr. Szabó Péter')">Dr. Szabó Péter</a></li>
+                                <li><a class="dropdown-item" @click="bulkAssign('Nagy Andrea')">Nagy Andrea</a></li>
+                                <li><a class="dropdown-item" @click="bulkAssign('Kovács Béla')">Kovács Béla</a></li>
+                                <li><a class="dropdown-item" @click="bulkAssign('Tóth Erzsébet')">Tóth Erzsébet</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-arrow-repeat"></i> Státusz módosítás
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" @click="bulkStatusChange('hatáskör vizsgálat')">Hatáskör vizsgálat</a></li>
+                                <li><a class="dropdown-item" @click="bulkStatusChange('formai ellenőrzés')">Formai ellenőrzés</a></li>
+                                <li><a class="dropdown-item" @click="bulkStatusChange('tartalmi ellenőrzés')">Tartalmi ellenőrzés</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" @click="bulkExport('excel')"><i class="bi bi-file-excel"></i> Excel (XLSX)</a></li>
+                                <li><a class="dropdown-item" @click="bulkExport('pdf')"><i class="bi bi-file-pdf"></i> PDF</a></li>
+                                <li><a class="dropdown-item" @click="bulkExport('csv')"><i class="bi bi-file-earmark-text"></i> CSV</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-outline-info" @click="bulkPrint">
+                            <i class="bi bi-printer"></i> Nyomtatás
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ügy lista táblázat -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Ügylista
+                        <span class="badge bg-secondary">{{ filteredUgyek.length }} ügy</span>
+                    </h6>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-secondary" @click="sortBy('hatarido')">
+                            <i class="bi bi-sort-down"></i> Határidő
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" @click="sortBy('benyujtas')">
+                            <i class="bi bi-sort-down"></i> Benyújtás
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" class="form-check-input"
+                                               @change="toggleSelectAll"
+                                               :checked="isAllSelected"
+                                               title="Összes kiválasztása">
+                                    </th>
+                                    <th>Ügyazonosító</th>
+                                    <th>Ügyfél</th>
+                                    <th>Aktuális lépés</th>
+                                    <th>Ügyintéző</th>
+                                    <th>Határidő</th>
+                                    <th>Státusz</th>
+                                    <th>Műveletek</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="ugy in paginatedUgyek" :key="ugy.ugyazonosito"
+                                    :class="{'table-primary': isSelected(ugy.ugyazonosito)}">
+                                    <td @click.stop>
+                                        <input type="checkbox" class="form-check-input"
+                                               :checked="isSelected(ugy.ugyazonosito)"
+                                               @change="toggleSelect(ugy.ugyazonosito)">
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <strong>{{ ugy.ugyazonosito }}</strong><br>
+                                        <small class="text-muted">{{ ugy.benyujtasDatum }}</small>
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <i class="bi bi-person"></i> {{ ugy.ugyfel.nev }}<br>
+                                        <small class="text-muted">{{ ugy.ugyfel.email }}</small>
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <span class="badge workflow-badge" :class="getWorkflowBadgeClass(ugy)">
+                                            {{ getAktualisLepes(ugy) }}
+                                        </span><br>
+                                        <small class="text-muted">{{ getWorkflowUCE(ugy) }}</small>
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <i class="bi bi-person-badge"></i> {{ ugy.ugyintezo && ugy.ugyintezo.nev ? ugy.ugyintezo.nev : (typeof ugy.ugyintezo === 'string' ? ugy.ugyintezo : 'N/A') }}
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <!-- P1-4: SLA követés progress bar -->
+                                        <div class="mb-1">
+                                            <span :class="getHatarideClass(ugy.hatarido)" style="font-size: 0.85em;">
+                                                <i class="bi bi-calendar-event"></i> {{ ugy.hatarido }}
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar"
+                                                 :class="'bg-' + getSLAProgress(ugy).variant"
+                                                 :style="'width: ' + getSLAProgress(ugy).percent + '%'"
+                                                 :title="getSLAProgress(ugy).percent + '% eltelt'">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            {{ getSLAProgress(ugy).hatralevo }} / {{ getSLAProgress(ugy).maxNapok }} nap
+                                            <span :class="getSLAProgress(ugy).variant === 'danger' ? 'text-danger fw-bold' : ''">
+                                                ({{ getSLAProgress(ugy).percent }}%)
+                                            </span>
+                                        </small>
+                                    </td>
+                                    <td style="cursor: pointer;" @click="openUgy(ugy.ugyazonosito)">
+                                        <span class="badge badge-status" :class="'badge-' + ugy.statuszClass">
+                                            {{ getAltalnosStatusz(ugy) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" @click.stop="openUgy(ugy.ugyazonosito)">
+                                            <i class="bi bi-folder-open"></i> Megnyit
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lapozás -->
+                    <div v-if="filteredUgyek.length > itemsPerPage" class="p-3 border-top">
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                                <li class="page-item" :class="{disabled: currentPage === 1}">
+                                    <a class="page-link" @click="currentPage--">Előző</a>
+                                </li>
+                                <li v-for="page in totalPages" :key="page" class="page-item" :class="{active: currentPage === page}">
+                                    <a class="page-link" @click="currentPage = page">{{ page }}</a>
+                                </li>
+                                <li class="page-item" :class="{disabled: currentPage === totalPages}">
+                                    <a class="page-link" @click="currentPage++">Következő</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EKEIDR Érkeztetés Modal -->
+        <div class="modal fade" id="ekeidrModal" tabindex="-1" aria-labelledby="ekeidrModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="ekeidrModalLabel">
+                            <i class="bi bi-inbox-fill"></i> EKEIDR Érkeztetés
+                            <span class="badge bg-light text-dark ms-2">F-0078</span>
+                            <span class="badge bg-light text-dark ms-1">UC-0302</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Bezárás"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>EKEIDR interfész kapcsolat</strong><br>
+                            Válasszon ki egy ügyet az EKEIDR rendszerből a VAHAP-ba történő átvételhez.
+                            Az átvétel után automatikusan generálódik a VAHAP ügyazonosító és bejövő iktatás.
+                        </div>
+
+                        <!-- Keresés és szűrés -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    v-model="ekeidrSearchQuery"
+                                    placeholder="Keresés EKEIDR iktatószám vagy tárgy alapján..."
+                                >
+                            </div>
+                        </div>
+
+                        <!-- EKEIDR ügyek lista -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>EKEIDR Iktatószám</th>
+                                        <th>Tárgy</th>
+                                        <th>Beérkezés</th>
+                                        <th>Művelet</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="ugy in filteredEkeidrUgyek" :key="ugy.ekeidr_id">
+                                        <td>
+                                            <strong>{{ ugy.ekeidr_id }}</strong><br>
+                                            <small class="text-muted">{{ ugy.ugyfelNev }}</small>
+                                        </td>
+                                        <td>
+                                            {{ ugy.targy }}<br>
+                                            <small class="text-muted">{{ ugy.megjegyzes }}</small>
+                                        </td>
+                                        <td>
+                                            <i class="bi bi-calendar-event"></i> {{ ugy.datum }}
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="btn btn-sm btn-primary"
+                                                @click="confirmReceiveCase(ugy)"
+                                            >
+                                                <i class="bi bi-download"></i> Átvétel
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div v-if="filteredEkeidrUgyek.length === 0" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Nincs elérhető EKEIDR ügy</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Mégse
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nézet kezelő Modal (P1-2) -->
+        <div class="modal fade" id="viewManagerModal" tabindex="-1" aria-labelledby="viewManagerModalLabel" aria-hidden="true"
+             v-if="showViewManager" @click.self="showViewManager = false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="viewManagerModalLabel">
+                            <i class="bi bi-bookmark-star"></i> Mentett nézetek kezelése
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="showViewManager = false" aria-label="Bezárás"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div v-if="savedViews.length === 0" class="text-center text-muted py-4">
+                            <i class="bi bi-bookmark" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Nincs még mentett nézet</p>
+                            <p class="small">Állítsa be a szűrőket és mentse el az aktuális nézetet!</p>
+                        </div>
+
+                        <div v-else class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Név</th>
+                                        <th>Szűrők</th>
+                                        <th>Találatok</th>
+                                        <th>Mentve</th>
+                                        <th style="width: 150px;">Műveletek</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="view in savedViews" :key="view.id">
+                                        <td>
+                                            <i class="bi bi-bookmark-fill text-primary"></i>
+                                            <strong>{{ view.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <span v-if="view.filters.statusFilter !== 'all'" class="badge bg-secondary me-1">
+                                                Státusz: {{ getStatuszLabel(view.filters.statusFilter) }}
+                                            </span>
+                                            <span v-if="view.filters.ugyintezoFilter !== 'all'" class="badge bg-info me-1">
+                                                Ügyintéző: {{ view.filters.ugyintezoFilter }}
+                                            </span>
+                                            <span v-if="view.filters.hatarideFilter !== 'all'" class="badge bg-warning me-1">
+                                                Határidő: {{ getHatarideLabel(view.filters.hatarideFilter) }}
+                                            </span>
+                                            <span v-if="view.filters.eljarasFilter !== 'all'" class="badge bg-success me-1">
+                                                Eljárás: {{ getEljarasLabel(view.filters.eljarasFilter) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ view.count }}</span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ formatDate(view.saved) }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" @click="loadView(view.id); showViewManager = false">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" @click="editView(view.id)">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" @click="deleteView(view.id)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="showViewManager = false">
+                            <i class="bi bi-x-circle"></i> Bezárás
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nézet mentése Modal (P1-2) -->
+        <div class="modal fade" id="saveViewModal" tabindex="-1" aria-labelledby="saveViewModalLabel" aria-hidden="true"
+             :class="{'show d-block': showSaveView}" @click.self="closeSaveViewDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="saveViewModalLabel">
+                            <i class="bi bi-save"></i> {{ editingViewId ? 'Nézet szerkesztése' : 'Új nézet mentése' }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="closeSaveViewDialog" aria-label="Bezárás"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="viewName" class="form-label">Nézet neve</label>
+                            <input type="text" class="form-control" id="viewName"
+                                   v-model="newViewName"
+                                   placeholder="pl. Sürgős ügyek, Saját ügyek, stb."
+                                   @keyup.enter="saveView">
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Aktuális szűrők:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li v-if="statusFilter !== 'all'">Státusz: {{ getStatuszLabel(statusFilter) }}</li>
+                                <li v-if="ugyintezoFilter !== 'all'">Ügyintéző: {{ ugyintezoFilter }}</li>
+                                <li v-if="hatarideFilter !== 'all'">Határidő: {{ getHatarideLabel(hatarideFilter) }}</li>
+                                <li v-if="eljarasFilter !== 'all'">Eljárás típus: {{ getEljarasLabel(eljarasFilter) }}</li>
+                                <li v-if="statusFilter === 'all' && ugyintezoFilter === 'all' && hatarideFilter === 'all' && eljarasFilter === 'all'">
+                                    <em>Nincs aktív szűrő</em>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle"></i>
+                            Találatok száma ezekkel a szűrőkkel: <strong>{{ filteredUgyek.length }}</strong>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="closeSaveViewDialog">
+                            <i class="bi bi-x-circle"></i> Mégse
+                        </button>
+                        <button type="button" class="btn btn-success" @click="saveView" :disabled="!newViewName.trim()">
+                            <i class="bi bi-save"></i> {{ editingViewId ? 'Frissítés' : 'Mentés' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oszlop testreszabás Modal (P1-3) -->
+        <div class="modal fade" id="columnCustomizerModal" tabindex="-1" aria-labelledby="columnCustomizerModalLabel" aria-hidden="true"
+             :class="{'show d-block': showColumnCustomizer}" @click.self="showColumnCustomizer = false">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="columnCustomizerModalLabel">
+                            <i class="bi bi-columns"></i> Oszlopok testreszabása
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="showColumnCustomizer = false" aria-label="Bezárás"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Húzza az oszlopokat</strong> a kívánt sorrendbe, és jelölje be/ki a látható oszlopokat.
+                            A kötelező oszlopok nem rejthetők el.
+                        </div>
+
+                        <div class="list-group">
+                            <div v-for="column in sortedColumns" :key="column.id"
+                                 class="list-group-item d-flex align-items-center"
+                                 :class="{'bg-light': !column.visible}"
+                                 draggable="true"
+                                 @dragstart="dragStart(column)"
+                                 @dragover.prevent
+                                 @drop="drop(column)"
+                                 style="cursor: move;">
+                                <i class="bi bi-grip-vertical me-2"></i>
+                                <div class="form-check flex-grow-1">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           :id="'col-' + column.id"
+                                           v-model="column.visible"
+                                           :disabled="column.required">
+                                    <label class="form-check-label" :for="'col-' + column.id">
+                                        <strong>{{ column.label }}</strong>
+                                        <span v-if="column.required" class="badge bg-danger ms-2">Kötelező</span>
+                                    </label>
+                                </div>
+                                <span class="badge bg-secondary">{{ column.order }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="resetColumns">
+                            <i class="bi bi-arrow-counterclockwise"></i> Alapértelmezett
+                        </button>
+                        <button type="button" class="btn btn-primary" @click="saveColumnsAndClose">
+                            <i class="bi bi-check-circle"></i> Mentés
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Mock adatok -->
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Közös funkciók -->
+    <script src="../../assets/js/vihar-common.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Bejelentkezett ügyintéző
+                    ugyintezoNev: "Dr. Szabó Péter",
+                    szerepkor: "VHF_UGYINTEZO", // vagy "VHF_DONTESHOZO"
+
+                    // Ügyek
+                    ugyek: [],
+
+                    // Szűrők
+                    searchQuery: "",
+                    statusFilter: "all",
+                    ugyintezoFilter: "all",
+                    hatarideFilter: "all",
+                    eljarasFilter: "all",
+
+                    // Lapozás
+                    currentPage: 1,
+                    itemsPerPage: 10,
+
+                    // Nézet
+                    showStatisztikak: true,
+
+                    // Tömeges műveletek
+                    selectedUgyek: [],
+
+                    // Mentett nézetek (P1-2)
+                    savedViews: [],
+                    currentViewName: '',
+                    showViewManager: false,
+                    showSaveView: false,
+                    newViewName: '',
+                    editingViewId: null,
+
+                    // Oszlop testreszabás (P1-3)
+                    showColumnCustomizer: false,
+                    availableColumns: [
+                        { id: 'ugyazonosito', label: 'Ügyazonosító', visible: true, order: 1, required: true },
+                        { id: 'ugyfel', label: 'Ügyfél', visible: true, order: 2, required: false },
+                        { id: 'ugytipus', label: 'Ügytípus', visible: true, order: 3, required: false },
+                        { id: 'statusz', label: 'Státusz', visible: true, order: 4, required: true },
+                        { id: 'ugyintezo', label: 'Ügyintéző', visible: true, order: 5, required: false },
+                        { id: 'hatarido', label: 'Határidő', visible: true, order: 6, required: true },
+                        { id: 'hatralevo', label: 'Hátralévő', visible: true, order: 7, required: false },
+                        { id: 'eljaras', label: 'Eljárás típus', visible: false, order: 8, required: false },
+                        { id: 'beerkezett', label: 'Beérkezett', visible: false, order: 9, required: false },
+                        { id: 'workflow', label: 'Workflow lépés', visible: false, order: 10, required: false }
+                    ],
+                    draggedColumn: null,
+
+                    // VNY024 statisztikák
+                    vny024_stats: {
+                        aktiv_vizsgalatok: 145,
+                        lejaro_alkalmassag: 3
+                    },
+
+                    // EKEIDR érkeztetés
+                    ekeidrSearchQuery: "",
+                    ekeidrUgyek: [
+                        {
+                            ekeidr_id: 'EKEIDR-2024-00789',
+                            targy: 'Járművezető alkalmassági vizsgálat',
+                            ugyfelNev: 'Kovács István',
+                            megjegyzes: 'Előzetes vizsgálat - új képesítés',
+                            datum: '2024-10-04',
+                            prioritas: 'normál'
+                        },
+                        {
+                            ekeidr_id: 'EKEIDR-2024-00790',
+                            targy: 'Járművezető képesítés megújítás',
+                            ugyfelNev: 'Nagy Péter',
+                            megjegyzes: 'Lejárt képesítés megújítása',
+                            datum: '2024-10-04',
+                            prioritas: 'normál'
+                        },
+                        {
+                            ekeidr_id: 'EKEIDR-2024-00791',
+                            targy: 'Vasútegészségügyi vizsgálat',
+                            ugyfelNev: 'Tóth Anna',
+                            megjegyzes: 'Időszakos egészségügyi vizsgálat',
+                            datum: '2024-10-03',
+                            prioritas: 'sürgős'
+                        },
+                        {
+                            ekeidr_id: 'EKEIDR-2024-00792',
+                            targy: 'Mozdonyvezetői alkalmassági vizsgálat',
+                            ugyfelNev: 'Szabó Gábor',
+                            megjegyzes: 'Kiegészítő vizsgálat - új kategória',
+                            datum: '2024-10-02',
+                            prioritas: 'normál'
+                        },
+                        {
+                            ekeidr_id: 'EKEIDR-2024-00793',
+                            targy: 'Vasúti jármű kezelői engedély',
+                            ugyfelNev: 'Kiss Márta',
+                            megjegyzes: 'Első alkalommal történő engedélyezés',
+                            datum: '2024-10-01',
+                            prioritas: 'normál'
+                        }
+                    ]
+                };
+            },
+            computed: {
+                szerepkorCimke() {
+                    return this.szerepkor === 'VHF_UGYINTEZO' ? 'Ügyintéző' : 'Döntéshozó';
+                },
+
+                // Oszlop testreszabás computed (P1-3)
+                visibleColumns() {
+                    return this.availableColumns
+                        .filter(col => col.visible)
+                        .sort((a, b) => a.order - b.order);
+                },
+
+                sortedColumns() {
+                    return [...this.availableColumns].sort((a, b) => a.order - b.order);
+                },
+
+                // SLA követés computed (P1-4)
+                getSLAProgress() {
+                    return (ugy) => {
+                        const maxNapok = ugy.eljarasTipus === 'sommas' ? 8 : 60;
+                        const hatralevo = this.getHatralevoNapokSzam(ugy.hatarido);
+                        const eltelt = maxNapok - hatralevo;
+                        const progress = Math.min(100, Math.max(0, (eltelt / maxNapok) * 100));
+
+                        let variant = 'success';
+                        if (progress > 80) variant = 'danger';
+                        else if (progress > 60) variant = 'warning';
+
+                        return {
+                            percent: Math.round(progress),
+                            variant: variant,
+                            hatralevo: hatralevo,
+                            maxNapok: maxNapok
+                        };
+                    };
+                },
+
+                // Tömeges műveletek computed
+                isAllSelected() {
+                    return this.paginatedUgyek.length > 0 &&
+                           this.paginatedUgyek.every(u => this.selectedUgyek.includes(u.ugyazonosito));
+                },
+
+                stats() {
+                    return {
+                        uj_ugyek: this.ugyek.filter(u => u.statusz === 'új' || u.statusz === 'érkeztetett').length,
+                        vizsgalat_alatt: this.ugyek.filter(u =>
+                            u.statusz === 'hatáskör vizsgálat' ||
+                            u.statusz === 'formai ellenőrzés' ||
+                            u.statusz === 'tartalmi ellenőrzés'
+                        ).length,
+                        dontesre_var: this.ugyek.filter(u => u.statusz === 'döntésre vár').length,
+                        ugyfel_muvelet: this.ugyek.filter(u =>
+                            u.statusz === 'hiánypótlásra vár' ||
+                            u.statusz === 'tényállás tisztázás'
+                        ).length,
+                        surgos: this.ugyek.filter(u => this.getHatralevoNapokSzam(u.hatarido) <= 3 && u.statusz !== 'lezárt').length,
+                        lezart_ma: this.ugyek.filter(u => u.statusz === 'lezárt' && u.lezarasDatum === this.getMa()).length
+                    };
+                },
+
+                filteredUgyek() {
+                    let result = this.ugyek;
+
+                    // Keresés
+                    if (this.searchQuery) {
+                        result = result.filter(u =>
+                            u.ugyazonosito.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            u.ugyfel.nev.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        );
+                    }
+
+                    // Státusz szűrő
+                    if (this.statusFilter !== 'all') {
+                        result = result.filter(u => u.statusz === this.statusFilter);
+                    }
+
+                    // Ügyintéző szűrő
+                    if (this.ugyintezoFilter !== 'all') {
+                        if (this.ugyintezoFilter === 'sajat') {
+                            result = result.filter(u => {
+                                const ugyintezoNev = u.ugyintezo && u.ugyintezo.nev ? u.ugyintezo.nev : u.ugyintezo;
+                                return ugyintezoNev === this.ugyintezoNev;
+                            });
+                        } else {
+                            result = result.filter(u => {
+                                const ugyintezoNev = u.ugyintezo && u.ugyintezo.nev ? u.ugyintezo.nev : u.ugyintezo;
+                                return ugyintezoNev === this.ugyintezoFilter;
+                            });
+                        }
+                    }
+
+                    // Határidő szűrő
+                    if (this.hatarideFilter !== 'all') {
+                        result = result.filter(u => {
+                            const napok = this.getHatralevoNapokSzam(u.hatarido);
+                            if (this.hatarideFilter === 'surgos') return napok <= 3;
+                            if (this.hatarideFilter === 'figyelmezteto') return napok > 3 && napok <= 7;
+                            if (this.hatarideFilter === 'normal') return napok > 7;
+                            return true;
+                        });
+                    }
+
+                    // Eljárás típus szűrő
+                    if (this.eljarasFilter !== 'all') {
+                        result = result.filter(u => u.eljarasTipus === this.eljarasFilter);
+                    }
+
+                    return result;
+                },
+
+                paginatedUgyek() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    return this.filteredUgyek.slice(start, end);
+                },
+
+                totalPages() {
+                    return Math.ceil(this.filteredUgyek.length / this.itemsPerPage);
+                },
+
+                filteredEkeidrUgyek() {
+                    if (!this.ekeidrSearchQuery) {
+                        return this.ekeidrUgyek;
+                    }
+                    const query = this.ekeidrSearchQuery.toLowerCase();
+                    return this.ekeidrUgyek.filter(ugy =>
+                        ugy.ekeidr_id.toLowerCase().includes(query) ||
+                        ugy.targy.toLowerCase().includes(query) ||
+                        ugy.ugyfelNev.toLowerCase().includes(query) ||
+                        ugy.megjegyzes.toLowerCase().includes(query)
+                    );
+                }
+            },
+            methods: {
+                // Tömeges műveletek metódusok
+                isSelected(ugyazonosito) {
+                    return this.selectedUgyek.includes(ugyazonosito);
+                },
+
+                toggleSelect(ugyazonosito) {
+                    const index = this.selectedUgyek.indexOf(ugyazonosito);
+                    if (index > -1) {
+                        this.selectedUgyek.splice(index, 1);
+                    } else {
+                        this.selectedUgyek.push(ugyazonosito);
+                    }
+                },
+
+                toggleSelectAll() {
+                    if (this.isAllSelected) {
+                        // Összes kijelölés törlése az aktuális oldalról
+                        this.paginatedUgyek.forEach(ugy => {
+                            const index = this.selectedUgyek.indexOf(ugy.ugyazonosito);
+                            if (index > -1) {
+                                this.selectedUgyek.splice(index, 1);
+                            }
+                        });
+                    } else {
+                        // Összes kijelölése az aktuális oldalon
+                        this.paginatedUgyek.forEach(ugy => {
+                            if (!this.selectedUgyek.includes(ugy.ugyazonosito)) {
+                                this.selectedUgyek.push(ugy.ugyazonosito);
+                            }
+                        });
+                    }
+                },
+
+                clearSelection() {
+                    this.selectedUgyek = [];
+                },
+
+                bulkAssign(ugyintezoNev) {
+                    if (this.selectedUgyek.length === 0) {
+                        alert('Nincs kiválasztott ügy!');
+                        return;
+                    }
+
+                    if (confirm(`${this.selectedUgyek.length} ügy átadása: ${ugyintezoNev}?`)) {
+                        this.selectedUgyek.forEach(ugyId => {
+                            const ugy = this.ugyek.find(u => u.ugyazonosito === ugyId);
+                            if (ugy) {
+                                ugy.ugyintezo = ugyintezoNev;
+                            }
+                        });
+
+                        console.log(`[BULK] ${this.selectedUgyek.length} ügy átadva: ${ugyintezoNev}`);
+                        alert(`Sikeres átadás! ${this.selectedUgyek.length} ügy átadva: ${ugyintezoNev}`);
+                        this.clearSelection();
+                    }
+                },
+
+                bulkStatusChange(ujStatusz) {
+                    if (this.selectedUgyek.length === 0) {
+                        alert('Nincs kiválasztott ügy!');
+                        return;
+                    }
+
+                    if (confirm(`${this.selectedUgyek.length} ügy státuszának módosítása: ${ujStatusz}?`)) {
+                        this.selectedUgyek.forEach(ugyId => {
+                            const ugy = this.ugyek.find(u => u.ugyazonosito === ugyId);
+                            if (ugy && ugy.statusz !== 'lezárt') {
+                                ugy.statusz = ujStatusz;
+                            }
+                        });
+
+                        console.log(`[BULK] ${this.selectedUgyek.length} ügy státusza módosítva: ${ujStatusz}`);
+                        alert(`Sikeres módosítás! ${this.selectedUgyek.length} ügy státusza: ${ujStatusz}`);
+                        this.clearSelection();
+                    }
+                },
+
+                bulkExport(format) {
+                    if (this.selectedUgyek.length === 0) {
+                        alert('Nincs kiválasztott ügy!');
+                        return;
+                    }
+
+                    console.log(`[BULK] Export: ${format.toUpperCase()}, ${this.selectedUgyek.length} ügy`);
+
+                    // Mock export funkció
+                    const selectedData = this.ugyek.filter(u => this.selectedUgyek.includes(u.ugyazonosito));
+
+                    if (format === 'excel') {
+                        alert(`Excel export előkészítve!\n\nKiválasztott ügyek: ${this.selectedUgyek.length}\nFormátum: XLSX\n\nValós rendszerben letöltődne a fájl.`);
+                    } else if (format === 'pdf') {
+                        alert(`PDF export előkészítve!\n\nKiválasztott ügyek: ${this.selectedUgyek.length}\nFormátum: PDF\n\nValós rendszerben letöltődne a fájl.`);
+                    } else if (format === 'csv') {
+                        alert(`CSV export előkészítve!\n\nKiválasztott ügyek: ${this.selectedUgyek.length}\nFormátum: CSV\n\nValós rendszerben letöltődne a fájl.`);
+                    }
+                },
+
+                bulkPrint() {
+                    if (this.selectedUgyek.length === 0) {
+                        alert('Nincs kiválasztott ügy!');
+                        return;
+                    }
+
+                    console.log(`[BULK] Nyomtatás: ${this.selectedUgyek.length} ügy`);
+                    alert(`Nyomtatás előkészítve!\n\nKiválasztott ügyek: ${this.selectedUgyek.length}\n\nValós rendszerben megnyílna a nyomtatási előnézet.`);
+                },
+
+                // ===== Mentett nézetek metódusok (P1-2) =====
+
+                showSaveViewDialog() {
+                    this.newViewName = '';
+                    this.editingViewId = null;
+                    this.showSaveView = true;
+                },
+
+                closeSaveViewDialog() {
+                    this.showSaveView = false;
+                    this.newViewName = '';
+                    this.editingViewId = null;
+                },
+
+                saveView() {
+                    if (!this.newViewName.trim()) {
+                        alert('Adjon meg egy nevet a nézethez!');
+                        return;
+                    }
+
+                    const viewData = {
+                        id: this.editingViewId || Date.now(),
+                        name: this.newViewName,
+                        filters: {
+                            statusFilter: this.statusFilter,
+                            ugyintezoFilter: this.ugyintezoFilter,
+                            hatarideFilter: this.hatarideFilter,
+                            eljarasFilter: this.eljarasFilter
+                        },
+                        count: this.filteredUgyek.length,
+                        saved: new Date().toISOString()
+                    };
+
+                    if (this.editingViewId) {
+                        // Frissítés
+                        const index = this.savedViews.findIndex(v => v.id === this.editingViewId);
+                        if (index > -1) {
+                            this.savedViews[index] = viewData;
+                            console.log('[VIEW] Nézet frissítve:', this.newViewName);
+                        }
+                    } else {
+                        // Új nézet
+                        this.savedViews.push(viewData);
+                        console.log('[VIEW] Új nézet mentve:', this.newViewName);
+                    }
+
+                    this.saveViewsToLocalStorage();
+                    this.currentViewName = this.newViewName;
+                    this.closeSaveViewDialog();
+                    alert(`Nézet sikeresen mentve: ${this.newViewName}`);
+                },
+
+                loadView(viewId) {
+                    const view = this.savedViews.find(v => v.id === viewId);
+                    if (!view) {
+                        console.error('[VIEW] Nézet nem található:', viewId);
+                        return;
+                    }
+
+                    // Szűrők alkalmazása
+                    this.statusFilter = view.filters.statusFilter;
+                    this.ugyintezoFilter = view.filters.ugyintezoFilter;
+                    this.hatarideFilter = view.filters.hatarideFilter;
+                    this.eljarasFilter = view.filters.eljarasFilter;
+
+                    this.currentViewName = view.name;
+                    console.log('[VIEW] Nézet betöltve:', view.name);
+                },
+
+                editView(viewId) {
+                    const view = this.savedViews.find(v => v.id === viewId);
+                    if (!view) return;
+
+                    this.editingViewId = viewId;
+                    this.newViewName = view.name;
+                    this.showViewManager = false;
+                    this.showSaveView = true;
+                },
+
+                deleteView(viewId) {
+                    const view = this.savedViews.find(v => v.id === viewId);
+                    if (!view) return;
+
+                    if (confirm(`Biztosan törli a(z) "${view.name}" nézetet?`)) {
+                        const index = this.savedViews.findIndex(v => v.id === viewId);
+                        if (index > -1) {
+                            this.savedViews.splice(index, 1);
+                            this.saveViewsToLocalStorage();
+
+                            if (this.currentViewName === view.name) {
+                                this.currentViewName = '';
+                            }
+
+                            console.log('[VIEW] Nézet törölve:', view.name);
+                            alert(`Nézet törölve: ${view.name}`);
+                        }
+                    }
+                },
+
+                saveViewsToLocalStorage() {
+                    try {
+                        localStorage.setItem('vahap_saved_views', JSON.stringify(this.savedViews));
+                        console.log('[VIEW] Nézetek mentve LocalStorage-ba');
+                    } catch (e) {
+                        console.error('[VIEW] LocalStorage mentési hiba:', e);
+                    }
+                },
+
+                loadViewsFromLocalStorage() {
+                    try {
+                        const saved = localStorage.getItem('vahap_saved_views');
+                        if (saved) {
+                            this.savedViews = JSON.parse(saved);
+                            console.log('[VIEW] Nézetek betöltve LocalStorage-ból:', this.savedViews.length);
+                        }
+                    } catch (e) {
+                        console.error('[VIEW] LocalStorage betöltési hiba:', e);
+                    }
+                },
+
+                getStatuszLabel(value) {
+                    const labels = {
+                        'all': 'Összes',
+                        'uj_ugyek': 'Új ügyek',
+                        'vizsgalat_alatt': 'Vizsgálat alatt',
+                        'hatasko_vizsgalat': 'Hatáskör vizsgálat',
+                        'formai_ellenorzes': 'Formai ellenőrzés',
+                        'tartalmi_ellenorzes': 'Tartalmi ellenőrzés',
+                        'dontesre_var': 'Döntésre vár',
+                        'hianypotlas_keszites': 'Hiánypótlás',
+                        'tenyallas_tisztazas': 'Tényállás tisztázás',
+                        'lezart': 'Lezárt'
+                    };
+                    return labels[value] || value;
+                },
+
+                getHatarideLabel(value) {
+                    const labels = {
+                        'all': 'Összes',
+                        'surgos': 'Sürgős (≤3 nap)',
+                        'figyelmezteto': 'Figyelmeztetés (≤7 nap)',
+                        'normal': 'Normál (>7 nap)'
+                    };
+                    return labels[value] || value;
+                },
+
+                getEljarasLabel(value) {
+                    const labels = {
+                        'all': 'Összes',
+                        'sommas': 'Sommás (8 nap)',
+                        'teljes': 'Teljes (60 nap)'
+                    };
+                    return labels[value] || value;
+                },
+
+                formatDate(isoString) {
+                    const date = new Date(isoString);
+                    return date.toLocaleDateString('hu-HU', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                // ===== Oszlop testreszabás metódusok (P1-3) =====
+
+                dragStart(column) {
+                    this.draggedColumn = column;
+                },
+
+                drop(targetColumn) {
+                    if (!this.draggedColumn || this.draggedColumn.id === targetColumn.id) {
+                        return;
+                    }
+
+                    const draggedOrder = this.draggedColumn.order;
+                    const targetOrder = targetColumn.order;
+
+                    // Swap order values
+                    this.draggedColumn.order = targetOrder;
+                    targetColumn.order = draggedOrder;
+
+                    this.draggedColumn = null;
+                    console.log('[COLUMN] Oszlopok átrendezve');
+                },
+
+                resetColumns() {
+                    if (confirm('Biztosan visszaállítja az oszlopokat az alapértelmezett beállításokra?')) {
+                        this.availableColumns = [
+                            { id: 'ugyazonosito', label: 'Ügyazonosító', visible: true, order: 1, required: true },
+                            { id: 'ugyfel', label: 'Ügyfél', visible: true, order: 2, required: false },
+                            { id: 'ugytipus', label: 'Ügytípus', visible: true, order: 3, required: false },
+                            { id: 'statusz', label: 'Státusz', visible: true, order: 4, required: true },
+                            { id: 'ugyintezo', label: 'Ügyintéző', visible: true, order: 5, required: false },
+                            { id: 'hatarido', label: 'Határidő', visible: true, order: 6, required: true },
+                            { id: 'hatralevo', label: 'Hátralévő', visible: true, order: 7, required: false },
+                            { id: 'eljaras', label: 'Eljárás típus', visible: false, order: 8, required: false },
+                            { id: 'beerkezett', label: 'Beérkezett', visible: false, order: 9, required: false },
+                            { id: 'workflow', label: 'Workflow lépés', visible: false, order: 10, required: false }
+                        ];
+                        this.saveColumnsToLocalStorage();
+                        console.log('[COLUMN] Oszlopok visszaállítva');
+                    }
+                },
+
+                saveColumnsAndClose() {
+                    this.saveColumnsToLocalStorage();
+                    this.showColumnCustomizer = false;
+                    alert('Oszlop beállítások mentve!');
+                },
+
+                saveColumnsToLocalStorage() {
+                    try {
+                        localStorage.setItem('vahap_columns', JSON.stringify(this.availableColumns));
+                        console.log('[COLUMN] Oszlopok mentve LocalStorage-ba');
+                    } catch (e) {
+                        console.error('[COLUMN] LocalStorage mentési hiba:', e);
+                    }
+                },
+
+                loadColumnsFromLocalStorage() {
+                    try {
+                        const saved = localStorage.getItem('vahap_columns');
+                        if (saved) {
+                            this.availableColumns = JSON.parse(saved);
+                            console.log('[COLUMN] Oszlopok betöltve LocalStorage-ból');
+                        }
+                    } catch (e) {
+                        console.error('[COLUMN] LocalStorage betöltési hiba:', e);
+                    }
+                },
+
+                loadUgyek() {
+                    console.log('[VAHAP] Ügyek betöltése...');
+
+                    // Mock adatok betöltése
+                    if (VahapMockData && VahapMockData.vasut && VahapMockData.vasut.ugyek_belso) {
+                        this.ugyek = VahapMockData.vasut.ugyek_belso;
+                    }
+
+                    console.log(`Betöltve: ${this.ugyek.length} ügy`);
+                },
+
+                openUgy(ugyazonosito) {
+                    console.log('[VAHAP] Ügy megnyitása:', ugyazonosito);
+                    window.location.href = `ugy-munkalap-v3.html?ugy=${ugyazonosito}`;
+                },
+
+                getAktualisLepes(ugy) {
+                    const lepes_map = {
+                        'új': 'Érkeztetés',
+                        'érkeztetett': 'Érkeztetett',
+                        'hatáskör vizsgálat': 'Hatáskör vizsgálat',
+                        'hatasko_vizsgalat': 'Hatáskör vizsgálat',
+                        'formai ellenőrzés': 'Formai ellenőrzés',
+                        'formai_ellenorzes': 'Formai ellenőrzés',
+                        'tartalmi ellenőrzés': 'Tartalmi ellenőrzés',
+                        'tartalmi_ellenorzes': 'Tartalmi ellenőrzés',
+                        'hiánypótlásra vár': 'Hiánypótlásra vár',
+                        'hianypotlas_varasa': 'Hiánypótlásra vár',
+                        'tényállás tisztázás': 'Tényállás tisztázás',
+                        'tenyallas_tisztazas': 'Tényállás tisztázás',
+                        'döntésre vár': 'Döntésre vár',
+                        'dontesre_var': 'Döntésre vár',
+                        'jóváhagyva': 'Jóváhagyva',
+                        'jovahagyva': 'Jóváhagyva',
+                        'elutasítva': 'Elutasítva',
+                        'elutasitva': 'Elutasítva',
+                        'lezárt': 'Lezárt',
+                        'lezart': 'Lezárt'
+                    };
+                    return lepes_map[ugy.statusz] || ugy.statusz;
+                },
+
+                getWorkflowUCE(ugy) {
+                    const uce_map = {
+                        'új': 'UCE-1778',
+                        'érkeztetett': 'UCE-1778',
+                        'hatáskör vizsgálat': 'UCE-1793',
+                        'hatasko_vizsgalat': 'UCE-1793',
+                        'formai ellenőrzés': 'UCE-1799',
+                        'formai_ellenorzes': 'UCE-1799',
+                        'tartalmi ellenőrzés': 'UCE-1794',
+                        'tartalmi_ellenorzes': 'UCE-1794',
+                        'hiánypótlásra vár': 'UCE-2000',
+                        'hianypotlas_varasa': 'UCE-2000',
+                        'tényállás tisztázás': 'UCE-2002',
+                        'tenyallas_tisztazas': 'UCE-2002',
+                        'döntésre vár': 'UCE-1826',
+                        'dontesre_var': 'UCE-1826',
+                        'lezárt': 'UCE-1828',
+                        'lezart': 'UCE-1828'
+                    };
+                    return uce_map[ugy.statusz] || '';
+                },
+
+                getWorkflowBadgeClass(ugy) {
+                    const class_map = {
+                        'új': 'bg-info',
+                        'érkeztetett': 'bg-info',
+                        'hatáskör vizsgálat': 'bg-primary',
+                        'hatasko_vizsgalat': 'bg-primary',
+                        'formai ellenőrzés': 'bg-warning',
+                        'formai_ellenorzes': 'bg-warning',
+                        'tartalmi ellenőrzés': 'bg-warning',
+                        'tartalmi_ellenorzes': 'bg-warning',
+                        'hiánypótlásra vár': 'bg-danger',
+                        'hianypotlas_varasa': 'bg-danger',
+                        'tényállás tisztázás': 'bg-secondary',
+                        'tenyallas_tisztazas': 'bg-secondary',
+                        'döntésre vár': 'bg-purple',
+                        'dontesre_var': 'bg-purple',
+                        'jóváhagyva': 'bg-success',
+                        'jovahagyva': 'bg-success',
+                        'elutasítva': 'bg-dark',
+                        'elutasitva': 'bg-dark',
+                        'lezárt': 'bg-success',
+                        'lezart': 'bg-success'
+                    };
+                    return class_map[ugy.statusz] || 'bg-secondary';
+                },
+
+                getAltalnosStatusz(ugy) {
+                    const statusz_map = {
+                        'new': 'Új',
+                        'pending': 'Folyamatban',
+                        'info': 'Vizsgálat alatt',
+                        'warning': 'Hiánypótlás',
+                        'approved': 'Jóváhagyva',
+                        'rejected': 'Elutasítva',
+                        'closed': 'Lezárt'
+                    };
+                    return statusz_map[ugy.statuszClass] || 'Folyamatban';
+                },
+
+                getHatarideClass(hatarido) {
+                    const napok = this.getHatralevoNapokSzam(hatarido);
+                    if (napok < 0) return 'deadline-urgent';
+                    if (napok <= 3) return 'deadline-urgent';
+                    if (napok <= 7) return 'deadline-warning';
+                    return 'deadline-ok';
+                },
+
+                getHatralevoNapok(hatarido) {
+                    const napok = this.getHatralevoNapokSzam(hatarido);
+                    if (napok < 0) return `${Math.abs(napok)} napja lejárt`;
+                    if (napok === 0) return 'Ma jár le';
+                    if (napok === 1) return '1 nap van hátra';
+                    return `${napok} nap van hátra`;
+                },
+
+                getHatralevoNapokSzam(hatarido) {
+                    const today = new Date();
+                    const deadline = new Date(hatarido);
+                    const diff = deadline - today;
+                    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+                },
+
+                getMa() {
+                    return new Date().toISOString().split('T')[0];
+                },
+
+                sortBy(field) {
+                    if (field === 'hatarido') {
+                        this.ugyek.sort((a, b) => new Date(a.hatarido) - new Date(b.hatarido));
+                    } else if (field === 'benyujtas') {
+                        this.ugyek.sort((a, b) => new Date(b.benyujtasDatum) - new Date(a.benyujtasDatum));
+                    }
+                },
+
+                resetFilters() {
+                    this.searchQuery = "";
+                    this.statusFilter = "all";
+                    this.ugyintezoFilter = "all";
+                    this.hatarideFilter = "all";
+                    this.eljarasFilter = "all";
+                },
+
+                szuroRa(tipus) {
+                    this.resetFilters();
+
+                    if (tipus === 'uj_ugyek') {
+                        this.statusFilter = 'uj';
+                    } else if (tipus === 'hatasko_vizsgalat') {
+                        this.statusFilter = 'hatasko_vizsgalat';
+                    } else if (tipus === 'formai_ellenorzes') {
+                        this.statusFilter = 'formai_ellenorzes';
+                    } else if (tipus === 'tartalmi_ellenorzes') {
+                        this.statusFilter = 'tartalmi_ellenorzes';
+                    } else if (tipus === 'hianypotlas_keszites') {
+                        this.statusFilter = 'hianypotlas_varasa';
+                    } else if (tipus === 'dontesre_var') {
+                        this.statusFilter = 'dontesre_var';
+                    }
+                },
+
+                megnyitVNY024() {
+                    console.log('[F-0090] VNY024 Vasútegészségügyi nyilvántartás megnyitása');
+                    alert('VNY024 Vasútegészségügyi nyilvántartás\n\nEz egy mock funkció.\nValós rendszerben megnyílna a VNY024 interfész.');
+                },
+
+                receiveNewCase() {
+                    // F-0078 - VAHAP érkeztetés (EKEIDR interfész)
+                    // F-0079 - VAHAP bejövő iktatás
+                    // UC-0302 - Érkeztetés
+                    console.log('[VAHAP] EKEIDR érkeztetés modal megnyitása');
+
+                    // Modal megnyitása
+                    const modal = new bootstrap.Modal(document.getElementById('ekeidrModal'));
+                    modal.show();
+                },
+
+                confirmReceiveCase(ekeidrUgy) {
+                    console.log('[VAHAP] Ügy átvétele EKEIDR-ből:', ekeidrUgy.ekeidr_id);
+
+                    // F-0078 - VAHAP érkeztetés (EKEIDR interfész)
+                    // F-0079 - VAHAP bejövő iktatás
+                    // DS-0090: VAHAP érkeztetési adatok (bemenet)
+                    // DS-0102: EKEIDR érkeztetési adatok (kimenet)
+
+                    // VAHAP ügyazonosító generálása
+                    const vahapId = `VAHAP-V-2024-${Math.floor(Math.random() * 900000 + 100000)}`;
+
+                    // Új ügy létrehozása a VAHAP rendszerben
+                    const ujUgy = {
+                        ugyazonosito: vahapId,
+                        ugytipus: 'V-044',
+                        megnevezes: 'Vasúti járművezetők előzetes alkalmassági vizsgálata',
+                        statusz: 'új',
+                        statuszClass: 'new',
+                        benyujtasDatum: new Date().toISOString().split('T')[0],
+                        hatarido: new Date(Date.now() + 60*24*60*60*1000).toISOString().split('T')[0],
+                        eljarasTipus: 'teljes',
+                        ugyfel: {
+                            nev: ekeidrUgy.ugyfelNev,
+                            email: `${ekeidrUgy.ugyfelNev.toLowerCase().replace(' ', '.')}@example.hu`
+                        },
+                        ugyintezo: this.ugyintezoNev,
+                        ekeidr_iktatoszam: ekeidrUgy.ekeidr_id,
+                        ekeidr_targy: ekeidrUgy.targy,
+                        workflow_lepesek: {
+                            erkeztetes: true,
+                            hatáskor_vizsgalat: false
+                        }
+                    };
+
+                    // Ügy hozzáadása a listához
+                    this.ugyek.unshift(ujUgy);
+
+                    // Ügy eltávolítása az EKEIDR listából
+                    const index = this.ekeidrUgyek.findIndex(u => u.ekeidr_id === ekeidrUgy.ekeidr_id);
+                    if (index !== -1) {
+                        this.ekeidrUgyek.splice(index, 1);
+                    }
+
+                    // Modal bezárása
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('ekeidrModal'));
+                    modal.hide();
+
+                    // Sikeres érkeztetés visszajelzés
+                    this.showSuccessNotification(vahapId, ekeidrUgy.ekeidr_id);
+
+                    console.log('[VAHAP] ✓ Érkeztetés sikeres');
+                    console.log(`[VAHAP] VAHAP ID: ${vahapId}`);
+                    console.log(`[VAHAP] EKEIDR ID: ${ekeidrUgy.ekeidr_id}`);
+                    console.log('[VAHAP] Következő lépés: UCE-1793 - Hatáskör vizsgálat');
+                },
+
+                showSuccessNotification(vahapId, ekeidrId) {
+                    // Toast notification létrehozása
+                    const toastHtml = `
+                        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <strong>Sikeres érkeztetés!</strong><br>
+                                    <small>VAHAP ID: ${vahapId}</small><br>
+                                    <small>EKEIDR: ${ekeidrId}</small><br>
+                                    <small>Következő: UCE-1793 (Hatáskör vizsgálat)</small>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Toast container ellenőrzése
+                    let toastContainer = document.getElementById('toastContainer');
+                    if (!toastContainer) {
+                        toastContainer = document.createElement('div');
+                        toastContainer.id = 'toastContainer';
+                        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                        toastContainer.style.zIndex = '9999';
+                        document.body.appendChild(toastContainer);
+                    }
+
+                    // Toast beszúrása
+                    toastContainer.innerHTML = toastHtml;
+
+                    // Toast megjelenítése
+                    const toastElement = document.getElementById('successToast');
+                    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+                    toast.show();
+
+                    // Automatikus scroll az új ügyhöz
+                    setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 500);
+                },
+
+                // ===== Gyorsbillentyűk metódusok (P1-5) =====
+
+                handleKeyboardShortcuts(event) {
+                    // Ha input mezőben vagyunk, ne aktiváljuk a shortcut-okat
+                    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+
+                    // Ctrl/Cmd + K - Keresés fókusz
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                        event.preventDefault();
+                        const searchInput = document.querySelector('input[placeholder*="Ügyazonosító"]');
+                        if (searchInput) {
+                            searchInput.focus();
+                            searchInput.select();
+                            console.log('[SHORTCUT] Keresés fókusz (Ctrl+K)');
+                        }
+                    }
+
+                    // Ctrl/Cmd + N - Nézet mentés
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+                        event.preventDefault();
+                        this.showSaveViewDialog();
+                        console.log('[SHORTCUT] Nézet mentés (Ctrl+N)');
+                    }
+
+                    // Ctrl/Cmd + M - Nézet kezelő
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'm') {
+                        event.preventDefault();
+                        this.showViewManager = true;
+                        console.log('[SHORTCUT] Nézet kezelő (Ctrl+M)');
+                    }
+
+                    // Ctrl/Cmd + L - Oszlop testreszabás
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'l') {
+                        event.preventDefault();
+                        this.showColumnCustomizer = true;
+                        console.log('[SHORTCUT] Oszlop testreszabás (Ctrl+L)');
+                    }
+
+                    // Ctrl/Cmd + E - EKEIDR érkeztetés
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
+                        event.preventDefault();
+                        const ekeidrModal = new bootstrap.Modal(document.getElementById('ekeidrModal'));
+                        ekeidrModal.show();
+                        console.log('[SHORTCUT] EKEIDR érkeztetés (Ctrl+E)');
+                    }
+
+                    // Ctrl/Cmd + R - Szűrők reset
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'r') {
+                        event.preventDefault();
+                        this.resetFilters();
+                        console.log('[SHORTCUT] Szűrők reset (Ctrl+R)');
+                    }
+
+                    // Ctrl/Cmd + A - Összes kijelölése
+                    if ((event.ctrlKey || event.metaKey) && event.key === 'a' && this.selectedUgyek.length === 0) {
+                        event.preventDefault();
+                        this.paginatedUgyek.forEach(ugy => {
+                            if (!this.selectedUgyek.includes(ugy.ugyazonosito)) {
+                                this.selectedUgyek.push(ugy.ugyazonosito);
+                            }
+                        });
+                        console.log('[SHORTCUT] Összes kijelölése (Ctrl+A)');
+                    }
+
+                    // Escape - Kijelölés törlése / Modal bezárás
+                    if (event.key === 'Escape') {
+                        if (this.selectedUgyek.length > 0) {
+                            this.clearSelection();
+                            console.log('[SHORTCUT] Kijelölés törlése (Escape)');
+                        } else if (this.showViewManager) {
+                            this.showViewManager = false;
+                            console.log('[SHORTCUT] Nézet kezelő bezárás (Escape)');
+                        } else if (this.showSaveView) {
+                            this.closeSaveViewDialog();
+                            console.log('[SHORTCUT] Nézet mentés bezárás (Escape)');
+                        } else if (this.showColumnCustomizer) {
+                            this.showColumnCustomizer = false;
+                            console.log('[SHORTCUT] Oszlop testreszabás bezárás (Escape)');
+                        }
+                    }
+
+                    // F1 - Súgó (gyorsbillentyűk megjelenítése)
+                    if (event.key === 'F1') {
+                        event.preventDefault();
+                        this.showKeyboardShortcutsHelp();
+                    }
+                },
+
+                showKeyboardShortcutsHelp() {
+                    const shortcuts = `
+Gyorsbillentyűk:
+
+Ctrl+K - Keresés fókusz
+Ctrl+N - Aktuális nézet mentése
+Ctrl+M - Nézet kezelő megnyitása
+Ctrl+L - Oszlop testreszabás
+Ctrl+E - EKEIDR érkeztetés
+Ctrl+R - Szűrők alaphelyzetbe
+Ctrl+A - Összes kijelölése
+Escape - Kijelölés törlése / Modal bezárás
+F1 - Súgó (ez az ablak)
+
+Tömeges műveletek:
+- Jelölje be az ügyeket a táblázatban
+- Használja a megjelenő művelet panelt
+                    `.trim();
+
+                    alert(shortcuts);
+                    console.log('[SHORTCUT] Súgó megjelenítve (F1)');
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Belső munkalista betöltve');
+                console.log('Szerepkör:', this.szerepkor);
+                this.loadUgyek();
+                this.loadViewsFromLocalStorage(); // P1-2: Mentett nézetek betöltése
+                this.loadColumnsFromLocalStorage(); // P1-3: Oszlop beállítások betöltése
+
+                // P1-5: Gyorsbillentyűk event listener
+                window.addEventListener('keydown', this.handleKeyboardShortcuts);
+
+                // P1-2: Alapértelmezett nézetek létrehozása, ha még nincs mentett nézet
+                if (this.savedViews.length === 0) {
+                    this.savedViews = [
+                        {
+                            id: 1,
+                            name: 'Sürgős ügyek',
+                            filters: {
+                                statusFilter: 'all',
+                                ugyintezoFilter: 'all',
+                                hatarideFilter: 'surgos',
+                                eljarasFilter: 'all'
+                            },
+                            count: 0,
+                            saved: new Date().toISOString()
+                        },
+                        {
+                            id: 2,
+                            name: 'Saját vizsgálat alatt',
+                            filters: {
+                                statusFilter: 'vizsgalat_alatt',
+                                ugyintezoFilter: this.ugyintezo,
+                                hatarideFilter: 'all',
+                                eljarasFilter: 'all'
+                            },
+                            count: 0,
+                            saved: new Date().toISOString()
+                        },
+                        {
+                            id: 3,
+                            name: 'Döntésre vár',
+                            filters: {
+                                statusFilter: 'dontesre_var',
+                                ugyintezoFilter: 'all',
+                                hatarideFilter: 'all',
+                                eljarasFilter: 'all'
+                            },
+                            count: 0,
+                            saved: new Date().toISOString()
+                        }
+                    ];
+                    this.saveViewsToLocalStorage();
+                    console.log('[VIEW] Alapértelmezett nézetek létrehozva');
+                }
+            },
+            beforeUnmount() {
+                // P1-5: Gyorsbillentyűk event listener eltávolítása
+                window.removeEventListener('keydown', this.handleKeyboardShortcuts);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

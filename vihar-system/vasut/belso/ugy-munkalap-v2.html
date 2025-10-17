@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Vasúti Ügymunkalap (Refaktorált)</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP CSS Fájlok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-arculat.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-layout.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-workflow.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-tabs.css">
+    <link rel="stylesheet" href="../../assets/css/vihar-panels.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc a súgó gombbal -->
+        <div class="border-bottom bg-white">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col p-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-primary">
+                                <i class="bi bi-train-front"></i> VAHAP Ügyintézői Felület
+                            </strong>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" @click="showSugo = true">
+                            <i class="bi bi-question-circle"></i> Súgó
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row vh-100">
+
+                <!-- ========================================
+                     1. BAL OSZLOP - Navigáció (2 col)
+                     ======================================== -->
+                <div class="col-md-2 bg-light p-0 d-flex flex-column sidebar-left"
+                     :class="{
+                         collapsed: leftCollapsed,
+                         'border-end': !leftCollapsed
+                     }"
+                     :style="{
+                         flex: leftCollapsed ? '0 0 50px' : '',
+                         maxWidth: leftCollapsed ? '50px' : '',
+                         width: leftCollapsed ? '50px' : ''
+                     }">
+
+                    <!-- Toggle gomb -->
+                    <button class="toggle-btn toggle-btn-left" @click="leftCollapsed = !leftCollapsed">
+                        <i class="bi" :class="leftCollapsed ? 'bi-chevron-right' : 'bi-chevron-left'"></i>
+                    </button>
+
+                    <!-- Workflow navigáció komponens -->
+                    <vahap-workflow-nav
+                        :ugy="ugy"
+                        :active-tab="activeTab"
+                        @select="selectTab">
+                    </vahap-workflow-nav>
+                </div>
+
+                <!-- ========================================
+                     2. KÖZÉPSŐ OSZLOP - Munkaterület (7 col)
+                     ======================================== -->
+                <div class="p-0 d-flex flex-column middle-column"
+                     :class="middleColumnClasses"
+                     :style="middleColumnStyle">
+
+                    <!-- Ügyfejléc -->
+                    <div class="case-header">
+                        <div class="row g-0">
+                            <div class="col-4 case-info-item">
+                                <div class="case-info-label">Ügyazonosító</div>
+                                <div class="case-info-value">{{ ugy.ugyazonosito }}</div>
+                            </div>
+                            <div class="col-3 case-info-item">
+                                <div class="case-info-label">Ügyfél</div>
+                                <div class="case-info-value">{{ ugy.ugyfel.nev }}</div>
+                            </div>
+                            <div class="col-3 case-info-item">
+                                <div class="case-info-label">Határidő</div>
+                                <div class="case-info-value">{{ ugy.hatarido }}</div>
+                            </div>
+                            <div class="col-2 case-info-item">
+                                <div class="case-info-label">Eljárás</div>
+                                <div class="case-info-value" style="font-size: 0.85rem;">{{ ugy.eljaras_tipusa }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Munkaterület - Tab komponensek -->
+                    <div class="flex-grow-1 overflow-auto p-3">
+
+                        <vahap-tab-kerelem
+                            :active="activeTab === 'kerelem'"
+                            :ugy="ugy">
+                        </vahap-tab-kerelem>
+
+                        <vahap-tab-hatáskor
+                            :active="activeTab === 'hatáskor'"
+                            :ugy="ugy">
+                        </vahap-tab-hatáskor>
+
+                        <vahap-tab-formai
+                            :active="activeTab === 'formai'"
+                            :ugy="ugy">
+                        </vahap-tab-formai>
+
+                        <vahap-tab-tartalmi
+                            :active="activeTab === 'tartalmi'"
+                            :ugy="ugy">
+                        </vahap-tab-tartalmi>
+
+                        <vahap-tab-vny024
+                            :active="activeTab === 'vny024'"
+                            :ugy="ugy">
+                        </vahap-tab-vny024>
+
+                        <vahap-tab-sommas
+                            :active="activeTab === 'sommas'"
+                            :ugy="ugy">
+                        </vahap-tab-sommas>
+
+                        <vahap-tab-dontesi-javaslat
+                            :active="activeTab === 'dontesi-javaslat'"
+                            :ugy="ugy">
+                        </vahap-tab-dontesi-javaslat>
+
+                        <vahap-tab-dokumentumok
+                            :active="activeTab === 'dokumentumok'"
+                            :ugy="ugy">
+                        </vahap-tab-dokumentumok>
+
+                        <vahap-tab-velemenyezes
+                            :active="activeTab === 'velemenyezes'"
+                            :ugy="ugy">
+                        </vahap-tab-velemenyezes>
+
+                        <vahap-tab-lezaras
+                            :active="activeTab === 'lezaras'"
+                            :ugy="ugy">
+                        </vahap-tab-lezaras>
+
+                        <vahap-tab-hianypotlas
+                            :active="activeTab === 'hianypotlas'"
+                            :ugy="ugy">
+                        </vahap-tab-hianypotlas>
+
+                        <vahap-tab-tenyallas
+                            :active="activeTab === 'tenyallas'"
+                            :ugy="ugy">
+                        </vahap-tab-tenyallas>
+
+                        <vahap-tab-ertesites
+                            :active="activeTab === 'ertesites'"
+                            :ugy="ugy">
+                        </vahap-tab-ertesites>
+
+                        <vahap-tab-vezetoi-dontes
+                            :active="activeTab === 'vezetoi-dontes'"
+                            :ugy="ugy">
+                        </vahap-tab-vezetoi-dontes>
+
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     3. JOBB OSZLOP - Döntési és info panelek (3 col)
+                     ======================================== -->
+                <div class="col-md-3 bg-light p-0 sidebar-right"
+                     :class="{
+                         collapsed: rightCollapsed,
+                         'border-start': !rightCollapsed
+                     }"
+                     :style="{
+                         flex: rightCollapsed ? '0 0 50px' : '',
+                         maxWidth: rightCollapsed ? '50px' : '',
+                         width: rightCollapsed ? '50px' : ''
+                     }">
+
+                    <!-- Toggle gomb -->
+                    <button class="toggle-btn toggle-btn-right" @click="rightCollapsed = !rightCollapsed">
+                        <i class="bi" :class="rightCollapsed ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
+                    </button>
+
+                    <!-- Normál nézet tartalma -->
+                    <div class="sidebar-content">
+
+                        <!-- Panel 1: Döntési pontok (V2 - Fejlesztett verzió) -->
+                        <vahap-panel-dontesek-v2
+                            :active-tab="activeTab"
+                            :ugy="ugy"
+                            @decision="handleDecision"
+                            @navigate="selectTab">
+                        </vahap-panel-dontesek-v2>
+
+                        <!-- Panel 2: Eljárás előzmények -->
+                        <vahap-panel-elozmenyek
+                            :ugy="ugy">
+                        </vahap-panel-elozmenyek>
+
+                        <!-- Panel 3: Kapcsolódó dokumentumok -->
+                        <vahap-panel-dokumentumok
+                            :ugy="ugy"
+                            @download="handleDownload"
+                            @upload="handleUpload">
+                        </vahap-panel-dokumentumok>
+
+                        <!-- Panel 4: Ügyfél információk -->
+                        <vahap-panel-ugyfel
+                            :ugy="ugy">
+                        </vahap-panel-ugyfel>
+
+                    </div>
+
+                    <!-- Kollapsz ikon sáv -->
+                    <div class="collapsed-icon-bar bg-light">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-check-circle-fill" style="font-size: 1.5rem; color: var(--vahap-success);"></i>
+                        </div>
+                        <div class="text-center mb-2">
+                            <i class="bi bi-clock-history" title="Előzmények"></i>
+                        </div>
+                        <div class="text-center mb-2">
+                            <i class="bi bi-file-text" title="Dokumentumok"></i>
+                        </div>
+                        <div class="text-center mb-2" v-if="ugy.dokumentumok && ugy.dokumentumok.length > 0">
+                            <span class="badge bg-danger rounded-pill">{{ ugy.dokumentumok.length }}</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Súgó Modal -->
+        <vahap-sugo-modal
+            :show="showSugo"
+            @close="showSugo = false">
+        </vahap-sugo-modal>
+
+    </div>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../../assets/js/vihar-config.js"></script>
+    <script src="../../assets/js/vihar-common.js"></script>
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+    <script src="../../assets/js/vihar-pdf-generator.js"></script>
+
+    <!-- VAHAP Komponensek -->
+    <script src="../../assets/js/components/vihar-workflow-nav.js"></script>
+    <script src="../../assets/js/components/vihar-tab-kerelem.js"></script>
+    <script src="../../assets/js/components/vihar-tab-hatáskor.js"></script>
+    <script src="../../assets/js/components/vihar-tab-formai.js"></script>
+    <script src="../../assets/js/components/vihar-tab-tartalmi.js"></script>
+    <script src="../../assets/js/components/vihar-tab-vny024.js"></script>
+    <script src="../../assets/js/components/vihar-tab-sommas.js"></script>
+    <script src="../../assets/js/components/vihar-tab-dontesi-javaslat.js"></script>
+    <script src="../../assets/js/components/vihar-tab-dokumentumok.js"></script>
+    <script src="../../assets/js/components/vihar-tab-velemenyezes.js"></script>
+    <script src="../../assets/js/components/vihar-tab-lezaras.js"></script>
+    <script src="../../assets/js/components/vihar-tab-hianypotlas.js"></script>
+    <script src="../../assets/js/components/vihar-tab-tenyallas.js"></script>
+    <script src="../../assets/js/components/vihar-tab-ertesites.js"></script>
+    <script src="../../assets/js/components/vihar-tab-vezetoi-dontes.js"></script>
+    <script src="../../assets/js/components/vihar-panel-dontesek.js"></script>
+    <script src="../../assets/js/components/vihar-panel-dontesek-v2.js"></script>
+    <script src="../../assets/js/components/vihar-panel-elozmenyek.js"></script>
+    <script src="../../assets/js/components/vihar-panel-dokumentumok.js"></script>
+    <script src="../../assets/js/components/vihar-panel-ugyfel.js"></script>
+    <script src="../../assets/js/components/vihar-sugo-modal.js"></script>
+
+    <!-- Új komponensek -->
+    <script src="../../assets/js/components/vihar-velemenyezes.js"></script>
+    <script src="../../assets/js/components/vihar-feladat-kioszt.js"></script>
+    <script src="../../assets/js/components/vihar-lista-csempe.js"></script>
+
+    <!-- Főalkalmazás -->
+    <script src="../../assets/js/apps/vihar-munkalap-app.js"></script>
+
+    <script>
+        const app = Vue.createApp(VahapMunkalapApp);
+
+        // Komponensek regisztrálása
+        app.component('vahap-workflow-nav', VahapWorkflowNav);
+        app.component('vahap-tab-kerelem', VahapTabKerelem);
+        app.component('vahap-tab-hatáskor', VahapTabHatáskor);
+        app.component('vahap-tab-formai', VahapTabFormai);
+        app.component('vahap-tab-tartalmi', VahapTabTartalmi);
+        app.component('vahap-tab-vny024', VahapTabVny024);
+        app.component('vahap-tab-sommas', VahapTabSommas);
+        app.component('vahap-tab-dontesi-javaslat', VahapTabDontesiJavaslat);
+        app.component('vahap-tab-dokumentumok', VahapTabDokumentumok);
+        app.component('vahap-tab-velemenyezes', VahapTabVelemenyezes);
+        app.component('vahap-tab-lezaras', VahapTabLezaras);
+        app.component('vahap-tab-hianypotlas', VahapTabHianypotlas);
+        app.component('vahap-tab-tenyallas', VahapTabTenyallas);
+        app.component('vahap-tab-ertesites', VahapTabErtesites);
+        app.component('vahap-tab-vezetoi-dontes', VahapTabVezetoiDontes);
+        app.component('vahap-panel-dontesek', VahapPanelDontesek);
+        app.component('vahap-panel-dontesek-v2', VahapPanelDontesekV2);
+        app.component('vahap-panel-elozmenyek', VahapPanelElozmenyek);
+        app.component('vahap-panel-dokumentumok', VahapPanelDokumentumok);
+        app.component('vahap-panel-ugyfel', VahapPanelUgyfel);
+        app.component('vahap-sugo-modal', VahapSugoModal);
+
+        app.mount('#app');
+    </script>
+</body>
+</html>

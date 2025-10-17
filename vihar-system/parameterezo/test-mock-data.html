@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Data Teszt</title>
+</head>
+<body>
+    <h1>Mock Data Teszt</h1>
+    <div id="output"></div>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function log(msg) {
+            const p = document.createElement('p');
+            p.textContent = msg;
+            output.appendChild(p);
+        }
+
+        log('=== Mock Data Teszt ===');
+        log('');
+
+        // VahapMockData ellenőrzés
+        if (typeof VahapMockData !== 'undefined') {
+            log('✅ VahapMockData betöltve');
+        } else {
+            log('❌ VahapMockData HIÁNYZIK');
+        }
+
+        // VIHARMockData ellenőrzés (alias)
+        if (typeof VIHARMockData !== 'undefined') {
+            log('✅ VIHARMockData betöltve (alias)');
+        } else {
+            log('❌ VIHARMockData HIÁNYZIK');
+        }
+
+        log('');
+        log('=== Paraméterező adatok ===');
+
+        if (VIHARMockData && VIHARMockData.parameterezo) {
+            log('✅ parameterezo objektum létezik');
+            log('Kulcsok: ' + Object.keys(VIHARMockData.parameterezo).join(', '));
+            log('');
+
+            // Ellenőrzési listák
+            const hataskort = VIHARMockData.parameterezo.ellenorzesi_lista_hatáskor;
+            if (hataskort) {
+                log('✅ ellenorzesi_lista_hatáskor: ' + (hataskort.kriteriumok?.length || 0) + ' kritérium');
+            } else {
+                log('❌ ellenorzesi_lista_hatáskor HIÁNYZIK');
+            }
+
+            const formai = VIHARMockData.parameterezo.ellenorzesi_lista_formai;
+            if (formai) {
+                log('✅ ellenorzesi_lista_formai: ' + (formai.kriteriumok?.length || 0) + ' kritérium');
+            } else {
+                log('❌ ellenorzesi_lista_formai HIÁNYZIK');
+            }
+
+            const tartalmi = VIHARMockData.parameterezo.ellenorzesi_lista_tartalmi;
+            if (tartalmi) {
+                log('✅ ellenorzesi_lista_tartalmi: ' + (tartalmi.kriteriumok?.length || 0) + ' kritérium');
+            } else {
+                log('❌ ellenorzesi_lista_tartalmi HIÁNYZIK');
+            }
+
+            log('');
+
+            // Dokumentum sablonok
+            const dokSablonok = VIHARMockData.parameterezo.dokumentum_sablonok;
+            if (dokSablonok) {
+                log('✅ dokumentum_sablonok létezik');
+                log('Típusok: ' + Object.keys(dokSablonok).join(', '));
+                log('  - vegzes: ' + (dokSablonok.vegzes?.length || 0) + ' sablon');
+                log('  - hatarozat: ' + (dokSablonok.hatarozat?.length || 0) + ' sablon');
+                log('  - igazolas: ' + (dokSablonok.igazolas?.length || 0) + ' sablon');
+                log('  - tajekoztatas: ' + (dokSablonok.tajekoztatas?.length || 0) + ' sablon');
+                log('  - hirdetmeny: ' + (dokSablonok.hirdetmeny?.length || 0) + ' sablon');
+            } else {
+                log('❌ dokumentum_sablonok HIÁNYZIK');
+            }
+
+            log('');
+
+            // Workflow sablonok
+            const wfSablonok = VIHARMockData.parameterezo.workflow_sablonok;
+            if (wfSablonok) {
+                log('✅ workflow_sablonok létezik');
+                log('Workflow-k: ' + Object.keys(wfSablonok).join(', '));
+            } else {
+                log('❌ workflow_sablonok HIÁNYZIK');
+            }
+
+        } else {
+            log('❌ parameterezo HIÁNYZIK');
+        }
+
+        log('');
+        log('=== Console-ban további részletek ===');
+        console.log('VIHARMockData:', VIHARMockData);
+    </script>
+</body>
+</html>

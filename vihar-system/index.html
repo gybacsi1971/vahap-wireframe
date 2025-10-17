@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Vasúti és Hajózási Integrált Hatósági Rendszer</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="assets/css/vihar-common.css">
+    <link rel="stylesheet" href="assets/css/vihar-arculat.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #004b87 0%, #0066b3 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .module-card {
+            border: none;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .module-card-vasut {
+            border-left: 5px solid var(--vasut-color);
+        }
+
+        .module-card-hajozas {
+            border-left: 5px solid var(--hajozas-color);
+        }
+
+        .module-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .access-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: #212529;
+            transition: all 0.3s ease;
+            border: 1px solid #dee2e6;
+        }
+
+        .access-link:hover {
+            background-color: var(--vahap-primary);
+            color: white;
+            border-color: var(--vahap-primary);
+            transform: translateX(5px);
+        }
+
+        .access-link i {
+            margin-right: 0.5rem;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .info-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2rem;
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="main-container">
+            <!-- Hero szekció -->
+            <div class="hero-section">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-shield-check"></i> VAHAP
+                </h1>
+                <p class="lead mb-4">Vasúti és Hajózási Integrált Hatósági Rendszer</p>
+                <div class="d-flex justify-content-center flex-wrap">
+                    <span class="info-badge">
+                        <i class="bi bi-file-earmark-check"></i> Elektronikus ügyintézés
+                    </span>
+                    <span class="info-badge">
+                        <i class="bi bi-clock-history"></i> Gyors eljárás
+                    </span>
+                    <span class="info-badge">
+                        <i class="bi bi-shield-lock"></i> Biztonságos
+                    </span>
+                </div>
+            </div>
+
+            <!-- Modulok -->
+            <div class="container py-5">
+                <div class="row g-4">
+                    <!-- Vasúti Modul -->
+                    <div class="col-md-6">
+                        <div class="card module-card module-card-vasut h-100">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-train-front module-icon text-vasut"></i>
+                                    <h3 class="card-title fw-bold">Vasúti Modul</h3>
+                                    <span class="badge bg-secondary">V-044</span>
+                                </div>
+
+                                <p class="text-muted mb-4">
+                                    Vasúti járművezetők előzetes alkalmassági vizsgálata
+                                </p>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-box-arrow-in-right"></i> Belépési pontok
+                                </h6>
+
+                                <a href="vasut/kulso/munkalista.html" class="access-link">
+                                    <i class="bi bi-person"></i>
+                                    Ügyfél Dashboard
+                                    <span class="badge bg-light text-dark float-end">Külső</span>
+                                </a>
+
+                                <a href="vasut/belso/munkalista.html" class="access-link">
+                                    <i class="bi bi-briefcase"></i>
+                                    Ügyintéző Dashboard
+                                    <span class="badge bg-light text-dark float-end">Belső</span>
+                                </a>
+
+                                <a href="vasut/belso/vezeto-dashboard.html" class="access-link">
+                                    <i class="bi bi-briefcase"></i>
+                                    Vezetői Dashboard
+                                    <span class="badge bg-light text-dark float-end">Belső</span>
+                                </a>
+
+                                <a href="vasut/belso/szignalo-dashboard.html" class="access-link">
+                                    <i class="bi bi-briefcase"></i>
+                                    Szignáló Dashboard
+                                    <span class="badge bg-light text-dark float-end">Belső</span>
+                                </a>
+
+                                <div class="mt-4 p-3 bg-light rounded">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i>
+                                        Szervezet: Vasúti Hatósági Főosztály (VHF)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hajózási Modul -->
+                    <div class="col-md-6">
+                        <div class="card module-card module-card-hajozas h-100">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-water module-icon text-hajozas"></i>
+                                    <h3 class="card-title fw-bold">Hajózási Modul</h3>
+                                    <span class="badge bg-secondary">H-052</span>
+                                </div>
+
+                                <p class="text-muted mb-4">
+                                    Országos közforgalmú kikötő létesítésének engedélyezése
+                                </p>
+
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-box-arrow-in-right"></i> Belépési pontok
+                                </h6>
+
+                                <a href="hajozas/kulso/munkalista.html" class="access-link">
+                                    <i class="bi bi-person"></i>
+                                    Kérelmező Dashboard
+                                    <span class="badge bg-light text-dark float-end">Külső</span>
+                                </a>
+
+                                <a href="hajozas/belso/munkalista.html" class="access-link">
+                                    <i class="bi bi-briefcase"></i>
+                                    Ügyintéző Dashboard
+                                    <span class="badge bg-light text-dark float-end">Belső</span>
+                                </a>
+
+                                <div class="mt-4 p-3 bg-light rounded">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i>
+                                        Szervezet: Hajózási Hatósági Főosztály (HHF)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paraméterező Modul -->
+                <div class="row g-4 mt-4">
+                    <div class="col-12">
+                        <div class="card border-primary">
+                            <div class="card-body p-4">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-gear module-icon text-primary"></i>
+                                    <h3 class="card-title fw-bold">Paraméterező Modul</h3>
+                                    <span class="badge bg-primary">Rendszeradminisztráció</span>
+                                </div>
+
+                                <p class="text-muted mb-4 text-center">
+                                    Rendszerparaméterek konfigurálása, ellenőrzési listák, határidők, díjtételek és sablonok kezelése
+                                </p>
+
+                                <div class="row">
+                                    <div class="col-md-6 offset-md-3">
+                                        <a href="parameterezo/index.html" class="access-link">
+                                            <i class="bi bi-sliders"></i>
+                                            Rendszer paraméterek
+                                            <span class="badge bg-primary float-end">Adminisztrátor</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 p-3 bg-light rounded">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i>
+                                        Funkciók: Ellenőrzési listák (F-0064, F-0065, F-0066), Határidők, Díjtételek, Dokumentum sablonok
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Információs szekció -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3">
+                                    <i class="bi bi-info-circle-fill text-primary"></i>
+                                    Fontos információk
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="fw-bold">
+                                            <i class="bi bi-clock"></i> Ügyintézési határidő
+                                        </h6>
+                                        <p class="text-muted small mb-0">
+                                            Sommás eljárás: 8 nap<br>
+                                            Teljes eljárás: 60 nap
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="fw-bold">
+                                            <i class="bi bi-file-earmark-text"></i> Dokumentumok
+                                        </h6>
+                                        <p class="text-muted small mb-0">
+                                            Elektronikus űrlapok<br>
+                                            PDF generálás automatikus
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <h6 class="fw-bold">
+                                            <i class="bi bi-headset"></i> Támogatás
+                                        </h6>
+                                        <p class="text-muted small mb-0">
+                                            Munkaidőben: 8:00 - 16:00<br>
+                                            Telefon: +36 1 795 1000
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lábléc -->
+            <div class="footer">
+                <p class="mb-2">
+                    <strong>Építési és Közlekedési Minisztérium</strong>
+                </p>
+                <p class="small mb-0">
+                    VAHAP rendszer v1.0 |
+                    <i class="bi bi-shield-check"></i> Biztonságos kapcsolat |
+                    © 2024 Minden jog fenntartva
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

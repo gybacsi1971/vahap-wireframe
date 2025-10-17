@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Határidők Paraméterezés</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/vihar-common.css">
+</head>
+<body>
+    <div id="app">
+        <param-header
+            title="Határidők"
+            subtitle="Eljárási határidők beállítása ügytípusonként"
+            :breadcrumbs="breadcrumbs"
+            :show-save="false"
+            :show-back="true"
+            @back="navigateBack">
+        </param-header>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card sticky-top" style="top: 1rem;">
+                        <div class="card-header bg-light"><h6 class="mb-0"><i class="bi bi-gear"></i> Paraméterek</h6></div>
+                        <div class="list-group list-group-flush">
+                            <a href="../index.html" class="list-group-item list-group-item-action"><i class="bi bi-house"></i> Főoldal</a>
+                            <a href="index.html" class="list-group-item list-group-item-action"><i class="bi bi-sliders"></i> Paraméterező Dashboard</a>
+                            <hr class="my-0">
+                            <a href="ellenorzesi-listak.html" class="list-group-item list-group-item-action"><i class="bi bi-list-check"></i> Ellenőrzési Listák</a>
+                            <a href="hataridok.html" class="list-group-item list-group-item-action active"><i class="bi bi-calendar-event"></i> Határidők <span class="badge bg-success float-end">Aktív</span></a>
+                            <a href="dijtetelek.html" class="list-group-item list-group-item-action"><i class="bi bi-cash-stack"></i> Díjtételek</a>
+                            <a href="dokumentum-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-file-earmark-text"></i> Dokumentum Sablonok</a>
+                            <a href="workflow-sablonok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-3"></i> Workflow Sablonok</a>
+                            <a href="alfolyamatok.html" class="list-group-item list-group-item-action"><i class="bi bi-diagram-2"></i> Alfolyamatok</a>
+                            <a href="nyilvantartasok.html" class="list-group-item list-group-item-action"><i class="bi bi-database"></i> Nyilvántartások</a>
+                            <a href="felhasznalok.html" class="list-group-item list-group-item-action"><i class="bi bi-people"></i> Felhasználók</a>
+                            <a href="szerepkorok.html" class="list-group-item list-group-item-action"><i class="bi bi-shield-check"></i> Szerepkörök</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <label class="form-label"><i class="bi bi-filter"></i> Ügytípus választó</label>
+                            <select class="form-select" v-model="ugytipus">
+                                <option value="V-044">V-044 - Vasúti járművezetők</option>
+                                <option value="H-052">H-052 - Hajózási létesítmények</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <param-hataridok
+                        :ugytipus="ugytipus"
+                        @save="handleSave"
+                        @change="handleChange">
+                    </param-hataridok>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+    <script src="../assets/js/components/parameterezo/param-header.js"></script>
+    <script src="../assets/js/components/parameterezo/param-tabla.js"></script>
+    <script src="../assets/js/components/parameterezo/param-hataridok.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            components: { 'param-header': ParamHeader, 'param-hataridok': ParamHataridok },
+            data() {
+                return {
+                    ugytipus: 'V-044',
+                    breadcrumbs: [
+                        { label: 'Főoldal', url: '../index.html' },
+                        { label: 'Paraméterező', url: 'index.html' },
+                        { label: 'Határidők', url: '' }
+                    ]
+                };
+            },
+            methods: {
+                navigateBack() { window.location.href = 'index.html'; },
+                handleSave(data) { console.log('✅ Határidők mentve:', data); alert('Határidők sikeresen mentve!'); },
+                handleChange(data) { console.log('📝 Változás:', data); }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

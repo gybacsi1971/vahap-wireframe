@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tényállás tisztázás | VAHAP Vasúti Modul</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Közös stílusok -->
+    <link rel="stylesheet" href="../../assets/css/vihar-common.css?v=2">
+</head>
+<body>
+    <div id="app" class="container-fluid vh-100 d-flex flex-column p-0">
+        <!-- Fejléc -->
+        <nav class="navbar navbar-light bg-light border-bottom">
+            <div class="container-fluid px-4">
+                <span class="navbar-brand mb-0">
+                    <i class="bi bi-train-front text-vasut"></i>
+                    <strong>VAHAP - Vasúti Modul</strong>
+                    <span class="badge bg-vasut ms-2">V-044</span>
+                </span>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i> {{ ugyfel.nev }}
+                    </span>
+                    <a href="munkalista.html" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Vissza
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Fő tartalom -->
+        <div class="flex-grow-1 overflow-auto">
+            <div class="container py-4">
+
+                <!-- Ügyfejléc -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-vasut text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-chat-left-text"></i> Tényállás tisztázás
+                            <span class="badge bg-light text-dark ms-2">F-0104</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Ügyazonosító:</strong><br>
+                                {{ ugyazonosito }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Határidő:</strong><br>
+                                <span class="badge badge-status badge-info">{{ hatarido }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hatósági kérés -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-file-earmark-text"></i> Hatósági felszólítás tartalma
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            A kérelem elbírálásához további információk szükségesek. Kérjük, az alábbi kérdésekre adjon választ!
+                        </div>
+
+                        <h6 class="mt-4 mb-3">Tisztázandó kérdések:</h6>
+                        <div class="list-group">
+                            <div class="list-group-item" v-for="(kerdes, index) in kerdesek" :key="index">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-question-circle text-info me-3 fs-5"></i>
+                                    <div class="flex-grow-1">
+                                        <strong>{{ kerdes.megnevezes }}</strong><br>
+                                        <small class="text-muted">{{ kerdes.leiras }}</small><br>
+                                        <span v-if="kerdes.megvalaszolva" class="badge bg-success mt-1">
+                                            <i class="bi bi-check-circle"></i> Megválaszolva
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Válasz űrlap -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-vasut text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-pencil-square"></i> Válaszok benyújtása
+                        </h6>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Kérdésenkénti válaszok -->
+                        <div v-for="(kerdes, index) in kerdesek" :key="'valasz-' + index" class="mb-4">
+                            <label class="form-label required">
+                                <strong>{{ index + 1 }}. {{ kerdes.megnevezes }}</strong>
+                            </label>
+                            <textarea class="form-control" v-model="kerdes.valasz" rows="4"
+                                      :placeholder="'Válasz a kérdésre: ' + kerdes.leiras"
+                                      @input="kerdes.megvalaszolva = !!kerdes.valasz"
+                                      required></textarea>
+                        </div>
+
+                        <!-- Kiegészítő dokumentumok feltöltése -->
+                        <h6 class="border-top pt-3 mt-4 mb-3">Kiegészítő dokumentumok (opcionális)</h6>
+                        <div class="list-group mb-4">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <i class="bi bi-file-earmark-arrow-up"></i>
+                                        <strong>Kiegészítő dokumentumok</strong>
+                                        <br>
+                                        <small class="text-muted">PDF, JPG, PNG formátumok, max 10MB</small>
+                                    </div>
+                                    <div>
+                                        <input type="file" id="file-kiegeszito" @change="feltoltDokumentum" class="d-none" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                                        <button class="btn btn-sm btn-outline-primary" @click="document.getElementById('file-kiegeszito').click()">
+                                            <i class="bi bi-upload"></i> Feltöltés
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="feltoltottDokumentumok.length > 0" class="mt-3">
+                                    <small class="text-success">
+                                        <i class="bi bi-check-circle"></i> Feltöltött fájlok:
+                                    </small>
+                                    <ul class="list-unstyled mt-2">
+                                        <li v-for="(file, index) in feltoltottDokumentumok" :key="index" class="mb-1">
+                                            <i class="bi bi-file-check"></i> {{ file.name }}
+                                            <button class="btn btn-sm btn-link text-danger" @click="torolDokumentum(index)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Összefoglaló -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Állapot:</strong>
+                            {{ megvalaszoltKerdesekSzama }} / {{ kerdesek.length }} kérdés megválaszolva
+                        </div>
+
+                        <!-- Benyújtás -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" @click="benyujtTenyallasTisztazas"
+                                    :disabled="!osszesKerdesMegvalaszolva || benyujtva">
+                                <i class="bi bi-send-check"></i> Tényállás tisztázás benyújtása
+                            </button>
+                            <button class="btn btn-outline-secondary" @click="piszkozatMentes">
+                                <i class="bi bi-save"></i> Mentés piszkozatként
+                            </button>
+                        </div>
+
+                        <!-- Sikeres benyújtás -->
+                        <div v-if="benyujtva" class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <strong>Tényállás tisztázás sikeresen benyújtva!</strong><br>
+                            Az ügy feldolgozása folytatódik. Értesítést kap az eredményről.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Lábléc -->
+        <div class="border-top bg-light p-3">
+            <div class="container d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="bi bi-clock"></i> Határidő: {{ hatarido }}
+                </small>
+                <a href="munkalista.html" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Vissza
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Mock adatok -->
+    <script src="../../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Közös funkciók -->
+    <script src="../../assets/js/vihar-common.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Ügy adatok
+                    ugyazonosito: "VAHAP-V-2024-000321",
+                    hatarido: "2024-10-28",
+
+                    // Ügyfél
+                    ugyfel: {
+                        nev: "Kovács János"
+                    },
+
+                    // F-0104 - Tényállás tisztázás kérdések
+                    kerdesek: [
+                        {
+                            megnevezes: "Korábbi vasúti járművezető tapasztalat",
+                            leiras: "Dolgozott-e korábban vasúti járművezetőként? Ha igen, milyen kategóriában és mennyi ideig?",
+                            megvalaszolva: false,
+                            valasz: ""
+                        },
+                        {
+                            megnevezes: "Egészségügyi alkalmassági vizsgálat",
+                            leiras: "Mikor volt az utolsó teljes körű egészségügyi vizsgálata? Kérem, adja meg a vizsgálat pontos dátumát.",
+                            megvalaszolva: false,
+                            valasz: ""
+                        },
+                        {
+                            megnevezes: "Munkahelyi státusz tisztázása",
+                            leiras: "A megadott munkáltató (MÁV-START Zrt.) esetén milyen munkakörben dolgozik jelenleg?",
+                            megvalaszolva: false,
+                            valasz: ""
+                        }
+                    ],
+
+                    // Feltöltött dokumentumok
+                    feltoltottDokumentumok: [],
+
+                    // Állapot
+                    benyujtva: false
+                };
+            },
+            computed: {
+                // Megválaszolt kérdések száma
+                megvalaszoltKerdesekSzama() {
+                    return this.kerdesek.filter(k => k.megvalaszolva).length;
+                },
+
+                // Minden kérdés megválaszolva?
+                osszesKerdesMegvalaszolva() {
+                    return this.kerdesek.every(k => k.megvalaszolva);
+                }
+            },
+            methods: {
+                // F-0104 - Tényállás tisztázás benyújtása
+                benyujtTenyallasTisztazas() {
+                    console.log('[F-0104] Tényállás tisztázás benyújtása...');
+
+                    if (!this.osszesKerdesMegvalaszolva) {
+                        VahapCommon.notifications.show('Kérjük, válaszoljon minden kérdésre!', 'warning');
+                        return;
+                    }
+
+                    // Mock: Benyújtás
+                    setTimeout(() => {
+                        this.benyujtva = true;
+                        VahapCommon.notifications.show('Tényállás tisztázás sikeresen benyújtva!', 'success');
+
+                        // Ügy státusz frissítés
+                        const ugyek = JSON.parse(localStorage.getItem('vahap_ugyek_kulso_vasut') || '[]');
+                        const ugy = ugyek.find(u => u.ugyazonosito === this.ugyazonosito);
+                        if (ugy) {
+                            ugy.statusz = 'folyamatban';
+                            ugy.statuszClass = 'pending';
+                            ugy.ugyfelMuvelet = null;
+                            localStorage.setItem('vahap_ugyek_kulso_vasut', JSON.stringify(ugyek));
+                        }
+
+                        // Átirányítás 2 mp után
+                        setTimeout(() => {
+                            window.location.href = 'munkalista.html';
+                        }, 2000);
+                    }, 1000);
+                },
+
+                // Dokumentum feltöltés
+                feltoltDokumentum(event) {
+                    const files = Array.from(event.target.files);
+                    files.forEach(file => {
+                        // Fájl méret ellenőrzés
+                        if (file.size > 10 * 1024 * 1024) {
+                            VahapCommon.notifications.show(`${file.name} túl nagy! Maximum 10MB lehet.`, 'error');
+                            return;
+                        }
+
+                        this.feltoltottDokumentumok.push(file);
+                        VahapCommon.notifications.show(`${file.name} feltöltve`, 'success');
+                    });
+
+                    // Input reset
+                    event.target.value = '';
+                },
+
+                // Dokumentum törlés
+                torolDokumentum(index) {
+                    const file = this.feltoltottDokumentumok[index];
+                    this.feltoltottDokumentumok.splice(index, 1);
+                    VahapCommon.notifications.show(`${file.name} törölve`, 'info');
+                },
+
+                // Piszkozat mentés
+                piszkozatMentes() {
+                    const draft = {
+                        kerdesek: this.kerdesek,
+                        feltoltottDokumentumok: this.feltoltottDokumentumok.map(f => f.name)
+                    };
+                    localStorage.setItem(`vahap_tenyallas_draft_${this.ugyazonosito}`, JSON.stringify(draft));
+                    VahapCommon.notifications.show('Piszkozat mentve', 'success');
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Tényállás tisztázás modul betöltve');
+                console.log('Funkció: F-0104 - Tényállás tisztázás benyújtása');
+
+                // Piszkozat betöltés
+                const draft = localStorage.getItem(`vahap_tenyallas_draft_${this.ugyazonosito}`);
+                if (draft) {
+                    const data = JSON.parse(draft);
+                    if (data.kerdesek) {
+                        this.kerdesek = data.kerdesek;
+                    }
+                }
+
+                // URL paraméter: ügyazonosító
+                const urlParams = new URLSearchParams(window.location.search);
+                const ugyId = urlParams.get('ugy');
+                if (ugyId) {
+                    this.ugyazonosito = ugyId;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

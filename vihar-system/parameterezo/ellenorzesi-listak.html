@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP - Ellenőrzési Listák Paraméterezés</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- VAHAP Közös Stílusok -->
+    <link rel="stylesheet" href="../assets/css/vihar-common.css">
+
+    <style>
+        .nav-tabs .nav-link {
+            color: #666;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--vahap-primary);
+            font-weight: 600;
+        }
+        .badge-uce {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .badge-function {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Fejléc komponens -->
+        <param-header
+            title="Ellenőrzési Listák"
+            subtitle="Hatáskör, formai és tartalmi ellenőrzési kritériumok kezelése"
+            :breadcrumbs="breadcrumbs"
+            :show-save="false"
+            :show-back="true"
+            admin-user="Rendszergazda"
+            admin-role="VHF_ADMIN"
+            @back="navigateBack">
+        </param-header>
+
+        <!-- Tartalom -->
+        <div class="container-fluid py-4">
+            <div class="row">
+                <!-- Bal oldali menü -->
+                <div class="col-md-3">
+                    <div class="card sticky-top" style="top: 1rem;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="bi bi-gear"></i> Paraméterek
+                            </h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="../index.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-house"></i> Főoldal
+                            </a>
+                            <a href="index.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-sliders"></i> Paraméterező Dashboard
+                            </a>
+                            <hr class="my-0">
+                            <a href="ellenorzesi-listak.html" class="list-group-item list-group-item-action active">
+                                <i class="bi bi-list-check"></i> Ellenőrzési Listák
+                                <span class="badge bg-success float-end">Aktív</span>
+                            </a>
+                            <a href="hataridok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-calendar-event"></i> Határidők
+                            </a>
+                            <a href="dijtetelek.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-cash-stack"></i> Díjtételek
+                            </a>
+                            <a href="dokumentum-sablonok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-file-earmark-text"></i> Dokumentum Sablonok
+                            </a>
+                            <a href="workflow-sablonok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-diagram-3"></i> Workflow Sablonok
+                            </a>
+                            <a href="alfolyamatok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-diagram-2"></i> Alfolyamatok
+                            </a>
+                            <a href="nyilvantartasok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-database"></i> Nyilvántartások
+                            </a>
+                            <a href="felhasznalok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-people"></i> Felhasználók
+                            </a>
+                            <a href="szerepkorok.html" class="list-group-item list-group-item-action">
+                                <i class="bi bi-shield-check"></i> Szerepkörök
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fő tartalom -->
+                <div class="col-md-9">
+                    <!-- Ügytípus választó -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label mb-0">
+                                        <i class="bi bi-filter"></i> Ügytípus szűrő
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" v-model="ugytipus">
+                                        <option value="V-044">V-044 - Vasúti járművezetők</option>
+                                        <option value="H-052">H-052 - Hajózási létesítmények</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fülek a különböző lista típusokhoz -->
+                    <ul class="nav nav-tabs mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               :class="{ active: activeLista === 'hatáskor' }"
+                               @click="activeLista = 'hatáskor'"
+                               href="javascript:void(0)">
+                                <span class="badge badge-function me-2">F-0064</span>
+                                Hatáskör vizsgálat
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               :class="{ active: activeLista === 'formai' }"
+                               @click="activeLista = 'formai'"
+                               href="javascript:void(0)">
+                                <span class="badge badge-function me-2">F-0065</span>
+                                Formai megfelelőség
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               :class="{ active: activeLista === 'tartalmi' }"
+                               @click="activeLista = 'tartalmi'"
+                               href="javascript:void(0)">
+                                <span class="badge badge-function me-2">F-0066</span>
+                                Tartalmi megfelelőség
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Lista kezelő komponens -->
+                    <param-lista-kezelo
+                        :lista-tipus="activeLista"
+                        :ugytipus="ugytipus"
+                        @save="handleSave"
+                        @change="handleChange">
+                    </param-lista-kezelo>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- VAHAP Központi Fájlok -->
+    <script src="../assets/js/vihar-config.js"></script>
+    <script src="../assets/js/vihar-common.js"></script>
+    <script src="../assets/js/vihar-mock-data.js"></script>
+
+    <!-- Paraméterező Komponensek -->
+    <script src="../assets/js/components/parameterezo/param-header.js"></script>
+    <script src="../assets/js/components/parameterezo/param-tabla.js"></script>
+    <script src="../assets/js/components/parameterezo/param-szerkeszto.js"></script>
+    <script src="../assets/js/components/parameterezo/param-lista-kezelo.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            components: {
+                'param-header': ParamHeader,
+                'param-tabla': ParamTabla,
+                'param-szerkeszto': ParamSzerkeszto,
+                'param-lista-kezelo': ParamListaKezelo
+            },
+            data() {
+                return {
+                    ugytipus: 'V-044',
+                    activeLista: 'hatáskor',
+                    breadcrumbs: [
+                        { label: 'Főoldal', url: '../index.html' },
+                        { label: 'Paraméterező', url: 'index.html' },
+                        { label: 'Ellenőrzési Listák', url: '' }
+                    ]
+                };
+            },
+            methods: {
+                navigateBack() {
+                    window.location.href = 'index.html';
+                },
+                handleSave(data) {
+                    console.log('✅ Ellenőrzési lista mentve:', data);
+                    alert('Ellenőrzési lista sikeresen mentve!');
+                },
+                handleChange(data) {
+                    console.log('📝 Változás észlelve:', data);
+                }
+            },
+            mounted() {
+                console.log('[VAHAP] Ellenőrzési Listák paraméterezés betöltve');
+                console.log('[VAHAP] activeLista:', this.activeLista);
+                console.log('[VAHAP] ugytipus:', this.ugytipus);
+                console.log('[VAHAP] VIHARMockData.parameterezo keys:', Object.keys(VIHARMockData.parameterezo));
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
