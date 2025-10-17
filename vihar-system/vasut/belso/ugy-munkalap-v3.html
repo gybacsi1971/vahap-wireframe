@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="../../assets/css/vihar-wizard.css">
 
     <style>
-        /* 3 oszlopos layout specifikus stílusok */
+        /* 2 oszlopos layout - bal workflow panel + jobb munkaterület */
         .main-container {
             display: flex;
             flex-direction: column;
@@ -62,7 +62,7 @@
             gap: 0.5rem;
         }
 
-        /* Munkaterület (középen) */
+        /* Munkaterület (jobb oldalon, teljes szélességű) */
         .workspace-column {
             flex: 1;
             display: flex;
@@ -815,7 +815,7 @@
                             :class="{ active: activeTab === 'history' }"
                             @click="activeTab = 'history'">
                         <i class="bi bi-clock-history"></i>
-                        <span>Ügy előzmények</span>
+                        <span>Események</span>
                         <span class="badge bg-secondary ms-2">{{ workflowHistory.length }}</span>
                     </button>
                 </div>
@@ -943,6 +943,7 @@
     <script src="../../assets/js/components/workflow/wf-hataskor-wizard.js"></script>
     <script src="../../assets/js/components/workflow/wf-formai-wizard.js"></script>
     <script src="../../assets/js/components/workflow/wf-tartalmi-wizard.js"></script>
+    <script src="../../assets/js/components/workflow/wf-hianypotlas-wizard.js"></script>
 
     <!-- Eredeti komponensek -->
     <script src="../../assets/js/components/workflow/wf-szignalas.js"></script>
@@ -968,6 +969,9 @@
         console.log('WfSzignalas létezik:', typeof WfSzignalas !== 'undefined');
         console.log('WfDokumentumGyartas létezik:', typeof WfDokumentumGyartas !== 'undefined');
         console.log('WfDontes létezik:', typeof WfDontes !== 'undefined');
+        console.log('WfVelemenyezes létezik:', typeof WfVelemenyezes !== 'undefined');
+        console.log('WfHianypotlasWizard létezik:', typeof WfHianypotlasWizard !== 'undefined');
+        console.log('VahapMockData.velemenyezes:', typeof VahapMockData !== 'undefined' ? !!VahapMockData.velemenyezes : 'N/A');
         console.log('=========================');
     </script>
 </body>

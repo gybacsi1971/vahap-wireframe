@@ -3079,7 +3079,174 @@ Felhívom Teszt Erika kérelmezőt, hogy az alábbi hiányosságokat 15 napon be
             { kod: 'figyelembe_vesz', label: 'Figyelembe veszem', szin: 'success' },
             { kod: 'nem_vesz_figyelembe', label: 'Nem veszem figyelembe', szin: 'secondary' },
             { kod: 'reszben_figyelembe_vesz', label: 'Részben figyelembe veszem', szin: 'warning' }
-        ]
+        ],
+
+        // Rugalmas workflow - véleményeztetési feladatok
+        velemenyeztetes_feladatok: {
+            // Belső felhasználói törzs (véleményezők)
+            belsoFelhasznalok: [
+                { id: 'UI001', nev: 'Dr. Szabó Péter', beosztas: 'Vezető ügyintéző', osztaly: 'Vasúti Hatósági Főosztály' },
+                { id: 'UI002', nev: 'Nagy Andrea', beosztas: 'Ügyintéző', osztaly: 'Vasúti Hatósági Főosztály' },
+                { id: 'UI003', nev: 'Kiss Péter', beosztas: 'Jogi szakreferens', osztaly: 'Jogi Osztály' },
+                { id: 'UI004', nev: 'Tóth Gábor', beosztas: 'Műszaki szakértő', osztaly: 'Műszaki Osztály' },
+                { id: 'VEZ001', nev: 'Dr. Kovács Anna', beosztas: 'Főosztályvezető', osztaly: 'Vasúti Hatósági Főosztály' },
+                { id: 'VEZ002', nev: 'Dr. Horváth István', beosztas: 'Osztályvezető', osztaly: 'Jogi Osztály' }
+            ],
+
+            // Feladat típusok
+            feladatTipusok: [
+                { id: 'szakmai', nev: 'Szakmai véleményezés', icon: 'bi-clipboard-check' },
+                { id: 'jogi', nev: 'Jogi véleményezés', icon: 'bi-scale' },
+                { id: 'muszaki', nev: 'Műszaki véleményezés', icon: 'bi-gear' },
+                { id: 'vezetoi', nev: 'Vezetői jóváhagyás', icon: 'bi-person-check' },
+                { id: 'egyeb', nev: 'Egyéb', icon: 'bi-chat-dots' }
+            ],
+
+            // Aktív feladatok
+            aktivFeladatok: [
+                {
+                    id: 'VEL-2025-001',
+                    ugyazonosito: 'VAHAP-V-2024-001234',
+                    feladatTipus: 'szakmai',
+                    feladatNev: 'Dokumentum(ok) véleményezése - Alkalmassági vizsgálat',
+                    leiras: 'Kérem véleményezzék a döntési javaslatot és a határozat tervezetet. A kérelmező minden feltételnek megfelelt, javasolt a pozitív döntés.',
+                    hatarido: '2025-10-25',
+                    kiadas_datum: '2025-10-17',
+                    kiiro: { id: 'UI001', nev: 'Dr. Szabó Péter' },
+                    cimzettek: [
+                        {
+                            id: 'UI002',
+                            nev: 'Nagy Andrea',
+                            statusz: 'kesz',
+                            velemeny_datum: '2025-10-20',
+                            velemeny: {
+                                tipus: 'elfogadas',
+                                szoveg: 'Egyetértek a döntési javaslattal. A határozat tervezet megfelelő, javaslom elfogadásra.',
+                                modositas_szukseges: false
+                            }
+                        },
+                        {
+                            id: 'UI003',
+                            nev: 'Kiss Péter',
+                            statusz: 'folyamatban',
+                            velemeny_datum: null,
+                            velemeny: null
+                        },
+                        {
+                            id: 'VEZ001',
+                            nev: 'Dr. Kovács Anna',
+                            statusz: 'varakozas',
+                            velemeny_datum: null,
+                            velemeny: null
+                        }
+                    ],
+                    csatolmanyok: [
+                        { nev: 'Döntési javaslat.pdf', meret: '245 KB', datum: '2025-10-17' },
+                        { nev: 'Határozat tervezet.docx', meret: '128 KB', datum: '2025-10-17' }
+                    ],
+                    statusz: 'folyamatban',
+                    early_warning_napok: [3, 2, 1],
+                    sablon: false,
+                    napok_hatra: 8
+                },
+                {
+                    id: 'VEL-2025-002',
+                    ugyazonosito: 'VAHAP-V-2024-001235',
+                    feladatTipus: 'jogi',
+                    feladatNev: 'Hiánypótlási végzés jogi véleményezése',
+                    leiras: 'Kérem ellenőrizzék a hiánypótlási végzés jogi megalapozottságát.',
+                    hatarido: '2025-10-22',
+                    kiadas_datum: '2025-10-18',
+                    kiiro: { id: 'UI002', nev: 'Nagy Andrea' },
+                    cimzettek: [
+                        {
+                            id: 'UI003',
+                            nev: 'Kiss Péter',
+                            statusz: 'kesz',
+                            velemeny_datum: '2025-10-19',
+                            velemeny: {
+                                tipus: 'modositas',
+                                szoveg: 'A végzésben szerepeltetni kell az Ákr. 47. § hivatkozását is. Egyébként a dokumentum megfelelő.',
+                                modositas_szukseges: true,
+                                modositasi_javaslat: 'Kiegészítés: "Az Ákr. 47. § (1) bekezdése alapján..."'
+                            }
+                        }
+                    ],
+                    csatolmanyok: [
+                        { nev: 'Hiánypótlási végzés tervezet.pdf', meret: '189 KB', datum: '2025-10-18' }
+                    ],
+                    statusz: 'modositas_szukseges',
+                    early_warning_napok: [3, 2, 1],
+                    sablon: false,
+                    napok_hatra: 5
+                },
+                {
+                    id: 'VEL-2025-003',
+                    ugyazonosito: 'VAHAP-V-2024-001236',
+                    feladatTipus: 'vezetoi',
+                    feladatNev: 'Határozat kiadmányozás előtti jóváhagyás',
+                    leiras: 'Kérem jóváhagyását a véglegesített határozathoz.',
+                    hatarido: '2025-10-19',
+                    kiadas_datum: '2025-10-17',
+                    kiiro: { id: 'UI001', nev: 'Dr. Szabó Péter' },
+                    cimzettek: [
+                        {
+                            id: 'VEZ001',
+                            nev: 'Dr. Kovács Anna',
+                            statusz: 'folyamatban',
+                            velemeny_datum: null,
+                            velemeny: null
+                        }
+                    ],
+                    csatolmanyok: [
+                        { nev: 'Végleges határozat.pdf', meret: '312 KB', datum: '2025-10-17' }
+                    ],
+                    statusz: 'surgos',
+                    early_warning_napok: [3, 2, 1],
+                    sablon: false,
+                    napok_hatra: 2
+                }
+            ],
+
+            // Lezárt feladatok
+            lezartFeladatok: [
+                {
+                    id: 'VEL-2024-099',
+                    ugyazonosito: 'VAHAP-V-2024-001200',
+                    feladatTipus: 'szakmai',
+                    feladatNev: 'Sommás eljárás alkalmazhatóságának véleményezése',
+                    hatarido: '2025-10-10',
+                    lezaras_datum: '2025-10-09',
+                    kiiro: { id: 'UI001', nev: 'Dr. Szabó Péter' },
+                    statusz: 'lezart_kesz',
+                    osszegzes: 'Minden véleményező elfogadta. Sommás eljárás alkalmazható.'
+                }
+            ],
+
+            // Feladat sablonok (ügytípushoz kötött)
+            sablonok: [
+                {
+                    id: 'SABLON-001',
+                    ugytipus: 'V-044',
+                    feladatTipus: 'szakmai',
+                    sablon_nev: 'Döntési javaslat véleményezés - Alkalmassági vizsgálat',
+                    leiras: 'Döntési javaslat és határozat tervezet szakmai véleményezése vasúti járművezető alkalmassági ügyekben.',
+                    alapertelmezett_cimzettek: ['UI002', 'UI003', 'VEZ001'],
+                    alapertelmezett_hatarido_nap: 7,
+                    early_warning_napok: [3, 2, 1]
+                },
+                {
+                    id: 'SABLON-002',
+                    ugytipus: 'V-044',
+                    feladatTipus: 'jogi',
+                    sablon_nev: 'Végzés jogi ellenőrzés',
+                    leiras: 'Végzések jogi megalapozottságának ellenőrzése.',
+                    alapertelmezett_cimzettek: ['UI003', 'VEZ002'],
+                    alapertelmezett_hatarido_nap: 5,
+                    early_warning_napok: [2, 1]
+                }
+            ]
+        }
     }
 };
 

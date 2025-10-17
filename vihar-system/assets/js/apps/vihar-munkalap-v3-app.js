@@ -73,15 +73,6 @@ const VahapMunkalapV3App = {
                     completed: true
                 },
                 {
-                    id: 'velemenyeztetes-formai',
-                    name: 'Véleményeztetés',
-                    code: 'UCE-1824',
-                    icon: 'bi-chat-dots',
-                    component: 'wf-velemenyeztetes',
-                    indented: true,
-                    completed: true
-                },
-                {
                     id: 'tartalmi',
                     name: 'Tartalmi ellenőrzés',
                     code: 'UCE-1794',
@@ -100,11 +91,28 @@ const VahapMunkalapV3App = {
                     completed: false
                 },
                 {
+                    id: 'tenyallas',
+                    name: 'Tényállás tisztázása',
+                    code: 'F-0102',
+                    icon: 'bi-diagram-3',
+                    component: 'wf-rugalmas-workflow',
+                    completed: false
+                },
+                {
                     id: 'dontes',
                     name: 'Döntés előkészítés',
                     code: 'UCE-1800',
                     icon: 'bi-signpost-split',
                     component: 'wf-dontes',
+                    completed: false
+                },
+                {
+                    id: 'velemenyeztetes-formai',
+                    name: 'Véleményeztetés',
+                    code: 'UCE-1824',
+                    icon: 'bi-chat-dots',
+                    component: 'wf-velemenyezes',
+                    indented: true,
                     completed: false
                 },
                 {
@@ -616,6 +624,7 @@ const VahapMunkalapV3App = {
         'wf-hataskor-wizard': typeof WfHataskorWizard !== 'undefined' ? WfHataskorWizard : { template: '<div class="alert alert-info">Hatáskör wizard betöltése...</div>' },
         'wf-formai-wizard': typeof WfFormaiWizard !== 'undefined' ? WfFormaiWizard : { template: '<div class="alert alert-info">Formai wizard betöltése...</div>' },
         'wf-tartalmi-wizard': typeof WfTartalmiWizard !== 'undefined' ? WfTartalmiWizard : { template: '<div class="alert alert-info">Tartalmi wizard betöltése...</div>' },
+        'wf-hianypotlas': typeof WfHianypotlasWizard !== 'undefined' ? WfHianypotlasWizard : { template: '<div class="alert alert-info">Hiánypótlás wizard betöltése...</div>' },
 
         // Eredeti komponensek
         'wf-szignalas': typeof WfSzignalas !== 'undefined' ? WfSzignalas : { template: '<div class="alert alert-info">Szignálás komponens betöltése...</div>' },
