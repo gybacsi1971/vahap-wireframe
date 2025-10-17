@@ -56,7 +56,7 @@ const VahapMunkalapV3App = {
             workflowSteps: [
                 {
                     id: 'hataskor',
-                    name: 'Hatáskör vizsgálat',
+                    name: 'Hatáskör és illetékesség',
                     code: 'UCE-1793',
                     icon: 'bi-shield-check',
                     component: 'wf-hataskor-wizard',
@@ -70,25 +70,34 @@ const VahapMunkalapV3App = {
                     icon: 'bi-clipboard-check',
                     component: 'wf-formai-wizard',
                     data: { checklistType: 'formai' },
-                    completed: false
+                    completed: true
                 },
                 {
-                    id: 'velemenyezes-formai',
-                    name: 'Véleményezés',
+                    id: 'velemenyeztetes-formai',
+                    name: 'Véleményeztetés',
                     code: 'UCE-1824',
                     icon: 'bi-chat-dots',
-                    component: 'wf-velemenyezes',
+                    component: 'wf-velemenyeztetes',
                     indented: true,
-                    completed: false
+                    completed: true
                 },
                 {
                     id: 'tartalmi',
-                    name: 'Tartalmi vizsgálat',
+                    name: 'Tartalmi ellenőrzés',
                     code: 'UCE-1794',
                     icon: 'bi-search',
                     component: 'wf-tartalmi-wizard',
                     data: { checklistType: 'tartalmi' },
                     completed: true
+                },
+                {
+                    id: 'hianypotlas',
+                    name: 'Hiánypótlás',
+                    code: 'UCE-2071',
+                    icon: 'bi-exclamation-triangle',
+                    component: 'wf-hianypotlas',
+                    indented: true,
+                    completed: false
                 },
                 {
                     id: 'dontes',
@@ -99,35 +108,11 @@ const VahapMunkalapV3App = {
                     completed: false
                 },
                 {
-                    id: 'dokumentum',
-                    name: 'Dokumentum készítés',
-                    code: 'UCE-1810',
-                    icon: 'bi-file-text',
-                    component: 'wf-dokumentum-gyartas',
-                    completed: false
-                },
-                {
                     id: 'kiadmanyozas',
                     name: 'Kiadmányozás',
                     code: '',
                     icon: 'bi-pen',
                     component: 'wf-kiadmanyozas',
-                    completed: false
-                },
-                {
-                    id: 'expedialas',
-                    name: 'Expediálás',
-                    code: '',
-                    icon: 'bi-send',
-                    component: 'wf-expedialas',
-                    completed: false
-                },
-                {
-                    id: 'lezaras',
-                    name: 'Ügy lezárása',
-                    code: 'UCE-1828',
-                    icon: 'bi-archive',
-                    component: 'wf-lezaras',
                     completed: false
                 }
             ],
@@ -369,8 +354,8 @@ const VahapMunkalapV3App = {
         isStepAvailable(step) {
             const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
 
-            // Az első HÁROM lépés mindig elérhető (hataskor, formai, velemenyezes-formai)
-            if (stepIndex <= 2) return true;
+            // Az első ÖT lépés mindig elérhető (hataskor, formai, velemenyeztetes-formai, tartalmi, hianypotlas)
+            if (stepIndex <= 4) return true;
 
             // A többi lépésnél ellenőrizzük az előzőek teljesítését
             if (stepIndex === 0) return true;
