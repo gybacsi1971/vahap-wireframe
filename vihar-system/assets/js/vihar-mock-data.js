@@ -3246,7 +3246,279 @@ Felhívom Teszt Erika kérelmezőt, hogy az alábbi hiányosságokat 15 napon be
                     early_warning_napok: [2, 1]
                 }
             ]
+        },
+
+    /**
+     * KIADMÁNYOZÁSI RENDSZER MOCK ADATOK
+     * F-0099 - Érdemi döntés: vezetői döntés
+     * UCE-1815 - Jóváhagyott döntési javaslat? (Döntési pont)
+     * UCE-1820 - Jóváhagyás elutasításának indoklása
+     */
+    kiadmanyozas: {
+        // Lehetséges kiadmányozók (vezetők)
+        kiadmanyozok: [
+            {
+                id: 'VZ001',
+                nev: 'Dr. Nagy András',
+                beosztas: 'Főosztályvezető',
+                szervezet: 'Vasúti Hatósági Főosztály - ÉKM',
+                email: 'nagy.andras@ekm.gov.hu',
+                telefon: '+36 1 795 1100',
+                alairas_joga: true,
+                helyettes: 'VZ002',
+                aktiv: true
+            },
+            {
+                id: 'VZ002',
+                nev: 'Dr. Kovács Mária',
+                beosztas: 'Főosztályvezető-helyettes',
+                szervezet: 'Vasúti Hatósági Főosztály - ÉKM',
+                email: 'kovacs.maria@ekm.gov.hu',
+                telefon: '+36 1 795 1101',
+                alairas_joga: true,
+                helyettes: null,
+                aktiv: true
+            }
+        ],
+
+        // Aktív kiadmányozási feladatok
+        aktivFeladatok: [
+            {
+                id: 'KIAD-2024-001',
+                ugy_azonosito: 'VAHAP-V-2024-001234',
+                ugytipus: 'V-044',
+                megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                ugyfel_nev: 'Minta János',
+                statusz: 'kiadmanyozasra_var', // 'kiadmanyozasra_var', 'jóváhagyott', 'elutasított'
+                prioritas: 'normal', // 'normal', 'suergo', 'azonnali'
+                benyujtas_datum: '2025-10-15',
+                hatarido: '2025-10-20',
+                napok_hatra: 3,
+
+                // Döntési javaslat összefoglalója
+                dontesi_javaslat: {
+                    javaslat: 'A kérelem minden szempontból megfelel, javaslom az előzetes alkalmassági vizsgálat engedélyezését.',
+                    indoklas: 'A kérelmező megfelelt a formai és tartalmi követelményeknek. Az orvosi igazolás érvényes, a munkáltatói igazolás megfelelő. A díjfizetés megtörtént. Jogi akadály nincs.'
+                },
+
+                // Dokumentum tervezet
+                dokumentum: {
+                    tipus: 'határozat', // 'határozat', 'végzés', 'igazolás', 'tájékoztatás', 'hirdetmény'
+                    sablon_nev: 'Határozat - Alkalmassági vizsgálat engedélyezése',
+                    sablon_kod: 'V-HAT-001',
+                    sablon_verzio: 'v2.1',
+                    fajl_nev: 'VAHAP-V-2024-001234_Hatarozat.pdf',
+                    generalt_datum: '2025-10-14',
+                    oldalak_szama: 3
+                },
+
+                // Készítette
+                keszitette: {
+                    id: 'UI001',
+                    nev: 'Dr. Szabó Péter',
+                    beosztas: 'Vezető ügyintéző',
+                    szervezet: 'Vasúti Hatósági Főosztály'
+                },
+
+                // Kiadmányozó
+                kiadmanyozo: {
+                    id: 'VZ001',
+                    nev: 'Dr. Nagy András',
+                    beosztas: 'Főosztályvezető',
+                    szervezet: 'Vasúti Hatósági Főosztály - ÉKM'
+                },
+
+                // Véleményezés eredménye (ha volt)
+                velemenyezes_eredmeny: {
+                    osszes: 3,
+                    elfogad: 2,
+                    modositas: 1,
+                    elutasit: 0,
+                    hianyzik: 0
+                },
+
+                // Ügy előzményei (timeline)
+                elozmények: [
+                    {
+                        nev: 'Kérelem beérkezése',
+                        datum: '2025-09-15 09:23',
+                        icon: 'bi-inbox-fill'
+                    },
+                    {
+                        nev: 'Hatáskör vizsgálat',
+                        datum: '2025-09-16 11:42',
+                        icon: 'bi-shield-check'
+                    },
+                    {
+                        nev: 'Formai ellenőrzés',
+                        datum: '2025-09-17 14:30',
+                        icon: 'bi-clipboard-check'
+                    },
+                    {
+                        nev: 'Tartalmi vizsgálat',
+                        datum: '2025-09-18 10:15',
+                        icon: 'bi-search'
+                    },
+                    {
+                        nev: 'Döntési javaslat készítése',
+                        datum: '2025-10-12 16:00',
+                        icon: 'bi-lightbulb'
+                    },
+                    {
+                        nev: 'Véleményeztetés',
+                        datum: '2025-10-13 09:00',
+                        icon: 'bi-chat-square-dots'
+                    },
+                    {
+                        nev: 'Kiadmányozásra benyújtva',
+                        datum: '2025-10-15 08:30',
+                        icon: 'bi-send'
+                    }
+                ],
+
+                // Kiadmányozási döntés (null, ha még nincs)
+                kiadmanyozas_datum: null,
+                dontes: null, // 'elfogadva', 'elutasítva'
+                indoklas: null // Elutasítás esetén
+            },
+            {
+                id: 'KIAD-2024-002',
+                ugy_azonosito: 'VAHAP-V-2024-001235',
+                ugytipus: 'V-044',
+                megnevezes: 'Vasúti járművezető időszakos alkalmassági vizsgálat',
+                ugyfel_nev: 'Teszt Béla',
+                statusz: 'kiadmanyozasra_var',
+                prioritas: 'suergo',
+                benyujtas_datum: '2025-10-10',
+                hatarido: '2025-10-18',
+                napok_hatra: 1,
+
+                dontesi_javaslat: {
+                    javaslat: 'Javaslom az időszakos alkalmassági vizsgálat engedélyezését, kisebb feltétellel.',
+                    indoklas: 'A kérelmező minden követelménynek megfelelt, azonban az orvosi igazolás 1 hónapon belül lejár, ezért figyelemfelhívást javaslok a határozatba.'
+                },
+
+                dokumentum: {
+                    tipus: 'határozat',
+                    sablon_nev: 'Határozat - Időszakos alkalmassági vizsgálat',
+                    sablon_kod: 'V-HAT-002',
+                    sablon_verzio: 'v1.3',
+                    fajl_nev: 'VAHAP-V-2024-001235_Hatarozat.pdf',
+                    generalt_datum: '2025-10-09',
+                    oldalak_szama: 2
+                },
+
+                keszitette: {
+                    id: 'UI002',
+                    nev: 'Nagy Andrea',
+                    beosztas: 'Ügyintéző',
+                    szervezet: 'Vasúti Hatósági Főosztály'
+                },
+
+                kiadmanyozo: {
+                    id: 'VZ001',
+                    nev: 'Dr. Nagy András',
+                    beosztas: 'Főosztályvezető',
+                    szervezet: 'Vasúti Hatósági Főosztály - ÉKM'
+                },
+
+                velemenyezes_eredmeny: {
+                    osszes: 2,
+                    elfogad: 2,
+                    modositas: 0,
+                    elutasit: 0,
+                    hianyzik: 0
+                },
+
+                elozmenyec: [
+                    {
+                        nev: 'Kérelem beérkezése',
+                        datum: '2025-09-05 14:20',
+                        icon: 'bi-inbox-fill'
+                    },
+                    {
+                        nev: 'Hatáskör vizsgálat',
+                        datum: '2025-09-06 09:00',
+                        icon: 'bi-shield-check'
+                    },
+                    {
+                        nev: 'Formai ellenőrzés',
+                        datum: '2025-09-07 11:30',
+                        icon: 'bi-clipboard-check'
+                    },
+                    {
+                        nev: 'Döntési javaslat készítése',
+                        datum: '2025-10-08 15:00',
+                        icon: 'bi-lightbulb'
+                    },
+                    {
+                        nev: 'Véleményeztetés',
+                        datum: '2025-10-09 08:00',
+                        icon: 'bi-chat-square-dots'
+                    },
+                    {
+                        nev: 'Kiadmányozásra benyújtva',
+                        datum: '2025-10-10 07:45',
+                        icon: 'bi-send'
+                    }
+                ],
+
+                kiadmanyozas_datum: null,
+                dontes: null,
+                indoklas: null
+            }
+        ],
+
+        // Kiadmányozott ügyek (történeti)
+        kiadmanyozottUgyek: [
+            {
+                id: 'KIAD-2024-099',
+                ugy_azonosito: 'VAHAP-V-2024-001200',
+                ugytipus: 'V-044',
+                megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                ugyfel_nev: 'Példa Anna',
+                statusz: 'jóváhagyott',
+                prioritas: 'normal',
+                benyujtas_datum: '2025-09-25',
+                hatarido: '2025-10-05',
+                kiadmanyozas_datum: '2025-10-04',
+                dontes: 'elfogadva',
+                indoklas: null,
+                kiadmanyozo: {
+                    id: 'VZ001',
+                    nev: 'Dr. Nagy András'
+                }
+            },
+            {
+                id: 'KIAD-2024-098',
+                ugy_azonosito: 'VAHAP-V-2024-001199',
+                ugytipus: 'V-044',
+                megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                ugyfel_nev: 'Minta Géza',
+                statusz: 'elutasított',
+                prioritas: 'normal',
+                benyujtas_datum: '2025-09-20',
+                hatarido: '2025-10-01',
+                kiadmanyozas_datum: '2025-09-30',
+                dontes: 'elutasítva',
+                indoklas: 'A döntési javaslat indoklása nem megfelelő. Az orvosi hivatkozás hiányos. Kérem a dokumentum átdolgozását a jogi szakértő javaslatai szerint.',
+                kiadmanyozo: {
+                    id: 'VZ001',
+                    nev: 'Dr. Nagy András'
+                }
+            }
+        ],
+
+        // Statisztikák
+        statisztikak: {
+            osszes_kiadmanyozasra_var: 2,
+            havi_kiadmanyozott: 15,
+            havi_jóváhagyott: 13,
+            havi_elutasított: 2,
+            atlagos_kiadmanyozasi_ido_ora: 4.5,
+            surgos_ugyek: 1
         }
+    }
     }
 };
 

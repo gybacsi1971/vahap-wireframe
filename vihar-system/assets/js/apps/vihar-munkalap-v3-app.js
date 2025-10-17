@@ -72,6 +72,15 @@ const VahapMunkalapV3App = {
                     data: { checklistType: 'formai' },
                     completed: true
                 },
+                                {
+                    id: 'hianypotlas',
+                    name: 'Hiánypótlás',
+                    code: 'UCE-2071',
+                    icon: 'bi-exclamation-triangle',
+                    component: 'wf-hianypotlas',
+                    indented: true,
+                    completed: false
+                },
                 {
                     id: 'tartalmi',
                     name: 'Tartalmi ellenőrzés',
@@ -80,15 +89,6 @@ const VahapMunkalapV3App = {
                     component: 'wf-tartalmi-wizard',
                     data: { checklistType: 'tartalmi' },
                     completed: true
-                },
-                {
-                    id: 'hianypotlas',
-                    name: 'Hiánypótlás',
-                    code: 'UCE-2071',
-                    icon: 'bi-exclamation-triangle',
-                    component: 'wf-hianypotlas',
-                    indented: true,
-                    completed: false
                 },
                 {
                     id: 'tenyallas',
@@ -101,9 +101,9 @@ const VahapMunkalapV3App = {
                 {
                     id: 'dontes',
                     name: 'Döntés előkészítés',
-                    code: 'UCE-1800',
-                    icon: 'bi-signpost-split',
-                    component: 'wf-dontes',
+                    code: 'F-0088',
+                    icon: 'bi-file-earmark-text',
+                    component: 'wf-dontesi-adatlap',
                     completed: false
                 },
                 {
@@ -118,7 +118,7 @@ const VahapMunkalapV3App = {
                 {
                     id: 'kiadmanyozas',
                     name: 'Kiadmányozás',
-                    code: '',
+                    code: 'UCE-1815',
                     icon: 'bi-pen',
                     component: 'wf-kiadmanyozas',
                     completed: false
@@ -631,6 +631,7 @@ const VahapMunkalapV3App = {
         'wf-checklist': typeof WfChecklist !== 'undefined' ? WfChecklist : { template: '<div class="alert alert-info">Checklist komponens betöltése...</div>' },
         'wf-dokumentum-gyartas': typeof WfDokumentumGyartas !== 'undefined' ? WfDokumentumGyartas : { template: '<div class="alert alert-info">Dokumentum gyártás komponens betöltése...</div>' },
         'wf-dontes': typeof WfDontes !== 'undefined' ? WfDontes : { template: '<div class="alert alert-info">Döntés komponens betöltése...</div>' },
+        'wf-dontesi-adatlap': typeof WfDontesiAdatlap !== 'undefined' ? WfDontesiAdatlap : { template: '<div class="alert alert-info">Döntési adatlap betöltése...</div>' },
         'wf-velemenyezes': typeof WfVelemenyezes !== 'undefined' ? WfVelemenyezes : { template: '<div class="alert alert-info">Véleményezés komponens betöltése...</div>' },
         'wf-kiadmanyozas': typeof WfKiadmanyozas !== 'undefined' ? WfKiadmanyozas : { template: '<div class="alert alert-info">Kiadmányozás komponens betöltése...</div>' },
         'wf-expedialas': typeof WfExpedialas !== 'undefined' ? WfExpedialas : { template: '<div class="alert alert-info">Expediálás komponens betöltése...</div>' },

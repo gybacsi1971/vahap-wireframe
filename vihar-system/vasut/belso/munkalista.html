@@ -136,53 +136,9 @@
                     <a v-if="szerepkor === 'vezeto'" href="vezeto-dashboard.html" class="btn btn-primary">
                         <i class="bi bi-speedometer2"></i> Vezető Dashboard
                     </a>
-                    <!-- Véleményezési oldalak -->
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="bi bi-chat-square-text"></i> Véleményezés
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="velemenyezes-eloterjesztes.html">
-                                <i class="bi bi-send"></i> Véleményezésre előterjesztés
-                            </a></li>
-                            <li><a class="dropdown-item" href="velemeny-ertekeles.html">
-                                <i class="bi bi-clipboard-check"></i> Vélemények értékelése
-                            </a></li>
-                            <li v-if="szerepkor === 'vezeto'"><hr class="dropdown-divider"></li>
-                            <li v-if="szerepkor === 'vezeto'"><a class="dropdown-item" href="vezeto-velemenyezes.html">
-                                <i class="bi bi-person-check"></i> Véleményezéseim
-                            </a></li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-outline-primary" @click="showStatisztikak = !showStatisztikak">
-                        <i class="bi bi-graph-up"></i> Statisztikák
-                    </button>
-                    <a href="../../parameterezo/index.html" class="btn btn-outline-secondary">
-                        <i class="bi bi-gear"></i> Paraméterek
-                    </a>
                 </div>
             </div>
 
-            <!-- Ügy érkeztetése EKEIDR rendszerből -->
-            <div class="card mb-3 border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0">
-                        <i class="bi bi-inbox-fill"></i> EKEIDR Érkeztetés
-                        <span class="badge bg-light text-dark ms-2">F-0078</span>
-                        <span class="badge bg-light text-dark ms-1">F-0079</span>
-                        <span class="badge bg-light text-dark ms-1">UC-0302</span>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <p class="mb-2">
-                        <i class="bi bi-info-circle"></i>
-                        Új ügy érkeztetése az EKEIDR rendszerből a VAHAP vasúti modulba
-                    </p>
-                    <button class="btn btn-primary" @click="receiveNewCase">
-                        <i class="bi bi-download"></i> Ügy érkeztetése EKEIDR-ből
-                    </button>
-                </div>
-            </div>
 
             <!-- Dashboard statisztikák -->
             <div v-if="showStatisztikak" class="row g-3 mb-4">
@@ -265,100 +221,6 @@
                 </div>
             </div>
 
-            <!-- Szerepkör-specifikus gyors műveletek -->
-            <div class="row g-3 mb-4">
-                <!-- VHF Ügyintéző műveletek -->
-                <div v-if="szerepkor === 'VHF_UGYINTEZO'" class="col-md-6">
-                    <div class="card border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-lightning"></i> Gyors műveletek - Ügyintéző
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm btn-outline-primary" @click="szuroRa('uj_ugyek')">
-                                    <i class="bi bi-inbox"></i> Új ügyek átvétele
-                                    <span class="badge bg-primary">{{ stats.uj_ugyek }}</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning" @click="szuroRa('hatasko_vizsgalat')">
-                                    <i class="bi bi-shield-check"></i> Hatáskör vizsgálat
-                                    <span class="badge bg-secondary">F-0064</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info" @click="szuroRa('formai_ellenorzes')">
-                                    <i class="bi bi-file-earmark-check"></i> Formai ellenőrzés
-                                    <span class="badge bg-secondary">F-0065</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-success" @click="szuroRa('tartalmi_ellenorzes')">
-                                    <i class="bi bi-clipboard-check"></i> Tartalmi vizsgálat
-                                    <span class="badge bg-secondary">F-0066</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" @click="szuroRa('hianypotlas_keszites')">
-                                    <i class="bi bi-exclamation-circle"></i> Hiánypótlás készítés
-                                    <span class="badge bg-secondary">F-0100</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VHF Döntéshozó műveletek -->
-                <div v-if="szerepkor === 'VHF_DONTESHOZO'" class="col-md-6">
-                    <div class="card border-success">
-                        <div class="card-header bg-success text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-award"></i> Gyors műveletek - Döntéshozó
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-sm btn-outline-primary" @click="szuroRa('dontesre_var')">
-                                    <i class="bi bi-check-circle"></i> Döntésre váró ügyek
-                                    <span class="badge bg-primary">{{ stats.dontesre_var }}</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-success" @click="szuroRa('dontesi_javaslat')">
-                                    <i class="bi bi-file-text"></i> Döntési javaslatok
-                                    <span class="badge bg-secondary">F-0074</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-warning" @click="szuroRa('velemenyezes')">
-                                    <i class="bi bi-chat-square-text"></i> Véleményezendő
-                                    <span class="badge bg-secondary">F-0096</span>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info" @click="szuroRa('kiadmanyozas')">
-                                    <i class="bi bi-pen"></i> Kiadmányozásra vár
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VNY024 Nyilvántartás (vasút specifikus) -->
-                <div class="col-md-6">
-                    <div class="card border-info">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-database"></i> VNY024 Vasútegészségügyi Nyilvántartás
-                                <span class="badge bg-light text-dark">F-0090</span>
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small class="text-muted d-block">Aktív vizsgálatok</small>
-                                    <h5>{{ vny024_stats.aktiv_vizsgalatok }}</h5>
-                                </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted d-block">Ma lejáró alkalmassági</small>
-                                    <h5 class="text-danger">{{ vny024_stats.lejaro_alkalmassag }}</h5>
-                                </div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-info mt-2" @click="megnyitVNY024">
-                                <i class="bi bi-box-arrow-up-right"></i> Nyilvántartás megnyitása
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Szűrési opciók -->
             <div class="card mb-3 shadow-sm">
@@ -628,88 +490,6 @@
             </div>
         </div>
 
-        <!-- EKEIDR Érkeztetés Modal -->
-        <div class="modal fade" id="ekeidrModal" tabindex="-1" aria-labelledby="ekeidrModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="ekeidrModalLabel">
-                            <i class="bi bi-inbox-fill"></i> EKEIDR Érkeztetés
-                            <span class="badge bg-light text-dark ms-2">F-0078</span>
-                            <span class="badge bg-light text-dark ms-1">UC-0302</span>
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Bezárás"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>EKEIDR interfész kapcsolat</strong><br>
-                            Válasszon ki egy ügyet az EKEIDR rendszerből a VAHAP-ba történő átvételhez.
-                            Az átvétel után automatikusan generálódik a VAHAP ügyazonosító és bejövő iktatás.
-                        </div>
-
-                        <!-- Keresés és szűrés -->
-                        <div class="mb-3">
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    v-model="ekeidrSearchQuery"
-                                    placeholder="Keresés EKEIDR iktatószám vagy tárgy alapján..."
-                                >
-                            </div>
-                        </div>
-
-                        <!-- EKEIDR ügyek lista -->
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>EKEIDR Iktatószám</th>
-                                        <th>Tárgy</th>
-                                        <th>Beérkezés</th>
-                                        <th>Művelet</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="ugy in filteredEkeidrUgyek" :key="ugy.ekeidr_id">
-                                        <td>
-                                            <strong>{{ ugy.ekeidr_id }}</strong><br>
-                                            <small class="text-muted">{{ ugy.ugyfelNev }}</small>
-                                        </td>
-                                        <td>
-                                            {{ ugy.targy }}<br>
-                                            <small class="text-muted">{{ ugy.megjegyzes }}</small>
-                                        </td>
-                                        <td>
-                                            <i class="bi bi-calendar-event"></i> {{ ugy.datum }}
-                                        </td>
-                                        <td>
-                                            <button
-                                                class="btn btn-sm btn-primary"
-                                                @click="confirmReceiveCase(ugy)"
-                                            >
-                                                <i class="bi bi-download"></i> Átvétel
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div v-if="filteredEkeidrUgyek.length === 0" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                                <p class="mt-2">Nincs elérhető EKEIDR ügy</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle"></i> Mégse
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Nézet kezelő Modal (P1-2) -->
         <div class="modal fade" id="viewManagerModal" tabindex="-1" aria-labelledby="viewManagerModalLabel" aria-hidden="true"
@@ -963,58 +743,7 @@
                         { id: 'beerkezett', label: 'Beérkezett', visible: false, order: 9, required: false },
                         { id: 'workflow', label: 'Workflow lépés', visible: false, order: 10, required: false }
                     ],
-                    draggedColumn: null,
-
-                    // VNY024 statisztikák
-                    vny024_stats: {
-                        aktiv_vizsgalatok: 145,
-                        lejaro_alkalmassag: 3
-                    },
-
-                    // EKEIDR érkeztetés
-                    ekeidrSearchQuery: "",
-                    ekeidrUgyek: [
-                        {
-                            ekeidr_id: 'EKEIDR-2024-00789',
-                            targy: 'Járművezető alkalmassági vizsgálat',
-                            ugyfelNev: 'Kovács István',
-                            megjegyzes: 'Előzetes vizsgálat - új képesítés',
-                            datum: '2024-10-04',
-                            prioritas: 'normál'
-                        },
-                        {
-                            ekeidr_id: 'EKEIDR-2024-00790',
-                            targy: 'Járművezető képesítés megújítás',
-                            ugyfelNev: 'Nagy Péter',
-                            megjegyzes: 'Lejárt képesítés megújítása',
-                            datum: '2024-10-04',
-                            prioritas: 'normál'
-                        },
-                        {
-                            ekeidr_id: 'EKEIDR-2024-00791',
-                            targy: 'Vasútegészségügyi vizsgálat',
-                            ugyfelNev: 'Tóth Anna',
-                            megjegyzes: 'Időszakos egészségügyi vizsgálat',
-                            datum: '2024-10-03',
-                            prioritas: 'sürgős'
-                        },
-                        {
-                            ekeidr_id: 'EKEIDR-2024-00792',
-                            targy: 'Mozdonyvezetői alkalmassági vizsgálat',
-                            ugyfelNev: 'Szabó Gábor',
-                            megjegyzes: 'Kiegészítő vizsgálat - új kategória',
-                            datum: '2024-10-02',
-                            prioritas: 'normál'
-                        },
-                        {
-                            ekeidr_id: 'EKEIDR-2024-00793',
-                            targy: 'Vasúti jármű kezelői engedély',
-                            ugyfelNev: 'Kiss Márta',
-                            megjegyzes: 'Első alkalommal történő engedélyezés',
-                            datum: '2024-10-01',
-                            prioritas: 'normál'
-                        }
-                    ]
+                    draggedColumn: null
                 };
             },
             computed: {
@@ -1136,19 +865,6 @@
 
                 totalPages() {
                     return Math.ceil(this.filteredUgyek.length / this.itemsPerPage);
-                },
-
-                filteredEkeidrUgyek() {
-                    if (!this.ekeidrSearchQuery) {
-                        return this.ekeidrUgyek;
-                    }
-                    const query = this.ekeidrSearchQuery.toLowerCase();
-                    return this.ekeidrUgyek.filter(ugy =>
-                        ugy.ekeidr_id.toLowerCase().includes(query) ||
-                        ugy.targy.toLowerCase().includes(query) ||
-                        ugy.ugyfelNev.toLowerCase().includes(query) ||
-                        ugy.megjegyzes.toLowerCase().includes(query)
-                    );
                 }
             },
             methods: {
@@ -1657,118 +1373,6 @@
                     }
                 },
 
-                megnyitVNY024() {
-                    console.log('[F-0090] VNY024 Vasútegészségügyi nyilvántartás megnyitása');
-                    alert('VNY024 Vasútegészségügyi nyilvántartás\n\nEz egy mock funkció.\nValós rendszerben megnyílna a VNY024 interfész.');
-                },
-
-                receiveNewCase() {
-                    // F-0078 - VAHAP érkeztetés (EKEIDR interfész)
-                    // F-0079 - VAHAP bejövő iktatás
-                    // UC-0302 - Érkeztetés
-                    console.log('[VAHAP] EKEIDR érkeztetés modal megnyitása');
-
-                    // Modal megnyitása
-                    const modal = new bootstrap.Modal(document.getElementById('ekeidrModal'));
-                    modal.show();
-                },
-
-                confirmReceiveCase(ekeidrUgy) {
-                    console.log('[VAHAP] Ügy átvétele EKEIDR-ből:', ekeidrUgy.ekeidr_id);
-
-                    // F-0078 - VAHAP érkeztetés (EKEIDR interfész)
-                    // F-0079 - VAHAP bejövő iktatás
-                    // DS-0090: VAHAP érkeztetési adatok (bemenet)
-                    // DS-0102: EKEIDR érkeztetési adatok (kimenet)
-
-                    // VAHAP ügyazonosító generálása
-                    const vahapId = `VAHAP-V-2024-${Math.floor(Math.random() * 900000 + 100000)}`;
-
-                    // Új ügy létrehozása a VAHAP rendszerben
-                    const ujUgy = {
-                        ugyazonosito: vahapId,
-                        ugytipus: 'V-044',
-                        megnevezes: 'Vasúti járművezetők előzetes alkalmassági vizsgálata',
-                        statusz: 'új',
-                        statuszClass: 'new',
-                        benyujtasDatum: new Date().toISOString().split('T')[0],
-                        hatarido: new Date(Date.now() + 60*24*60*60*1000).toISOString().split('T')[0],
-                        eljarasTipus: 'teljes',
-                        ugyfel: {
-                            nev: ekeidrUgy.ugyfelNev,
-                            email: `${ekeidrUgy.ugyfelNev.toLowerCase().replace(' ', '.')}@example.hu`
-                        },
-                        ugyintezo: this.ugyintezoNev,
-                        ekeidr_iktatoszam: ekeidrUgy.ekeidr_id,
-                        ekeidr_targy: ekeidrUgy.targy,
-                        workflow_lepesek: {
-                            erkeztetes: true,
-                            hatáskor_vizsgalat: false
-                        }
-                    };
-
-                    // Ügy hozzáadása a listához
-                    this.ugyek.unshift(ujUgy);
-
-                    // Ügy eltávolítása az EKEIDR listából
-                    const index = this.ekeidrUgyek.findIndex(u => u.ekeidr_id === ekeidrUgy.ekeidr_id);
-                    if (index !== -1) {
-                        this.ekeidrUgyek.splice(index, 1);
-                    }
-
-                    // Modal bezárása
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('ekeidrModal'));
-                    modal.hide();
-
-                    // Sikeres érkeztetés visszajelzés
-                    this.showSuccessNotification(vahapId, ekeidrUgy.ekeidr_id);
-
-                    console.log('[VAHAP] ✓ Érkeztetés sikeres');
-                    console.log(`[VAHAP] VAHAP ID: ${vahapId}`);
-                    console.log(`[VAHAP] EKEIDR ID: ${ekeidrUgy.ekeidr_id}`);
-                    console.log('[VAHAP] Következő lépés: UCE-1793 - Hatáskör vizsgálat');
-                },
-
-                showSuccessNotification(vahapId, ekeidrId) {
-                    // Toast notification létrehozása
-                    const toastHtml = `
-                        <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
-                            <div class="d-flex">
-                                <div class="toast-body">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                    <strong>Sikeres érkeztetés!</strong><br>
-                                    <small>VAHAP ID: ${vahapId}</small><br>
-                                    <small>EKEIDR: ${ekeidrId}</small><br>
-                                    <small>Következő: UCE-1793 (Hatáskör vizsgálat)</small>
-                                </div>
-                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    `;
-
-                    // Toast container ellenőrzése
-                    let toastContainer = document.getElementById('toastContainer');
-                    if (!toastContainer) {
-                        toastContainer = document.createElement('div');
-                        toastContainer.id = 'toastContainer';
-                        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-                        toastContainer.style.zIndex = '9999';
-                        document.body.appendChild(toastContainer);
-                    }
-
-                    // Toast beszúrása
-                    toastContainer.innerHTML = toastHtml;
-
-                    // Toast megjelenítése
-                    const toastElement = document.getElementById('successToast');
-                    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-                    toast.show();
-
-                    // Automatikus scroll az új ügyhöz
-                    setTimeout(() => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }, 500);
-                },
 
                 // ===== Gyorsbillentyűk metódusok (P1-5) =====
 
@@ -1808,14 +1412,6 @@
                         event.preventDefault();
                         this.showColumnCustomizer = true;
                         console.log('[SHORTCUT] Oszlop testreszabás (Ctrl+L)');
-                    }
-
-                    // Ctrl/Cmd + E - EKEIDR érkeztetés
-                    if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
-                        event.preventDefault();
-                        const ekeidrModal = new bootstrap.Modal(document.getElementById('ekeidrModal'));
-                        ekeidrModal.show();
-                        console.log('[SHORTCUT] EKEIDR érkeztetés (Ctrl+E)');
                     }
 
                     // Ctrl/Cmd + R - Szűrők reset
@@ -1868,7 +1464,6 @@ Ctrl+K - Keresés fókusz
 Ctrl+N - Aktuális nézet mentése
 Ctrl+M - Nézet kezelő megnyitása
 Ctrl+L - Oszlop testreszabás
-Ctrl+E - EKEIDR érkeztetés
 Ctrl+R - Szűrők alaphelyzetbe
 Ctrl+A - Összes kijelölése
 Escape - Kijelölés törlése / Modal bezárás
