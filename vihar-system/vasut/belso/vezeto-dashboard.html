@@ -99,73 +99,149 @@
 
         <!-- Statisztikai kártyák -->
         <div class="container-fluid mb-4">
-            <div class="row g-3">
-                <!-- Új ügyek -->
+            <!-- Ügyek statisztikák (ha nem Teljesítmény tab) -->
+            <div v-if="tabFilter !== 'teljesitmeny'" class="row g-3">
+                <!-- Véleményezésre váró -->
                 <div class="col-md-3">
-                    <div class="card stat-card new-cases" @click="filterByStatus('új')">
+                    <div class="card stat-card pending-decision" @click="tabFilter = 'velemenyezes'">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted mb-2">ÚJ ÜGYEK</h6>
-                                    <h2 class="mb-0">{{ stats.uj }}</h2>
-                                    <small class="text-muted">Kiosz tásra várnak</small>
-                                </div>
-                                <div>
-                                    <i class="bi bi-inbox-fill text-danger" style="font-size: 3rem; opacity: 0.3;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Folyamatban -->
-                <div class="col-md-3">
-                    <div class="card stat-card in-progress" @click="filterByStatus('folyamatban')">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-2">FOLYAMATBAN</h6>
-                                    <h2 class="mb-0">{{ stats.folyamatban }}</h2>
-                                    <small class="text-muted">Aktív feldolgozás</small>
-                                </div>
-                                <div>
-                                    <i class="bi bi-gear-fill text-warning" style="font-size: 3rem; opacity: 0.3;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Döntésre vár -->
-                <div class="col-md-3">
-                    <div class="card stat-card pending-decision" @click="filterByStatus('döntés előkészítése')">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="text-muted mb-2">DÖNTÉSRE VÁR</h6>
-                                    <h2 class="mb-0">{{ stats.dontesre_var }}</h2>
+                                    <h6 class="text-muted mb-2">VÉLEMÉNYEZÉSRE VÁRÓ</h6>
+                                    <h2 class="mb-0">{{ stats.velemenyezes }}</h2>
                                     <small class="text-muted">Jóváhagyásra</small>
                                 </div>
                                 <div>
-                                    <i class="bi bi-check-circle-fill text-info" style="font-size: 3rem; opacity: 0.3;"></i>
+                                    <i class="bi bi-chat-square-text-fill text-info" style="font-size: 3rem; opacity: 0.3;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Lezárt ügyek (havi) -->
+                <!-- Kiadmányozásra váró -->
+                <div class="col-md-3">
+                    <div class="card stat-card pending-decision" @click="tabFilter = 'kiadmanyozas'">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">KIADMÁNYOZÁSRA VÁRÓ</h6>
+                                    <h2 class="mb-0">{{ stats.kiadmanyozas }}</h2>
+                                    <small class="text-muted">Aláírásra</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-pen-fill text-warning" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Összes ügy -->
+                <div class="col-md-3">
+                    <div class="card stat-card completed" @click="tabFilter = 'osszes'">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">ÖSSZES ÜGY</h6>
+                                    <h2 class="mb-0">{{ stats.osszes }}</h2>
+                                    <small class="text-muted">Aktív ügyek</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-folder-fill text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Csapat teljesítmény (mindig látható) -->
+                <div class="col-md-3">
+                    <div class="card stat-card in-progress" @click="tabFilter = 'teljesitmeny'">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">CSAPAT HATÉKONYSÁG</h6>
+                                    <h2 class="mb-0">{{ teljesitmenyStats.atlagHatekonysag }}%</h2>
+                                    <small class="text-muted">{{ teljesitmenyStats.ugyintezokSzama }} ügyintéző</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-graph-up-arrow text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teljesítmény statisztikák (ha Teljesítmény tab aktív) -->
+            <div v-else class="row g-3">
+                <!-- Összes feldolgozott -->
+                <div class="col-md-3">
+                    <div class="card stat-card new-cases">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">FELDOLGOZOTT ÜGYEK</h6>
+                                    <h2 class="mb-0">{{ teljesitmenyStats.osszesen }}</h2>
+                                    <small class="text-muted">Ez hónapban</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-folder-check text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Átlagos átfutási idő -->
+                <div class="col-md-3">
+                    <div class="card stat-card in-progress">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">ÁTLAGOS ÁTFUTÁS</h6>
+                                    <h2 class="mb-0">{{ teljesitmenyStats.atlagNap }} <small>nap</small></h2>
+                                    <small class="text-muted">Ügyenként</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-clock-history text-info" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Átlagos hatékonyság -->
+                <div class="col-md-3">
+                    <div class="card stat-card pending-decision">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-2">ÁTLAGOS HATÉKONYSÁG</h6>
+                                    <h2 class="mb-0">{{ teljesitmenyStats.atlagHatekonysag }}%</h2>
+                                    <small class="text-muted">Csapat átlag</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-speedometer2 text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aktív ügyintézők -->
                 <div class="col-md-3">
                     <div class="card stat-card completed">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="text-muted mb-2">LEZÁRVA (HÓNAP)</h6>
-                                    <h2 class="mb-0">{{ stats.lezart_honap }}</h2>
-                                    <small class="text-muted">Ez hónap</small>
+                                    <h6 class="text-muted mb-2">AKTÍV ÜGYINTÉZŐK</h6>
+                                    <h2 class="mb-0">{{ teljesitmenyStats.ugyintezokSzama }}</h2>
+                                    <small class="text-muted">Munkatársak</small>
                                 </div>
                                 <div>
-                                    <i class="bi bi-check2-all text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+                                    <i class="bi bi-people-fill text-warning" style="font-size: 3rem; opacity: 0.3;"></i>
                                 </div>
                             </div>
                         </div>
@@ -177,116 +253,188 @@
         <!-- Főtartalom -->
         <div class="container-fluid">
             <div class="row">
-                <!-- Bal oldal: Ügylista -->
-                <div class="col-md-8">
+                <!-- Ügylista (teljes szélesség) -->
+                <div class="col-md-12">
                     <div class="card shadow-sm">
                         <div class="card-header bg-white">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="bi bi-folder2-open"></i> Ügyek áttekintése
-                                    <span class="badge bg-secondary ms-2">{{ filteredUgyek.length }}</span>
-                                </h5>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-secondary" @click="statusFilter = ''">
-                                        <i class="bi bi-x-circle"></i> Szűrő törlése
-                                    </button>
+                            <h5 class="mb-3">
+                                <i class="bi bi-folder2-open"></i> Ügyek áttekintése
+                                <span class="badge bg-secondary ms-2">{{ filteredUgyek.length }}</span>
+                            </h5>
+
+                            <!-- Tab navigáció -->
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       :class="{ active: tabFilter === 'velemenyezes' }"
+                                       @click.prevent="tabFilter = 'velemenyezes'"
+                                       href="#">
+                                        <i class="bi bi-chat-square-text"></i> Véleményezésre váró
+                                        <span class="badge bg-info ms-1">{{ stats.velemenyezes }}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       :class="{ active: tabFilter === 'kiadmanyozas' }"
+                                       @click.prevent="tabFilter = 'kiadmanyozas'"
+                                       href="#">
+                                        <i class="bi bi-pen"></i> Kiadmányozásra váró
+                                        <span class="badge bg-warning ms-1">{{ stats.kiadmanyozas }}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       :class="{ active: tabFilter === 'osszes' }"
+                                       @click.prevent="tabFilter = 'osszes'"
+                                       href="#">
+                                        <i class="bi bi-list-ul"></i> Összes ügy
+                                        <span class="badge bg-secondary ms-1">{{ stats.osszes }}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                       :class="{ active: tabFilter === 'teljesitmeny' }"
+                                       @click.prevent="tabFilter = 'teljesitmeny'"
+                                       href="#">
+                                        <i class="bi bi-graph-up"></i> Teljesítmény
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <!-- Teljesítmény nézet -->
+                            <div v-if="tabFilter === 'teljesitmeny'">
+                                <!-- Havi összesítés -->
+                                <div class="mb-4">
+                                    <h6 class="text-muted mb-3">Havi összesítés</h6>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <!-- Lista/csempe nézet komponens -->
-                            <vihar-lista-csempe
-                                :items="filteredUgyek"
-                                :view-mode="viewMode"
-                                item-type="ugy"
-                                :show-actions="true"
-                                :show-filters="true"
-                                @view-change="viewMode = $event"
-                                @item-click="openUgyDetails"
-                                @action-click="handleUgyAction">
-                            </vihar-lista-csempe>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Jobb oldal: Gyors műveletek és értesítések -->
-                <div class="col-md-4">
-                    <!-- Gyors műveletek -->
-                    <div class="card shadow-sm mb-3">
-                        <div class="card-header bg-primary text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-lightning-charge"></i> Gyors műveletek
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-outline-primary" @click="filterByStatus('új')">
-                                    <i class="bi bi-inbox"></i> Új ügyek megtekintése
-                                </button>
-                                <button class="btn btn-outline-warning" @click="filterHatarido()">
-                                    <i class="bi bi-alarm"></i> Lejáró határidők
-                                </button>
-                                <button class="btn btn-outline-info" @click="showReports = true">
-                                    <i class="bi bi-bar-chart"></i> Jelentések
-                                </button>
-                                <button class="btn btn-outline-secondary" @click="showSettings = true">
-                                    <i class="bi bi-gear"></i> Beállítások
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                                <!-- Ügyintézők teljesítménye -->
+                                <div class="list-group">
+                                    <div v-for="(ui, index) in ugyintezok"
+                                         :key="ui.id"
+                                         class="list-group-item">
+                                        <div class="row align-items-center">
+                                            <!-- Rangsor -->
+                                            <div class="col-auto">
+                                                <div class="badge rounded-circle"
+                                                     :class="getRangsorBadge(index)"
+                                                     style="width: 50px; height: 50px; line-height: 50px; font-size: 1.2rem;">
+                                                    #{{ index + 1 }}
+                                                </div>
+                                            </div>
 
-                    <!-- Értesítések / Feladatok -->
-                    <div class="card shadow-sm mb-3">
-                        <div class="card-header bg-warning">
-                            <h6 class="mb-0">
-                                <i class="bi bi-bell"></i> Értesítések
-                                <span class="badge bg-danger ms-2">{{ ertesitesek.length }}</span>
-                            </h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="list-group list-group-flush">
-                                <a v-for="(ert, idx) in ertesitesek"
-                                   :key="idx"
-                                   href="#"
-                                   class="list-group-item list-group-item-action"
-                                   @click.prevent="handleErtesites(ert)">
-                                    <div class="d-flex align-items-start">
-                                        <i :class="ert.ikon" class="me-2 mt-1"></i>
-                                        <div class="flex-grow-1">
-                                            <div class="fw-bold">{{ ert.cim }}</div>
-                                            <small class="text-muted">{{ ert.leiras }}</small>
+                                            <!-- Név -->
+                                            <div class="col-md-2">
+                                                <h6 class="mb-0">{{ ui.nev }}</h6>
+                                                <small class="text-muted">{{ ui.beosztas }}</small>
+                                            </div>
+
+                                            <!-- Statisztikák -->
+                                            <div class="col">
+                                                <div class="row text-center">
+                                                    <div class="col">
+                                                        <h4 class="mb-0">{{ ui.osszes_ugy }}</h4>
+                                                        <small class="text-muted">Összes ügy</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <h4 class="mb-0 text-success">{{ ui.jovahagyott }}</h4>
+                                                        <small class="text-muted">Jóváhagyott</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <h4 class="mb-0 text-primary">{{ ui.atlag_nap }}</h4>
+                                                        <small class="text-muted">Átlag (nap)</small>
+                                                    </div>
+                                                    <div class="col">
+                                                        <h4 class="mb-0 text-info">{{ ui.hatekonysag }}%</h4>
+                                                        <small class="text-muted">Hatékonyság</small>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span :class="'badge bg-' + ert.prioritas + ' ms-2'">{{ ert.prioritas }}</span>
                                     </div>
-                                </a>
+                                </div>
 
-                                <div v-if="ertesitesek.length === 0" class="list-group-item text-muted text-center">
-                                    <i class="bi bi-check-circle"></i> Nincs új értesítés
+                                <!-- Havi teljesítmény riport -->
+                                <div class="card bg-primary text-white mt-4">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col">
+                                                <h5 class="mb-1">
+                                                    <i class="bi bi-file-earmark-text"></i> Havi teljesítmény riport
+                                                </h5>
+                                                <p class="mb-0">Részletes jelentés letöltése PDF formátumban</p>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button class="btn btn-light">
+                                                    <i class="bi bi-download"></i> Riport letöltése
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Ügyintézők terhelése -->
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0">
-                                <i class="bi bi-people"></i> Ügyintézők terhelése
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <div v-for="ui in ugyintezok" :key="ui.id" class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <small>{{ ui.nev }}</small>
-                                    <small class="text-muted">{{ ui.aktiv_ugyek }} / {{ ui.max_kapacitas }}</small>
+                            <!-- Ügylista nézetek (egyéb tabok) -->
+                            <div v-else>
+                                <!-- Keresés -->
+                                <div class="mb-3">
+                                    <input type="text"
+                                           class="form-control"
+                                           v-model="searchQuery"
+                                           placeholder="Keresés ügyazonosító, név vagy megnevezés alapján...">
                                 </div>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar"
-                                         :class="'bg-' + terheltségSzín(ui)"
-                                         :style="{ width: terheltségSzázalék(ui) + '%' }">
-                                        {{ terheltségSzázalék(ui) }}%
-                                    </div>
+
+                                <!-- Táblázat nézet -->
+                                <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Ügyazonosító</th>
+                                            <th>Ügyfél / Név</th>
+                                            <th>Megnevezés</th>
+                                            <th>Státusz</th>
+                                            <th>Benyújtva</th>
+                                            <th>Határidő</th>
+                                            <th>Ügyintéző</th>
+                                            <th>Műveletek</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="ugy in filteredUgyek"
+                                            :key="ugy.id"
+                                            style="cursor: pointer;"
+                                            @click="openUgyDetails(ugy)">
+                                            <td><strong>{{ ugy.ugyazonosito }}</strong></td>
+                                            <td>
+                                                <i class="bi bi-person"></i> {{ ugy.ugyfel.nev }}
+                                            </td>
+                                            <td>{{ ugy.megnevezes }}</td>
+                                            <td>
+                                                <span class="badge" :class="getStatuszBadge(ugy.statusz)">
+                                                    {{ ugy.statusz }}
+                                                </span>
+                                            </td>
+                                            <td>{{ ugy.benyujtasDatum }}</td>
+                                            <td :class="{ 'text-danger': isHataridoKozeli(ugy.hatarido) }">
+                                                {{ ugy.hatarido }}
+                                            </td>
+                                            <td>{{ ugy.ugyintezo || '-' }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                        @click.stop="openUgyDetails(ugy)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="filteredUgyek.length === 0">
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                                <p class="mt-2 mb-0">Nincs megjeleníthető ügy</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                                 </div>
                             </div>
                         </div>
@@ -316,7 +464,6 @@
     <script src="../../assets/js/vihar-mock-data.js"></script>
 
     <!-- VAHAP Komponensek -->
-    <script src="../../assets/js/components/vihar-lista-csempe.js"></script>
     <script src="../../assets/js/components/vihar-feladat-kioszt.js"></script>
 
     <!-- Oldal specifikus Vue App -->
@@ -325,7 +472,6 @@
 
         createApp({
             components: {
-                'vihar-lista-csempe': ViharListaCsempe,
                 'vihar-feladat-kioszt': ViharFeladatKioszt
             },
 
@@ -339,53 +485,73 @@
                     currentDate: new Date().toLocaleDateString('hu-HU'),
                     currentTime: new Date().toLocaleTimeString('hu-HU'),
 
-                    viewMode: 'csempe',
-                    statusFilter: '',
+                    tabFilter: 'osszes', // 'velemenyezes', 'kiadmanyozas', 'osszes', 'teljesitmeny'
+                    searchQuery: '',
 
                     ugyek: [],
                     ugyintezok: [],
 
-                    selectedUgyForAssign: null,
-
-                    ertesitesek: [
-                        {
-                            cim: 'Új ügy érkezett',
-                            leiras: 'VAHAP-V-2024-001240 - Sürgős elbírálás szükséges',
-                            ikon: 'bi bi-inbox-fill text-danger',
-                            prioritas: 'danger'
-                        },
-                        {
-                            cim: 'Határidő közeledik',
-                            leiras: '3 ügy határideje 3 napon belül lejár',
-                            ikon: 'bi bi-alarm-fill text-warning',
-                            prioritas: 'warning'
-                        },
-                        {
-                            cim: 'Véleményezésre vár',
-                            leiras: '2 határozat-tervezet vár jóváhagyásra',
-                            ikon: 'bi bi-file-earmark-text text-info',
-                            prioritas: 'info'
-                        }
-                    ],
-
-                    showReports: false,
-                    showSettings: false
+                    selectedUgyForAssign: null
                 };
             },
 
             computed: {
                 stats() {
                     return {
-                        uj: this.ugyek.filter(u => u.statusz === 'új').length,
-                        folyamatban: this.ugyek.filter(u => u.statusz === 'folyamatban').length,
-                        dontesre_var: this.ugyek.filter(u => u.statusz === 'döntés előkészítése').length,
-                        lezart_honap: this.ugyek.filter(u => u.statusz === 'lezárt' && this.isThisMonth(u.lezarasDatum)).length
+                        velemenyezes: this.ugyek.filter(u => u.statusz === 'véleményezésre vár').length,
+                        kiadmanyozas: this.ugyek.filter(u => u.statusz === 'kiadmányozásra vár').length,
+                        osszes: this.ugyek.length
+                    };
+                },
+
+                teljesitmenyStats() {
+                    if (this.ugyintezok.length === 0) {
+                        return {
+                            osszesen: 0,
+                            atlagNap: 0,
+                            atlagHatekonysag: 0,
+                            ugyintezokSzama: 0
+                        };
+                    }
+
+                    const osszesUgy = this.ugyintezok.reduce((sum, ui) => sum + ui.osszes_ugy, 0);
+                    const atlagNapok = Math.round(
+                        this.ugyintezok.reduce((sum, ui) => sum + ui.atlag_nap, 0) / this.ugyintezok.length
+                    );
+                    const atlagHat = Math.round(
+                        this.ugyintezok.reduce((sum, ui) => sum + ui.hatekonysag, 0) / this.ugyintezok.length
+                    );
+
+                    return {
+                        osszesen: osszesUgy,
+                        atlagNap: atlagNapok,
+                        atlagHatekonysag: atlagHat,
+                        ugyintezokSzama: this.ugyintezok.length
                     };
                 },
 
                 filteredUgyek() {
-                    if (!this.statusFilter) return this.ugyek;
-                    return this.ugyek.filter(u => u.statusz === this.statusFilter);
+                    let ugyek = this.ugyek;
+
+                    // Tab szűrés
+                    if (this.tabFilter === 'velemenyezes') {
+                        ugyek = ugyek.filter(u => u.statusz === 'véleményezésre vár');
+                    } else if (this.tabFilter === 'kiadmanyozas') {
+                        ugyek = ugyek.filter(u => u.statusz === 'kiadmányozásra vár');
+                    }
+                    // 'osszes' esetén nincs szűrés
+
+                    // Keresés
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        ugyek = ugyek.filter(u =>
+                            u.ugyazonosito.toLowerCase().includes(query) ||
+                            u.ugyfel.nev.toLowerCase().includes(query) ||
+                            u.megnevezes.toLowerCase().includes(query)
+                        );
+                    }
+
+                    return ugyek;
                 }
             },
 
@@ -395,18 +561,30 @@
                     this.ugyek = [
                         {
                             id: 1,
+                            ugyazonosito: 'VAHAP-V-2024-001237',
+                            ugytipus: 'V-044',
+                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
+                            ugyfel: { nev: 'Nagy Péter' },
+                            statusz: 'véleményezésre vár',
+                            benyujtasDatum: '2024-10-22',
+                            hatarido: '2024-11-22',
+                            prioritas: 'normal',
+                            ugyintezo: 'Dr. Szabó Péter'
+                        },
+                        {
+                            id: 2,
                             ugyazonosito: 'VAHAP-V-2024-001234',
                             ugytipus: 'V-044',
                             megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
                             ugyfel: { nev: 'Minta János' },
-                            statusz: 'új',
+                            statusz: 'kiadmányozásra vár',
                             benyujtasDatum: '2024-10-20',
                             hatarido: '2024-11-20',
                             prioritas: 'normal',
-                            ugyintezo: null
+                            ugyintezo: 'Nagy Andrea'
                         },
                         {
-                            id: 2,
+                            id: 3,
                             ugyazonosito: 'VAHAP-V-2024-001235',
                             ugytipus: 'V-044',
                             megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
@@ -418,52 +596,81 @@
                             ugyintezo: 'Dr. Szabó Péter'
                         },
                         {
-                            id: 3,
+                            id: 4,
                             ugyazonosito: 'VAHAP-V-2024-001236',
                             ugytipus: 'V-044',
                             megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
                             ugyfel: { nev: 'Kovács Anna' },
-                            statusz: 'döntés előkészítése',
+                            statusz: 'kiadmányozásra vár',
                             benyujtasDatum: '2024-10-10',
                             hatarido: '2024-11-10',
                             prioritas: 'magas',
                             ugyintezo: 'Nagy Andrea'
-                        },
-                        {
-                            id: 4,
-                            ugyazonosito: 'VAHAP-V-2024-001237',
-                            ugytipus: 'V-044',
-                            megnevezes: 'Vasúti járművezető alkalmassági vizsgálat',
-                            ugyfel: { nev: 'Nagy Péter' },
-                            statusz: 'új',
-                            benyujtasDatum: '2024-10-22',
-                            hatarido: '2024-11-22',
-                            prioritas: 'suergo',
-                            ugyintezo: null
                         }
                     ];
 
-                    // Mock ügyintézők betöltése
+                    // Mock ügyintézők teljesítmény adatok
                     this.ugyintezok = [
-                        { id: 'UI001', nev: 'Dr. Szabó Péter', aktiv_ugyek: 12, max_kapacitas: 20 },
-                        { id: 'UI002', nev: 'Nagy Andrea', aktiv_ugyek: 8, max_kapacitas: 15 },
-                        { id: 'UI003', nev: 'Kiss Gábor', aktiv_ugyek: 15, max_kapacitas: 18 }
+                        {
+                            id: 'UI001',
+                            nev: 'Kovács János',
+                            beosztas: 'Ügyintéző',
+                            osszes_ugy: 12,
+                            jovahagyott: 10,
+                            atlag_nap: 22,
+                            hatekonysag: 83
+                        },
+                        {
+                            id: 'UI002',
+                            nev: 'Nagy Péter',
+                            beosztas: 'Ügyintéző',
+                            osszes_ugy: 15,
+                            jovahagyott: 13,
+                            atlag_nap: 28,
+                            hatekonysag: 87
+                        },
+                        {
+                            id: 'UI003',
+                            nev: 'Szabó Anna',
+                            beosztas: 'Ügyintéző',
+                            osszes_ugy: 10,
+                            jovahagyott: 9,
+                            atlag_nap: 20,
+                            hatekonysag: 90
+                        },
+                        {
+                            id: 'UI004',
+                            nev: 'Tóth Katalin',
+                            beosztas: 'Ügyintéző',
+                            osszes_ugy: 8,
+                            jovahagyott: 7,
+                            atlag_nap: 24,
+                            hatekonysag: 88
+                        }
                     ];
                 },
 
-                filterByStatus(status) {
-                    this.statusFilter = status;
+                getStatuszBadge(statusz) {
+                    const badges = {
+                        'véleményezésre vár': 'bg-info',
+                        'kiadmányozásra vár': 'bg-warning',
+                        'folyamatban': 'bg-primary',
+                        'új': 'bg-secondary',
+                        'lezárt': 'bg-success'
+                    };
+                    return badges[statusz] || 'bg-secondary';
                 },
 
-                filterHatarido() {
-                    // Szűrés 7 napon belül lejáró ügyekre
-                    const today = new Date();
-                    const sevenDaysLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                getRangsorBadge(index) {
+                    const badges = ['bg-success', 'bg-primary', 'bg-info', 'bg-secondary'];
+                    return badges[index] || 'bg-secondary';
+                },
 
-                    this.ugyek = this.ugyek.filter(u => {
-                        const hatarido = new Date(u.hatarido);
-                        return hatarido >= today && hatarido <= sevenDaysLater;
-                    });
+                isHataridoKozeli(hatarido) {
+                    const today = new Date();
+                    const deadline = new Date(hatarido);
+                    const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+                    return diffDays <= 7 && diffDays >= 0;
                 },
 
                 openUgyDetails(ugy) {
@@ -488,29 +695,6 @@
                     }
 
                     this.selectedUgyForAssign = null;
-                },
-
-                handleErtesites(ert) {
-                    alert(`Értesítés: ${ert.cim}\n${ert.leiras}`);
-                },
-
-                terheltségSzín(ui) {
-                    const szazalek = (ui.aktiv_ugyek / ui.max_kapacitas) * 100;
-                    if (szazalek > 90) return 'danger';
-                    if (szazalek > 70) return 'warning';
-                    if (szazalek > 50) return 'info';
-                    return 'success';
-                },
-
-                terheltségSzázalék(ui) {
-                    return Math.round((ui.aktiv_ugyek / ui.max_kapacitas) * 100);
-                },
-
-                isThisMonth(datum) {
-                    if (!datum) return false;
-                    const d = new Date(datum);
-                    const now = new Date();
-                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
                 },
 
                 updateClock() {

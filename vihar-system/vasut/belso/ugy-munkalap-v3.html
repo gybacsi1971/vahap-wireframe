@@ -281,6 +281,50 @@
             color: #adb5bd;
         }
 
+        /* Indentált lépések - beszúrt, keskenyebb gombok */
+        .workflow-step-wrapper.indented {
+            margin-left: 1rem;
+            margin-right: 0;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .workflow-step.indented {
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
+            background: #f8f9fa;
+            border-color: #ced4da;
+            border-width: 1.5px;
+            margin-right: 1rem;
+        }
+
+        .workflow-step.indented .workflow-step-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.975rem;
+            margin-right: 0.625rem;
+        }
+
+        .workflow-step.indented .workflow-step-name {
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .workflow-step.indented:hover {
+            transform: translateX(2px);
+        }
+
+        .workflow-step.indented.active {
+            background: #e3f2fd;
+            border-color: #2196F3;
+            border-width: 2px;
+        }
+
+        .workflow-step.indented.completed {
+            background: linear-gradient(135deg, #f1f8f4 0%, #d4edda 100%);
+            border-color: #66bb6a;
+        }
+
         /* Munkaterület tartalom */
         .workspace-content {
             flex: 1;
@@ -757,13 +801,15 @@
                         <div v-for="(step, index) in workflowSteps" :key="step.id"
                              class="workflow-step-wrapper"
                              :class="{
-                                 'completed': step.completed
+                                 'completed': step.completed,
+                                 'indented': step.indented
                              }">
                             <div class="workflow-step"
                                  :class="{
                                      'active': step.id === currentStep,
                                      'completed': step.completed,
-                                     'pending': !step.completed && step.id !== currentStep
+                                     'pending': !step.completed && step.id !== currentStep,
+                                     'indented': step.indented
                                  }"
                                  @click="selectWorkflowStep(step)">
                                 <div class="workflow-step-icon">

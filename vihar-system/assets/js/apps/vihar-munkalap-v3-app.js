@@ -55,14 +55,6 @@ const VahapMunkalapV3App = {
             // Workflow lépések
             workflowSteps: [
                 {
-                    id: 'szignalas',
-                    name: 'Szignálás',
-                    code: 'UCE-1761',
-                    icon: 'bi-person-check',
-                    component: 'wf-szignalas-wizard',
-                    completed: true
-                },
-                {
                     id: 'hataskor',
                     name: 'Hatáskör vizsgálat',
                     code: 'UCE-1793',
@@ -81,13 +73,22 @@ const VahapMunkalapV3App = {
                     completed: false
                 },
                 {
+                    id: 'velemenyezes-formai',
+                    name: 'Véleményezés',
+                    code: 'UCE-1824',
+                    icon: 'bi-chat-dots',
+                    component: 'wf-velemenyezes',
+                    indented: true,
+                    completed: false
+                },
+                {
                     id: 'tartalmi',
                     name: 'Tartalmi vizsgálat',
                     code: 'UCE-1794',
                     icon: 'bi-search',
                     component: 'wf-tartalmi-wizard',
                     data: { checklistType: 'tartalmi' },
-                    completed: false
+                    completed: true
                 },
                 {
                     id: 'dontes',
@@ -103,14 +104,6 @@ const VahapMunkalapV3App = {
                     code: 'UCE-1810',
                     icon: 'bi-file-text',
                     component: 'wf-dokumentum-gyartas',
-                    completed: false
-                },
-                {
-                    id: 'velemenyezes',
-                    name: 'Véleményezés',
-                    code: 'UCE-1824',
-                    icon: 'bi-chat-dots',
-                    component: 'wf-velemenyezes',
                     completed: false
                 },
                 {
@@ -185,14 +178,14 @@ const VahapMunkalapV3App = {
 
             // Dokumentumok (workflow lépésenként kategorizálva)
             dokumentumok: [
-                // Szigálás
+                // Hatáskör vizsgálat
                 {
                     id: 'doc1',
                     nev: 'Kérelem - Alkalmassági vizsgálat',
                     tipus: 'Kérelem',
                     datum: '2024-10-15',
                     meret: '2.3 MB',
-                    workflowStep: 'szignalas'
+                    workflowStep: 'hataskor'
                 },
                 {
                     id: 'doc2',
@@ -200,7 +193,7 @@ const VahapMunkalapV3App = {
                     tipus: 'Melléklet',
                     datum: '2024-10-15',
                     meret: '456 KB',
-                    workflowStep: 'szignalas'
+                    workflowStep: 'hataskor'
                 },
                 {
                     id: 'doc3',
@@ -208,7 +201,7 @@ const VahapMunkalapV3App = {
                     tipus: 'Melléklet',
                     datum: '2024-10-15',
                     meret: '234 KB',
-                    workflowStep: 'szignalas'
+                    workflowStep: 'hataskor'
                 },
                 {
                     id: 'doc4',
@@ -216,9 +209,8 @@ const VahapMunkalapV3App = {
                     tipus: 'Melléklet',
                     datum: '2024-10-15',
                     meret: '128 KB',
-                    workflowStep: 'szignalas'
+                    workflowStep: 'hataskor'
                 },
-                // Hatáskör vizsgálat
                 {
                     id: 'doc5',
                     nev: 'Hatáskör vizsgálati jegyzőkönyv',
@@ -281,16 +273,6 @@ const VahapMunkalapV3App = {
                     status: 'completed',
                     result: null,
                     duration: null
-                },
-                {
-                    title: 'Szignálás',
-                    description: 'Az ügy szignálásra került a Vasúti Hatósági Főosztály részére. Az ügy feldolgozását Dr. Kovács Péter vezető ügyintéző végzi.',
-                    timestamp: '2025.09.15 10:15',
-                    user: 'Rendszer',
-                    icon: 'bi-person-check-fill',
-                    status: 'completed',
-                    result: 'Szignálva VHF/Dr. Kovács Péter',
-                    duration: '52 perc'
                 },
                 {
                     title: 'Hatáskör és illetékesség vizsgálat',
@@ -387,8 +369,8 @@ const VahapMunkalapV3App = {
         isStepAvailable(step) {
             const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
 
-            // Az első NÉGY lépés mindig elérhető (szignalas, hataskor, formai, tartalmi)
-            if (stepIndex <= 3) return true;
+            // Az első HÁROM lépés mindig elérhető (hataskor, formai, velemenyezes-formai)
+            if (stepIndex <= 2) return true;
 
             // A többi lépésnél ellenőrizzük az előzőek teljesítését
             if (stepIndex === 0) return true;

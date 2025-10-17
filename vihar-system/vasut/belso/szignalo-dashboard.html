@@ -30,11 +30,14 @@
                             100: '#dcfce7',
                             300: '#86efac',
                             600: '#16a34a',
+                            700: '#15803d',
                             900: '#14532d',
                         },
                         error: {
                             100: '#fee2e2',
                             300: '#fca5a5',
+                            600: '#dc2626',
+                            700: '#b91c1c',
                             900: '#7f1d1d',
                         },
                         warning: {
@@ -60,7 +63,7 @@
             <div class="min-h-screen bg-neutral-50">
                 <!-- Fejléc -->
                 <div class="bg-primary-600 text-white border-b border-primary-700">
-                    <div class="max-w-7xl mx-auto px-6 py-6">
+                    <div class="mx-auto px-6 py-6">
                         <div class="flex items-center justify-between mb-6">
                             <div>
                                 <h1 class="text-3xl font-bold text-white">Szignáló munkaterület</h1>
@@ -85,105 +88,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Statisztikai kártyák -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="bg-white rounded-lg shadow-md p-6 bg-white/95 border-white/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="bg-primary-500 p-3 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
-                                            <path d="m22 2-7 20-4-9-9-4Z"></path>
-                                            <path d="M22 2 11 13"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-neutral-600 font-medium">Be nem osztott</p>
-                                        <p class="text-2xl font-bold text-neutral-900">{{ stats.beNemOsztott }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-lg shadow-md p-6 bg-white/95 border-white/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="bg-accent-600 p-3 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                            <polyline points="7 10 12 15 17 10"></polyline>
-                                            <line x1="12" x2="12" y1="15" y2="3"></line>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-neutral-600 font-medium">EKEIDR ügyek</p>
-                                        <p class="text-2xl font-bold text-neutral-900">{{ stats.ekeidr }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-lg shadow-md p-6 bg-white/95 border-white/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="bg-success-600 p-3 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
-                                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                                            <circle cx="9" cy="7" r="4"></circle>
-                                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-neutral-600 font-medium">Ügyintézők</p>
-                                        <p class="text-2xl font-bold text-neutral-900">{{ stats.ugyintezok }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-white rounded-lg shadow-md p-6 bg-white/95 border-white/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="bg-warning-600 p-3 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-white">
-                                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                                            <path d="M12 9v4"></path>
-                                            <path d="M12 17h.01"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-neutral-600 font-medium">Túlterhelt</p>
-                                        <p class="text-2xl font-bold text-neutral-900">{{ stats.tulterhelt }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
                 <!-- Főtartalom -->
-                <div class="max-w-7xl mx-auto px-6 py-6">
-                    <!-- Tab navigáció -->
-                    <div class="mb-6 border-b border-neutral-200">
-                        <div class="flex gap-6">
-                            <button
-                                @click="activeTab = 'szignalando'"
-                                :class="activeTab === 'szignalando' ? 'border-primary-600 text-primary-600' : 'border-transparent text-neutral-600 hover:text-neutral-900'"
-                                class="pb-3 px-2 text-sm font-medium border-b-2 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline h-5 w-5 mr-2">
-                                    <path d="m22 2-7 20-4-9-9-4Z"></path>
-                                    <path d="M22 2 11 13"></path>
-                                </svg>
-                                Szignálandó ügyek ({{ stats.beNemOsztott }})
-                            </button>
-                            <button
-                                @click="activeTab = 'ekeidr'"
-                                :class="activeTab === 'ekeidr' ? 'border-primary-600 text-primary-600' : 'border-transparent text-neutral-600 hover:text-neutral-900'"
-                                class="pb-3 px-2 text-sm font-medium border-b-2 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline h-5 w-5 mr-2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" x2="12" y1="15" y2="3"></line>
-                                </svg>
-                                EKEIDR ügyek ({{ stats.ekeidr }})
-                            </button>
-                        </div>
-                    </div>
-
+                <div class="mx-auto px-6 py-6">
                     <div class="space-y-6">
                         <!-- Ügyintézők terheltsége -->
                         <div class="bg-white rounded-lg shadow-md p-6">
@@ -209,8 +118,80 @@
                             </div>
                         </div>
 
+                        <!-- Tab navigáció -->
+                        <div class="border-b border-neutral-200">
+                            <div class="flex gap-6">
+                                <button
+                                    @click="activeTab = 'szignalando'"
+                                    :class="activeTab === 'szignalando' ? 'border-primary-600 text-primary-600' : 'border-transparent text-neutral-600 hover:text-neutral-900'"
+                                    class="pb-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline h-5 w-5 mr-2">
+                                        <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                        <path d="M22 2 11 13"></path>
+                                    </svg>
+                                    Szignálandó ügyek ({{ stats.beNemOsztott }})
+                                </button>
+                                <button
+                                    @click="activeTab = 'ekeidr'"
+                                    :class="activeTab === 'ekeidr' ? 'border-primary-600 text-primary-600' : 'border-transparent text-neutral-600 hover:text-neutral-900'"
+                                    class="pb-3 px-2 text-sm font-medium border-b-2 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline h-5 w-5 mr-2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" x2="12" y1="15" y2="3"></line>
+                                    </svg>
+                                    EKEIDR ügyek ({{ stats.ekeidr }})
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Kötegelt műveletek panel -->
+                        <div v-if="selectedUgyek.length > 0" class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <span class="text-primary-700 font-semibold">{{ selectedUgyek.length }} ügy kiválasztva</span>
+
+                                    <!-- Ügyintéző választó -->
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-sm text-neutral-700 font-medium">Válasszon ügyintézőt:</label>
+                                        <select
+                                            v-model="selectedUgyintezoKotegelt"
+                                            class="px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-sm">
+                                            <option value="">-- Válasszon ügyintézőt --</option>
+                                            <option
+                                                v-for="ugyintezo in ugyintezok"
+                                                :key="ugyintezo.nev"
+                                                :value="ugyintezo.nev">
+                                                {{ ugyintezo.nev }} ({{ ugyintezo.aktivFeladatok }} feladat){{ ugyintezo.tulterhelt ? ' - Túlterhelt!' : '' }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <button
+                                        @click="kotegeltSzignalas"
+                                        :disabled="!selectedUgyintezoKotegelt"
+                                        :class="selectedUgyintezoKotegelt ? 'bg-success-600 hover:bg-success-700' : 'bg-neutral-400 cursor-not-allowed'"
+                                        class="px-4 py-2 text-white rounded-md flex items-center gap-2 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                            <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                            <path d="M22 2 11 13"></path>
+                                        </svg>
+                                        Kötegelt szignálás
+                                    </button>
+                                </div>
+                                <button
+                                    @click="clearSelection"
+                                    class="text-neutral-600 hover:text-neutral-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                        <path d="M18 6 6 18"></path>
+                                        <path d="m6 6 12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Be nem osztott ügyek táblázat -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
+                        <div v-if="activeTab === 'szignalando'" class="bg-white rounded-lg shadow-md p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold text-neutral-900">Be nem osztott ügyek ({{ beNemOsztottUgyek.length }})</h3>
                                 <button
@@ -230,45 +211,150 @@
                                 <table class="min-w-full divide-y divide-neutral-200">
                                     <thead class="bg-neutral-100">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">
-                                                <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-neutral-300 focus:ring-2 focus:ring-primary-500">
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">
+                                                <input
+                                                    type="checkbox"
+                                                    @change="toggleAll"
+                                                    :checked="allSelected"
+                                                    class="h-4 w-4 text-primary-600 rounded border-neutral-300 focus:ring-2 focus:ring-primary-500">
                                             </th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Ügy azonosító</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Iktatószám</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Ügytípus</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Státusz</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Prioritás</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Beérkezés</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Ügy azonosító</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Érkeztetési szám</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Ügytípus</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Státusz</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Prioritás</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Beérkezés</th>
+                                            <th class="px-3 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Műveletek</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-neutral-200">
                                         <tr v-for="ugy in beNemOsztottUgyek" :key="ugy.id">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-                                                <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-neutral-300 focus:ring-2 focus:ring-primary-500">
+                                            <td class="px-3 py-4 text-sm text-neutral-900">
+                                                <input
+                                                    type="checkbox"
+                                                    :value="ugy.id"
+                                                    v-model="selectedUgyek"
+                                                    class="h-4 w-4 text-primary-600 rounded border-neutral-300 focus:ring-2 focus:ring-primary-500">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
-                                                {{ ugy.azonosito || '-' }}
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm font-mono font-semibold">
+                                                {{ ugy.azonosito }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
-                                                <span :class="ugy.iktatoszam ? '' : 'text-neutral-400'">{{ ugy.iktatoszam || '-' }}</span>
+                                            <td class="px-3 py-4 text-sm font-mono text-primary-600">
+                                                {{ ugy.erkeztetesiSzam }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm">
                                                 {{ ugy.ugytipus }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                                            <td class="px-3 py-4 text-sm text-neutral-900">
                                                 <span
                                                     :class="getStatusClass(ugy.statusz)"
-                                                    class="px-3 py-1 rounded-md text-xs font-semibold uppercase">
+                                                    class="px-2 py-1 rounded-md text-xs font-semibold uppercase whitespace-nowrap">
                                                     {{ ugy.statusz }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-                                                <span class="px-3 py-1 rounded-md text-xs font-semibold uppercase bg-blue-100 text-blue-800 border border-blue-300">
+                                            <td class="px-3 py-4 text-sm text-neutral-900">
+                                                <span class="px-2 py-1 rounded-md text-xs font-semibold uppercase bg-blue-100 text-blue-800 border border-blue-300 whitespace-nowrap">
                                                     {{ ugy.prioritas }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                                            <td class="px-3 py-4 whitespace-nowrap text-sm text-neutral-900">
                                                 {{ ugy.beerkezes }}
+                                            </td>
+                                            <td class="px-3 py-4 text-sm">
+                                                <div class="flex gap-1 flex-nowrap">
+                                                    <button
+                                                        @click="openSzignalModal(ugy)"
+                                                        class="px-2 py-1 bg-success-600 text-white rounded-md hover:bg-success-700 text-xs font-medium flex items-center gap-1 whitespace-nowrap">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+                                                            <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                                            <path d="M22 2 11 13"></path>
+                                                        </svg>
+                                                        Szignálás
+                                                    </button>
+                                                    <button
+                                                        @click="visszavetUgy(ugy)"
+                                                        class="px-2 py-1 bg-error-600 text-white rounded-md hover:bg-error-700 text-xs font-medium flex items-center gap-1 whitespace-nowrap">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+                                                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                                            <path d="M3 3v5h5"></path>
+                                                        </svg>
+                                                        Visszavétel
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- EKEIDR ügyek táblázat -->
+                        <div v-if="activeTab === 'ekeidr'" class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-neutral-900">EKEIDR ügyek ({{ ekeidrUgyek.length }})</h3>
+                                <button
+                                    @click="refreshData"
+                                    class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-md hover:bg-neutral-200 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                                        <path d="M21 3v5h-5"></path>
+                                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                                        <path d="M8 16H3v5"></path>
+                                    </svg>
+                                    Frissítés
+                                </button>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-neutral-200">
+                                    <thead class="bg-neutral-100">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Küldemény azonosító</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Tárgy</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Feladó</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Ügytípus</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Érkeztetés</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-700 uppercase tracking-wider">Műveletek</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-neutral-200">
+                                        <tr v-for="ugy in ekeidrUgyek" :key="ugy.id">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-semibold">
+                                                {{ ugy.kuldemenyAzonosito }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm">
+                                                {{ ugy.targy }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                                                {{ ugy.felado }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-600">
+                                                {{ ugy.ugytipus }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                                                {{ ugy.erkeztetes }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div class="flex gap-2">
+                                                    <button
+                                                        @click="atvetelEkeidr(ugy)"
+                                                        class="px-3 py-1 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-xs font-medium flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+                                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                                        </svg>
+                                                        Átvétel
+                                                    </button>
+                                                    <button
+                                                        @click="visszakuldEkeidr(ugy)"
+                                                        class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs font-medium flex items-center gap-1">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+                                                            <circle cx="12" cy="12" r="10"></circle>
+                                                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                                                        </svg>
+                                                        Visszaküld
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -278,9 +364,70 @@
                     </div>
                 </div>
 
+                <!-- Szignálás Modal -->
+                <div
+                    v-if="showSzignalModal"
+                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    @click="closeSzignalModal">
+                    <div
+                        class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4"
+                        @click.stop>
+                        <h3 class="text-xl font-bold text-neutral-900 mb-4">Ügy szignálása</h3>
+
+                        <div class="mb-4">
+                            <p class="text-sm text-neutral-600 mb-2">
+                                <span v-if="selectedUgyToSzignal?.azonosito">Ügy azonosító:</span>
+                                <span v-else>Iktatószám:</span>
+                            </p>
+                            <p class="font-mono font-semibold text-primary-600">
+                                {{ selectedUgyToSzignal?.azonosito || selectedUgyToSzignal?.iktatoszam }}
+                            </p>
+                            <p v-if="selectedUgyToSzignal?.targy" class="text-sm text-neutral-600 mt-2">
+                                {{ selectedUgyToSzignal.targy }}
+                            </p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-neutral-700 mb-2">
+                                Válasszon ügyintézőt:
+                            </label>
+                            <select
+                                v-model="selectedUgyintezoEgyedi"
+                                class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white">
+                                <option value="">-- Válasszon ügyintézőt --</option>
+                                <option
+                                    v-for="ugyintezo in ugyintezok"
+                                    :key="ugyintezo.nev"
+                                    :value="ugyintezo.nev">
+                                    {{ ugyintezo.nev }} ({{ ugyintezo.aktivFeladatok }} feladat){{ ugyintezo.tulterhelt ? ' - Túlterhelt!' : '' }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-3 justify-end">
+                            <button
+                                @click="closeSzignalModal"
+                                class="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-md hover:bg-neutral-300">
+                                Mégse
+                            </button>
+                            <button
+                                @click="confirmSzignalas"
+                                :disabled="!selectedUgyintezoEgyedi"
+                                :class="selectedUgyintezoEgyedi ? 'bg-success-600 hover:bg-success-700' : 'bg-neutral-400 cursor-not-allowed'"
+                                class="px-4 py-2 text-white rounded-md flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                                    <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                    <path d="M22 2 11 13"></path>
+                                </svg>
+                                Szignálás
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Lábléc -->
                 <footer class="bg-white border-t border-neutral-200 mt-auto">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <p class="text-center text-sm text-neutral-600">
                             © 2025 VAHAP - Demo Rendszer | Bejelentkezve: <span class="font-semibold">szignáló</span> (VHF)
                         </p>
@@ -298,6 +445,10 @@
             data() {
                 return {
                     activeTab: 'szignalando',
+                    showSzignalModal: false,
+                    selectedUgyToSzignal: null,
+                    selectedUgyintezoEgyedi: '',
+                    selectedUgyintezoKotegelt: '',
                     stats: {
                         beNemOsztott: 4,
                         ekeidr: 11,
@@ -324,7 +475,8 @@
                     beNemOsztottUgyek: [
                         {
                             id: 1,
-                            azonosito: null,
+                            azonosito: 'VAHAP-V-2025-001234',
+                            erkeztetesiSzam: 'EKM-2025-10-14-00234',
                             iktatoszam: null,
                             ugytipus: 'V-028',
                             statusz: 'Beérkezett',
@@ -333,7 +485,8 @@
                         },
                         {
                             id: 2,
-                            azonosito: null,
+                            azonosito: 'VAHAP-V-2025-001235',
+                            erkeztetesiSzam: 'EKM-2025-10-14-00235',
                             iktatoszam: null,
                             ugytipus: 'V-031',
                             statusz: 'Beérkezett',
@@ -342,34 +495,206 @@
                         },
                         {
                             id: 3,
-                            azonosito: null,
-                            iktatoszam: 'ÉKM/VHF/K/2025/001001',
+                            azonosito: 'VAHAP-V-2025-001236',
+                            erkeztetesiSzam: 'EKM-2025-10-14-00236',
+                            iktatoszam: null,
                             ugytipus: 'V-044',
-                            statusz: 'hiánypótlás',
+                            statusz: 'Beérkezett',
                             prioritas: 'Normál',
                             beerkezes: '2025. 10. 14.'
                         },
                         {
                             id: 4,
-                            azonosito: null,
+                            azonosito: 'VAHAP-V-2025-001237',
+                            erkeztetesiSzam: 'EKM-2025-10-14-00237',
                             iktatoszam: null,
                             ugytipus: 'V-044',
-                            statusz: 'hiánypótlás',
+                            statusz: 'Beérkezett',
                             prioritas: 'Normál',
                             beerkezes: '2025. 10. 14.'
                         }
-                    ]
+                    ],
+                    ekeidrUgyek: [
+                        {
+                            id: 5,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001241',
+                            targy: 'Előzetes alkalmassági vizsgálat - 1 fő',
+                            felado: '-',
+                            ugytipus: 'Ismeretlen',
+                            erkeztetes: '2025. 10. 13. 16:32'
+                        },
+                        {
+                            id: 6,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001242',
+                            targy: 'Vasúti pálya használati engedély kérelme',
+                            felado: 'MÁV-START Zrt.',
+                            ugytipus: 'V-028',
+                            erkeztetes: '2025. 10. 13. 14:15'
+                        },
+                        {
+                            id: 7,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001243',
+                            targy: 'Vasútegészségügyi alkalmassági vizsgálat',
+                            felado: 'RailCargo Hungaria Zrt.',
+                            ugytipus: 'V-031',
+                            erkeztetes: '2025. 10. 13. 11:22'
+                        },
+                        {
+                            id: 8,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001244',
+                            targy: 'Vasúti járművezető engedély meghosszabbítása',
+                            felado: 'GYSEV Zrt.',
+                            ugytipus: 'V-044',
+                            erkeztetes: '2025. 10. 12. 16:45'
+                        },
+                        {
+                            id: 9,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001245',
+                            targy: 'Vasúti pályahálózat-működtetői engedély',
+                            felado: 'MÁV Zrt.',
+                            ugytipus: 'V-052',
+                            erkeztetes: '2025. 10. 12. 14:30'
+                        },
+                        {
+                            id: 10,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001246',
+                            targy: 'Vasúti járművezető pszichológiai alkalmassági vizsgálat',
+                            felado: 'Floyd Kft.',
+                            ugytipus: 'V-031',
+                            erkeztetes: '2025. 10. 12. 10:12'
+                        },
+                        {
+                            id: 11,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001247',
+                            targy: 'Vasúti biztonsági tanúsítvány kiadása',
+                            felado: 'MÁV-START Zrt.',
+                            ugytipus: 'V-028',
+                            erkeztetes: '2025. 10. 11. 15:20'
+                        },
+                        {
+                            id: 12,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001248',
+                            targy: 'Vasúti közlekedés engedélyezési eljárás',
+                            felado: 'RailCargo Hungaria Zrt.',
+                            ugytipus: 'V-044',
+                            erkeztetes: '2025. 10. 11. 13:45'
+                        },
+                        {
+                            id: 13,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001249',
+                            targy: 'Vasúti dolgozó egészségügyi alkalmassági vizsgálat',
+                            felado: 'GYSEV Zrt.',
+                            ugytipus: 'V-031',
+                            erkeztetes: '2025. 10. 11. 09:10'
+                        },
+                        {
+                            id: 14,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001250',
+                            targy: 'Vasúti pályafelügyelet hatósági ellenőrzése',
+                            felado: 'MÁV Zrt.',
+                            ugytipus: 'V-052',
+                            erkeztetes: '2025. 10. 10. 16:30'
+                        },
+                        {
+                            id: 15,
+                            kuldemenyAzonosito: 'EKEIDR-2025-001251',
+                            targy: 'Vasúti járművezetői vizsga engedélyezése',
+                            felado: 'Floyd Kft.',
+                            ugytipus: 'V-044',
+                            erkeztetes: '2025. 10. 10. 14:50'
+                        }
+                    ],
+                    selectedUgyek: []
                 };
+            },
+            computed: {
+                allSelected() {
+                    return this.beNemOsztottUgyek.length > 0 &&
+                           this.selectedUgyek.length === this.beNemOsztottUgyek.length;
+                }
             },
             methods: {
                 getStatusClass(statusz) {
                     if (statusz === 'Beérkezett') {
                         return 'bg-neutral-100 text-neutral-800 border border-neutral-300';
                     }
+                    if (statusz === 'Iktatva') {
+                        return 'bg-blue-100 text-blue-900 border border-blue-400';
+                    }
                     if (statusz === 'hiánypótlás') {
                         return 'bg-orange-100 text-orange-900 border border-orange-400';
                     }
                     return 'bg-neutral-100 text-neutral-800 border border-neutral-300';
+                },
+                toggleAll(event) {
+                    if (event.target.checked) {
+                        this.selectedUgyek = this.beNemOsztottUgyek.map(u => u.id);
+                    } else {
+                        this.selectedUgyek = [];
+                    }
+                },
+                clearSelection() {
+                    this.selectedUgyek = [];
+                    this.selectedUgyintezoKotegelt = '';
+                },
+                openSzignalModal(ugy) {
+                    this.selectedUgyToSzignal = ugy;
+                    this.selectedUgyintezoEgyedi = '';
+                    this.showSzignalModal = true;
+                },
+                closeSzignalModal() {
+                    this.showSzignalModal = false;
+                    this.selectedUgyToSzignal = null;
+                    this.selectedUgyintezoEgyedi = '';
+                },
+                confirmSzignalas() {
+                    if (!this.selectedUgyintezoEgyedi) {
+                        alert('Kérem válasszon ügyintézőt!');
+                        return;
+                    }
+                    console.log('Szignálás:', this.selectedUgyToSzignal.azonosito, 'Ügyintéző:', this.selectedUgyintezoEgyedi);
+                    alert(`Ügy szignálva!\n\nÜgy: ${this.selectedUgyToSzignal.azonosito}\nÜgyintéző: ${this.selectedUgyintezoEgyedi}`);
+                    this.closeSzignalModal();
+                },
+                visszavetUgy(ugy) {
+                    console.log('Visszavétel:', ugy.azonosito);
+                    if (confirm(`Biztosan visszaveszi az ügyet: ${ugy.azonosito}?`)) {
+                        alert('Ügy visszavéve!');
+                    }
+                },
+                atvetelEkeidr(ugy) {
+                    console.log('EKEIDR ügy átvétele:', ugy.kuldemenyAzonosito);
+                    if (confirm(`EKEIDR ügy átvétele\n\nKüldemény azonosító: ${ugy.kuldemenyAzonosito}\nTárgy: ${ugy.targy}\nFeladó: ${ugy.felado}\n\nÁtveszi az ügyet?`)) {
+                        alert(`EKEIDR ügy átvéve!\n\nKüldemény: ${ugy.kuldemenyAzonosito}\nAz ügy átkerült a belső rendszerbe.`);
+                        // Mock: EKEIDR ügy eltávolítása a listából
+                        const index = this.ekeidrUgyek.findIndex(e => e.id === ugy.id);
+                        if (index > -1) {
+                            this.ekeidrUgyek.splice(index, 1);
+                            this.stats.ekeidr--;
+                        }
+                    }
+                },
+                visszakuldEkeidr(ugy) {
+                    console.log('EKEIDR ügy visszaküldése:', ugy.kuldemenyAzonosito);
+                    const indok = prompt(`EKEIDR ügy visszaküldése\n\nKüldemény azonosító: ${ugy.kuldemenyAzonosito}\nTárgy: ${ugy.targy}\n\nAdja meg a visszaküldés indokát:`);
+                    if (indok && indok.trim() !== '') {
+                        alert(`EKEIDR ügy visszaküldve!\n\nKüldemény: ${ugy.kuldemenyAzonosito}\nIndok: ${indok}`);
+                        // Mock: EKEIDR ügy eltávolítása a listából
+                        const index = this.ekeidrUgyek.findIndex(e => e.id === ugy.id);
+                        if (index > -1) {
+                            this.ekeidrUgyek.splice(index, 1);
+                            this.stats.ekeidr--;
+                        }
+                    }
+                },
+                kotegeltSzignalas() {
+                    if (!this.selectedUgyintezoKotegelt) {
+                        alert('Kérem válasszon ügyintézőt!');
+                        return;
+                    }
+                    console.log('Kötegelt szignálás:', this.selectedUgyek, 'Ügyintéző:', this.selectedUgyintezoKotegelt);
+                    alert(`${this.selectedUgyek.length} ügy kötegelt szignálása\n\nÜgyintéző: ${this.selectedUgyintezoKotegelt}`);
+                    this.clearSelection();
                 },
                 refreshData() {
                     console.log('Adatok frissítése...');
