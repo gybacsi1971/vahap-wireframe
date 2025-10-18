@@ -779,6 +779,312 @@ router.get('/felhasznalok', (req, res) => {
 });
 
 // ============================================================================
+// WORKFLOW SABLONOK
+// ============================================================================
+
+// Összes workflow sablon lekérése (lépésekkel együtt)
+router.get('/workflow-sablonok', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { ugytipus_kod } = req.query;
+
+        let sql = 'SELECT * FROM workflow_sablonok WHERE aktiv = 1';
+        const params = [];
+
+        if (ugytipus_kod) {
+            sql += ' AND ugytipus_kod = ?';
+            params.push(ugytipus_kod);
+        }
+
+        sql += ' ORDER BY megnevezes';
+
+        const sablonok = db.prepare(sql).all(...params);
+
+        // Minden sablonhoz lekérjük a lépéseket
+        sablonok.forEach(sablon => {
+            sablon.lepesek = db.prepare(`
+                SELECT * FROM workflow_lepesek
+                WHERE workflow_id = ?
+                ORDER BY sorrend
+            `).all(sablon.id);
+        });
+
+        res.json({ sablonok });
+    } catch (error) {
+        console.error('Hiba a workflow sablonok lekérésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Egy workflow sablon lekérése (lépésekkel)
+router.get('/workflow-sablonok/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+
+        const sablon = db.prepare(`
+            SELECT * FROM workflow_sablonok WHERE id = ?
+        `).get(id);
+
+        if (!sablon) {
+            return res.status(404).json({ error: 'Workflow sablon nem található' });
+        }
+
+        // Lépések lekérése
+        sablon.lepesek = db.prepare(`
+            SELECT * FROM workflow_lepesek
+            WHERE workflow_id = ?
+            ORDER BY sorrend
+        `).all(id);
+
+        res.json(sablon);
+    } catch (error) {
+        console.error('Hiba a workflow sablon lekérésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Új workflow sablon létrehozása
+router.post('/workflow-sablonok', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { kod, megnevezes, ugytipus_kod, lepesek_szama, leiras, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            INSERT INTO workflow_sablonok (
+                kod, megnevezes, ugytipus_kod, lepesek_szama, leiras, aktiv
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+
+        const result = stmt.run(
+            kod,
+            megnevezes,
+            ugytipus_kod || null,
+            lepesek_szama || 0,
+            leiras || null,
+            aktiv !== undefined ? (aktiv ? 1 : 0) : 1
+        );
+
+        res.status(201).json({
+            id: result.lastInsertRowid,
+            message: 'Workflow sablon sikeresen létrehozva'
+        });
+    } catch (error) {
+        console.error('Hiba a workflow sablon létrehozásánál:', error);
+        if (error.message.includes('UNIQUE constraint failed')) {
+            res.status(400).json({ error: 'Ez a workflow kód már létezik' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Workflow sablon módosítása
+router.put('/workflow-sablonok/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+        const { kod, megnevezes, ugytipus_kod, lepesek_szama, leiras, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            UPDATE workflow_sablonok
+            SET kod = ?, megnevezes = ?, ugytipus_kod = ?, lepesek_szama = ?,
+                leiras = ?, aktiv = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(
+            kod,
+            megnevezes,
+            ugytipus_kod || null,
+            lepesek_szama || 0,
+            leiras || null,
+            aktiv ? 1 : 0,
+            id
+        );
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Workflow sablon nem található' });
+        }
+
+        res.json({ message: 'Workflow sablon sikeresen frissítve' });
+    } catch (error) {
+        console.error('Hiba a workflow sablon frissítésénél:', error);
+        if (error.message.includes('UNIQUE constraint failed')) {
+            res.status(400).json({ error: 'Ez a workflow kód már létezik' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Workflow sablon törlése (soft delete + cascade lépések)
+router.delete('/workflow-sablonok/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+
+        const stmt = db.prepare(`
+            UPDATE workflow_sablonok
+            SET aktiv = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Workflow sablon nem található' });
+        }
+
+        res.json({ message: 'Workflow sablon sikeresen törölve' });
+    } catch (error) {
+        console.error('Hiba a workflow sablon törlésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================================================
+// WORKFLOW LÉPÉSEK (nested resource)
+// ============================================================================
+
+// Workflow lépések lekérése
+router.get('/workflow-sablonok/:workflow_id/lepesek', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { workflow_id } = req.params;
+
+        const lepesek = db.prepare(`
+            SELECT * FROM workflow_lepesek
+            WHERE workflow_id = ?
+            ORDER BY sorrend
+        `).all(workflow_id);
+
+        res.json({ lepesek });
+    } catch (error) {
+        console.error('Hiba a workflow lépések lekérésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Új workflow lépés hozzáadása
+router.post('/workflow-sablonok/:workflow_id/lepesek', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { workflow_id } = req.params;
+        const { uce_kod, megnevezes, sorrend, kotelezo, hataridо_napok, felelos_szerepkor, leiras } = req.body;
+
+        const stmt = db.prepare(`
+            INSERT INTO workflow_lepesek (
+                workflow_id, uce_kod, megnevezes, sorrend, kotelezo,
+                hataridо_napok, felelos_szerepkor, leiras
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        const result = stmt.run(
+            workflow_id,
+            uce_kod || null,
+            megnevezes,
+            sorrend,
+            kotelezo !== undefined ? (kotelezo ? 1 : 0) : 1,
+            hataridо_napok || null,
+            felelos_szerepkor || null,
+            leiras || null
+        );
+
+        // Lépések számának frissítése a sablonban
+        db.prepare(`
+            UPDATE workflow_sablonok
+            SET lepesek_szama = (
+                SELECT COUNT(*) FROM workflow_lepesek WHERE workflow_id = ?
+            ),
+            updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `).run(workflow_id, workflow_id);
+
+        res.status(201).json({
+            id: result.lastInsertRowid,
+            message: 'Workflow lépés sikeresen létrehozva'
+        });
+    } catch (error) {
+        console.error('Hiba a workflow lépés létrehozásánál:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Workflow lépés módosítása
+router.put('/workflow-sablonok/:workflow_id/lepesek/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { workflow_id, id } = req.params;
+        const { uce_kod, megnevezes, sorrend, kotelezo, hataridо_napok, felelos_szerepkor, leiras } = req.body;
+
+        const stmt = db.prepare(`
+            UPDATE workflow_lepesek
+            SET uce_kod = ?, megnevezes = ?, sorrend = ?, kotelezo = ?,
+                hataridо_napok = ?, felelos_szerepkor = ?, leiras = ?
+            WHERE id = ? AND workflow_id = ?
+        `);
+
+        const result = stmt.run(
+            uce_kod || null,
+            megnevezes,
+            sorrend,
+            kotelezo ? 1 : 0,
+            hataridо_napok || null,
+            felelos_szerepkor || null,
+            leiras || null,
+            id,
+            workflow_id
+        );
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Workflow lépés nem található' });
+        }
+
+        res.json({ message: 'Workflow lépés sikeresen frissítve' });
+    } catch (error) {
+        console.error('Hiba a workflow lépés frissítésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Workflow lépés törlése
+router.delete('/workflow-sablonok/:workflow_id/lepesek/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { workflow_id, id } = req.params;
+
+        const stmt = db.prepare(`
+            DELETE FROM workflow_lepesek
+            WHERE id = ? AND workflow_id = ?
+        `);
+
+        const result = stmt.run(id, workflow_id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Workflow lépés nem található' });
+        }
+
+        // Lépések számának frissítése a sablonban
+        db.prepare(`
+            UPDATE workflow_sablonok
+            SET lepesek_szama = (
+                SELECT COUNT(*) FROM workflow_lepesek WHERE workflow_id = ?
+            ),
+            updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `).run(workflow_id, workflow_id);
+
+        res.json({ message: 'Workflow lépés sikeresen törölve' });
+    } catch (error) {
+        console.error('Hiba a workflow lépés törlésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================================================
 // ÜGYTÍPUSOK
 // ============================================================================
 

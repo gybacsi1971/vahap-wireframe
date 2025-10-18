@@ -22,6 +22,10 @@ const VAHAP_API = {
             ugytipusok: '/parameterezo/ugytipusok',
             dokumentumSablonok: '/parameterezo/dokumentum-sablonok',
             dokumentumSablonokGrouped: '/parameterezo/dokumentum-sablonok/grouped',
+            workflowSablonok: '/parameterezo/workflow-sablonok',
+            workflowSablonById: (id) => `/parameterezo/workflow-sablonok/${id}`,
+            workflowLepesek: (workflowId) => `/parameterezo/workflow-sablonok/${workflowId}/lepesek`,
+            workflowLepesById: (workflowId, lepesId) => `/parameterezo/workflow-sablonok/${workflowId}/lepesek/${lepesId}`,
             szerepkorok: '/parameterezo/szerepkorok',
             felhasznalok: '/parameterezo/felhasznalok'
         },
