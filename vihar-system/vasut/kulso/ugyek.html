@@ -29,7 +29,7 @@
         }
 
         .header-section {
-            background: linear-gradient(135deg, #004b87 0%, #0066b3 100%);
+            background: linear-gradient(135deg, var(--vahap-primary) 0%, var(--vahap-primary-hover) 100%);
             color: white;
             padding: 2rem;
             border-radius: 1rem 1rem 0 0;
@@ -48,7 +48,7 @@
         }
 
         .stat-card-folyamatban {
-            background: linear-gradient(135deg, #ffc107, #ffb300);
+            background: linear-gradient(135deg, var(--vahap-warning), #ffb300);
         }
 
         .stat-card-hianypotlas {
@@ -56,11 +56,11 @@
         }
 
         .stat-card-lezart {
-            background: linear-gradient(135deg, #28a745, #20bf6b);
+            background: linear-gradient(135deg, var(--vahap-positive), #20bf6b);
         }
 
         .stat-card-osszes {
-            background: linear-gradient(135deg, #17a2b8, #0099cc);
+            background: linear-gradient(135deg, var(--vahap-informative), #0099cc);
         }
 
         .stat-number {
@@ -82,15 +82,15 @@
         }
 
         .ugy-card-folyamatban {
-            border-left-color: #ffc107;
+            border-left-color: var(--vahap-warning);
         }
 
         .ugy-card-hianypotlas {
-            border-left-color: #dc3545;
+            border-left-color: var(--vahap-negative);
         }
 
         .ugy-card-lezart {
-            border-left-color: #28a745;
+            border-left-color: var(--vahap-positive);
         }
 
         .status-badge {
@@ -187,6 +187,11 @@
             margin-right: 1rem;
         }
     </style>
+
+    <!-- DÁP Design System - Inter betűtípus -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">

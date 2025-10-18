@@ -18,9 +18,9 @@
     --vahap-secondary: #6c757d;         /* Szürke */
     --vahap-secondary-light: #e9ecef;   /* Világosszürke */
 
-    /* Modul specifikus színek */
-    --vahap-vasut: #8B4513;             /* Barna - vasút */
-    --vahap-hajozas: #006994;           /* Tengerkék - hajózás */
+    /* Modul specifikus színek - DÁP compliance: mindkét modul a DÁP primary színt használja */
+    --vahap-vasut: #4650FB;             /* DÁP Indigo - vasúti modul */
+    --vahap-hajozas: #4650FB;           /* DÁP Indigo - hajózási modul */
 
     /* Státusz színek */
     --vahap-success: #28a745;           /* Zöld - sikeres */
@@ -62,6 +62,52 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.3;
     color: var(--vahap-primary);
+}
+
+/* Címsorok fehér színűek kék háttér esetén */
+.bg-vahap-primary h1,
+.bg-vahap-primary h2,
+.bg-vahap-primary h3,
+.bg-vahap-primary h4,
+.bg-vahap-primary h5,
+.bg-vahap-primary h6,
+.vahap-header-primary h1,
+.vahap-header-primary h2,
+.vahap-header-primary h3,
+.vahap-header-primary h4,
+.vahap-header-primary h5,
+.vahap-header-primary h6,
+.vahap-header-vasut h1,
+.vahap-header-vasut h2,
+.vahap-header-vasut h3,
+.vahap-header-vasut h4,
+.vahap-header-vasut h5,
+.vahap-header-vasut h6,
+.vahap-header-hajozas h1,
+.vahap-header-hajozas h2,
+.vahap-header-hajozas h3,
+.vahap-header-hajozas h4,
+.vahap-header-hajozas h5,
+.vahap-header-hajozas h6,
+.bg-vahap-vasut h1,
+.bg-vahap-vasut h2,
+.bg-vahap-vasut h3,
+.bg-vahap-vasut h4,
+.bg-vahap-vasut h5,
+.bg-vahap-vasut h6,
+.bg-vahap-hajozas h1,
+.bg-vahap-hajozas h2,
+.bg-vahap-hajozas h3,
+.bg-vahap-hajozas h4,
+.bg-vahap-hajozas h5,
+.bg-vahap-hajozas h6,
+.bg-primary h1,
+.bg-primary h2,
+.bg-primary h3,
+.bg-primary h4,
+.bg-primary h5,
+.bg-primary h6 {
+    color: var(--vahap-white) !important;
 }
 
 .text-vahap-primary {
@@ -222,17 +268,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .vahap-header-vasut {
-    background: linear-gradient(135deg, var(--vahap-vasut) 0%, #a0522d 100%);
+    background: linear-gradient(135deg, var(--vahap-vasut) 0%, #3840C9 100%);
     color: var(--vahap-white);
     padding: 2rem 1rem;
-    border-bottom: 3px solid #6f3410;
+    border-bottom: 3px solid #2A31A8;
 }
 
 .vahap-header-hajozas {
-    background: linear-gradient(135deg, var(--vahap-hajozas) 0%, #0088b8 100%);
+    background: linear-gradient(135deg, var(--vahap-hajozas) 0%, #3840C9 100%);
     color: var(--vahap-white);
     padding: 2rem 1rem;
-    border-bottom: 3px solid #005075;
+    border-bottom: 3px solid #2A31A8;
 }
 
 /* ============================================
@@ -339,6 +385,17 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-vahap .form-control.is-valid {
     border-color: var(--vahap-success);
+}
+
+/* Disabled és readonly állapotok - olvashatóság biztosítása */
+.form-vahap .form-control:disabled,
+.form-vahap .form-control[readonly],
+.form-vahap .form-select:disabled,
+.form-vahap .form-select[readonly] {
+    background-color: #f1f3f5;
+    color: #495057;
+    border-color: #ced4da;
+    opacity: 1;
 }
 
 /* Kötelező mező jelölés */

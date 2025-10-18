@@ -87,7 +87,7 @@
             border: none;
             border-bottom: 3px solid transparent;
             font-weight: 500;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
@@ -113,7 +113,7 @@
         /* Fejléc sáv */
         .app-header {
             height: 60px;
-            background: linear-gradient(135deg, #004b87 0%, #0066b3 100%);
+            background: linear-gradient(135deg, var(--vahap-primary) 0%, var(--vahap-primary-hover) 100%);
             color: white;
             display: flex;
             align-items: center;
@@ -124,6 +124,7 @@
         .app-header h5 {
             margin: 0;
             font-weight: 600;
+            color: white;
         }
 
         /* Ügy információs sáv - TELJES SZÉLESSÉGBEN */
@@ -142,7 +143,7 @@
 
         .case-info-label {
             font-size: 0.65rem;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
             text-transform: uppercase;
             letter-spacing: 0.3px;
             font-weight: 600;
@@ -285,7 +286,7 @@
         .workflow-step.test-mode-available {
             opacity: 1 !important;
             background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border-color: #ffc107;
+            border-color: var(--vahap-warning);
             cursor: pointer;
         }
 
@@ -296,7 +297,7 @@
         }
 
         .workflow-step.test-mode-available .workflow-step-icon {
-            background: #ffc107;
+            background: var(--vahap-warning);
             color: white;
         }
 
@@ -366,7 +367,7 @@
             font-size: 0.875rem;
             font-weight: 600;
             text-transform: uppercase;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
             margin-bottom: 1rem;
             display: flex;
             align-items: center;
@@ -484,7 +485,7 @@
             display: flex;
             gap: 2rem;
             font-size: 0.8rem;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
         }
 
         .document-row-meta-item {
@@ -568,7 +569,7 @@
         }
 
         .history-event-dot.status-pending {
-            background: #6c757d;
+            background: var(--vahap-neutral-500);
         }
 
         .history-event-content {
@@ -604,7 +605,7 @@
 
         .history-event-time {
             font-size: 0.85rem;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
             font-weight: 500;
         }
 
@@ -619,7 +620,7 @@
             display: flex;
             gap: 2rem;
             font-size: 0.8rem;
-            color: #6c757d;
+            color: var(--vahap-neutral-500);
         }
 
         .history-event-meta .meta-item {
@@ -714,6 +715,11 @@
             }
         }
     </style>
+
+    <!-- DÁP Design System - Inter betűtípus -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -791,7 +797,7 @@
                     </div>
 
                     <!-- Teszt mód kapcsoló -->
-                    <div v-show="!workflowCollapsed" class="workflow-test-mode" style="padding: 0.75rem 1rem; background: #fff3cd; border-bottom: 2px solid #ffc107;">
+                    <div v-show="!workflowCollapsed" class="workflow-test-mode" style="padding: 0.75rem 1rem; background: #fff3cd; border-bottom: 2px solid var(--vahap-warning);">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="testModeSwitch" v-model="testMode" @change="onTestModeChange">
                             <label class="form-check-label" for="testModeSwitch" style="font-size: 0.875rem; font-weight: 600; color: #856404; cursor: pointer;">

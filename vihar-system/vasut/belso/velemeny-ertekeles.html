@@ -39,24 +39,24 @@
         }
 
         .velemeny-card.elfogad {
-            border-left-color: #28a745;
+            border-left-color: var(--vahap-positive);
         }
 
         .velemeny-card.elutasit {
-            border-left-color: #dc3545;
+            border-left-color: var(--vahap-negative);
         }
 
         .velemeny-card.megjegyzes {
-            border-left-color: #ffc107;
+            border-left-color: var(--vahap-warning);
         }
 
         .velemeny-card.varakozik {
-            border-left-color: #6c757d;
+            border-left-color: var(--vahap-neutral-500);
         }
 
         .ertekeles-panel {
             background-color: #fff3cd;
-            border: 2px solid #ffc107;
+            border: 2px solid var(--vahap-warning);
             border-radius: 8px;
             padding: 1rem;
         }
@@ -68,13 +68,18 @@
         }
 
         .final-decision-card {
-            background: linear-gradient(135deg, #28a745 0%, #20a138 100%);
+            background: linear-gradient(135deg, var(--vahap-positive) 0%, #20a138 100%);
             color: white;
             border-radius: 12px;
             padding: 2rem;
             box-shadow: 0 8px 16px rgba(40, 167, 69, 0.3);
         }
     </style>
+
+    <!-- DÁP Design System - Inter betűtípus -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -199,7 +204,7 @@
                                                           stroke-width="3"/>
                                                     <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                                           fill="none"
-                                                          :stroke="velemenyStatusz.szazalek === 100 ? '#28a745' : '#ffc107'"
+                                                          :stroke="velemenyStatusz.szazalek === 100 ? 'var(--vahap-positive)' : 'var(--vahap-warning)'"
                                                           stroke-width="3"
                                                           :stroke-dasharray="velemenyStatusz.szazalek + ', 100'"/>
                                                     <text x="18" y="20.35" style="font-size: 0.5em; font-weight: bold;" text-anchor="middle" fill="#495057">
