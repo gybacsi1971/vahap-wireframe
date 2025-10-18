@@ -295,21 +295,44 @@ const ParamListaKezelo = {
         </div>
     `,
     methods: {
-        loadKriteriumok() {
-            // Betöltés mock adatokból
-            const mockKey = `ellenorzesi_lista_${this.listaTipus}`;
-            console.log('[param-lista-kezelo] Loading:', mockKey, 'listaTipus:', this.listaTipus);
+        async loadKriteriumok() {
+            // Betöltés API-ról
+            const listaKodMap = {
+                'hatáskor': 'F-0064',
+                'formai': 'F-0065',
+                'tartalmi': 'F-0066'
+            };
+            const listaKod = listaKodMap[this.listaTipus];
 
-            if (typeof VIHARMockData !== 'undefined' && VIHARMockData.parameterezo && VIHARMockData.parameterezo[mockKey]) {
-                this.kriteriumok = JSON.parse(JSON.stringify(
-                    VIHARMockData.parameterezo[mockKey].kriteriumok || []
-                ));
-                console.log('[param-lista-kezelo] Loaded', this.kriteriumok.length, 'kriteriumok');
-            } else {
-                console.warn('[param-lista-kezelo] Mock data not found for key:', mockKey);
-                console.log('Available keys:', VIHARMockData?.parameterezo ? Object.keys(VIHARMockData.parameterezo) : 'N/A');
+            if (!listaKod) {
+                console.error('[param-lista-kezelo] Ismeretlen lista típus:', this.listaTipus);
+                return;
             }
-            this.hasChanges = false;
+
+            try {
+                console.log('[param-lista-kezelo] Loading from API:', listaKod);
+
+                const endpoint = VAHAP_API.endpoints.parameterezo.ellenorzesiListaKriteriumok(listaKod);
+                const response = await VAHAP_API.get(endpoint);
+
+                if (response && response.kriteriumok) {
+                    this.kriteriumok = response.kriteriumok.map(k => ({
+                        ...k,
+                        kotelezo: Boolean(k.kotelezo),
+                        aktiv: Boolean(k.aktiv)
+                    }));
+                    console.log('[param-lista-kezelo] Loaded', this.kriteriumok.length, 'kriteriumok from API');
+                } else {
+                    console.warn('[param-lista-kezelo] Nincs kritérium adat az API válaszban');
+                    this.kriteriumok = [];
+                }
+
+                this.hasChanges = false;
+            } catch (error) {
+                console.error('[param-lista-kezelo] API hiba:', error);
+                alert('Hiba a kritériumok betöltésekor: ' + error.message);
+                this.kriteriumok = [];
+            }
         },
 
         openCreateDialog() {
@@ -333,37 +356,74 @@ const ParamListaKezelo = {
             this.showEditor = true;
         },
 
-        handleSaveKriterium(data) {
-            if (this.editMode === 'create') {
-                // Új kritérium hozzáadása
-                this.kriteriumok.push({
-                    id: Date.now(),
-                    ...data,
-                    letrehozva: new Date().toISOString(),
-                    modositva: new Date().toISOString()
-                });
-            } else {
-                // Meglévő kritérium módosítása
-                const index = this.kriteriumok.findIndex(k => k.id === data.id);
-                if (index > -1) {
-                    this.kriteriumok[index] = {
-                        ...data,
-                        modositva: new Date().toISOString()
-                    };
-                }
-            }
+        async handleSaveKriterium(data) {
+            const listaKodMap = {
+                'hatáskor': 'F-0064',
+                'formai': 'F-0065',
+                'tartalmi': 'F-0066'
+            };
+            const listaKod = listaKodMap[this.listaTipus];
 
-            this.hasChanges = true;
-            this.closeEditor();
-            this.$emit('change', this.kriteriumok);
+            try {
+                if (this.editMode === 'create') {
+                    // Új kritérium létrehozása API-n keresztül
+                    const maxSorrend = this.kriteriumok.length > 0
+                        ? Math.max(...this.kriteriumok.map(k => k.sorrend || 0))
+                        : 0;
+
+                    const payload = {
+                        ...data,
+                        sorrend: maxSorrend + 1
+                    };
+
+                    const endpoint = VAHAP_API.endpoints.parameterezo.ellenorzesiListaKriteriumok(listaKod);
+                    await VAHAP_API.post(endpoint, payload);
+
+                    console.log('[param-lista-kezelo] Kritérium létrehozva API-n keresztül');
+                } else {
+                    // Meglévő kritérium módosítása API-n keresztül
+                    const endpoint = `${VAHAP_API.endpoints.parameterezo.ellenorzesiListaKriteriumok(listaKod)}/${data.id}`;
+                    await VAHAP_API.put(endpoint, data);
+
+                    console.log('[param-lista-kezelo] Kritérium frissítve API-n keresztül');
+                }
+
+                // Újratöltés az API-ról
+                await this.loadKriteriumok();
+
+                this.closeEditor();
+                this.$emit('change', this.kriteriumok);
+            } catch (error) {
+                console.error('[param-lista-kezelo] Mentési hiba:', error);
+                alert('Hiba a kritérium mentésekor: ' + error.message);
+            }
         },
 
-        deleteKriterium(kriterium) {
-            const index = this.kriteriumok.findIndex(k => k.id === kriterium.id);
-            if (index > -1) {
-                this.kriteriumok.splice(index, 1);
-                this.hasChanges = true;
+        async deleteKriterium(kriterium) {
+            if (!confirm(`Biztosan törli: ${kriterium.megnevezes}?`)) {
+                return;
+            }
+
+            const listaKodMap = {
+                'hatáskor': 'F-0064',
+                'formai': 'F-0065',
+                'tartalmi': 'F-0066'
+            };
+            const listaKod = listaKodMap[this.listaTipus];
+
+            try {
+                const endpoint = `${VAHAP_API.endpoints.parameterezo.ellenorzesiListaKriteriumok(listaKod)}/${kriterium.id}`;
+                await VAHAP_API.delete(endpoint);
+
+                console.log('[param-lista-kezelo] Kritérium törölve API-n keresztül');
+
+                // Újratöltés az API-ról
+                await this.loadKriteriumok();
+
                 this.$emit('change', this.kriteriumok);
+            } catch (error) {
+                console.error('[param-lista-kezelo] Törlési hiba:', error);
+                alert('Hiba a kritérium törlésekor: ' + error.message);
             }
         },
 
@@ -372,17 +432,20 @@ const ParamListaKezelo = {
             this.editedKriterium = null;
         },
 
-        saveLista() {
+        async saveLista() {
+            // Az adatok már mentve vannak az API-ra a handleSaveKriterium-on keresztül
+            // Ez a gomb már nem szükséges API verzióban, de meghagyjuk kompatibilitás céljából
+
             // Emit save event
             this.$emit('save', {
                 listaTipus: this.listaTipus,
                 ugytipus: this.ugytipus,
                 kriteriumok: this.kriteriumok
             });
-            this.hasChanges = false;
 
-            // Show success message (in real app)
+            this.hasChanges = false;
             console.log('✅ Lista mentve:', this.listaCim);
+            alert('Lista sikeresen mentve!');
         },
 
         formatTipus(value) {

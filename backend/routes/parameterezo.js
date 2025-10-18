@@ -66,7 +66,7 @@ router.post('/ellenorzesi-listak/:lista_kod/kriteriumok', (req, res) => {
     try {
         const db = req.app.locals.db;
         const { lista_kod } = req.params;
-        const { megnevezes, leiras, sorrend, kotelezo } = req.body;
+        const { megnevezes, leiras, sorrend, kotelezo, tipus, suly, ugytipus_specifikus } = req.body;
 
         // Lista ID lekérése
         const lista = db.prepare(`
@@ -79,11 +79,23 @@ router.post('/ellenorzesi-listak/:lista_kod/kriteriumok', (req, res) => {
 
         // Új kritérium beszúrása
         const stmt = db.prepare(`
-            INSERT INTO ellenorzesi_kriterium (lista_id, megnevezes, leiras, sorrend, kotelezo, aktiv)
-            VALUES (?, ?, ?, ?, ?, 1)
+            INSERT INTO ellenorzesi_kriterium (
+                lista_id, megnevezes, leiras, sorrend, kotelezo,
+                tipus, suly, ugytipus_specifikus, aktiv
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
         `);
 
-        const result = stmt.run(lista.id, megnevezes, leiras || null, sorrend, kotelezo ? 1 : 0);
+        const result = stmt.run(
+            lista.id,
+            megnevezes,
+            leiras || null,
+            sorrend,
+            kotelezo ? 1 : 0,
+            tipus || 'igen_nem',
+            suly || 5,
+            ugytipus_specifikus || null
+        );
 
         res.status(201).json({
             id: result.lastInsertRowid,
@@ -100,15 +112,27 @@ router.put('/ellenorzesi-listak/:lista_kod/kriteriumok/:id', (req, res) => {
     try {
         const db = req.app.locals.db;
         const { id } = req.params;
-        const { megnevezes, leiras, sorrend, kotelezo, aktiv } = req.body;
+        const { megnevezes, leiras, sorrend, kotelezo, tipus, suly, ugytipus_specifikus, aktiv } = req.body;
 
         const stmt = db.prepare(`
             UPDATE ellenorzesi_kriterium
-            SET megnevezes = ?, leiras = ?, sorrend = ?, kotelezo = ?, aktiv = ?, updated_at = CURRENT_TIMESTAMP
+            SET megnevezes = ?, leiras = ?, sorrend = ?, kotelezo = ?,
+                tipus = ?, suly = ?, ugytipus_specifikus = ?, aktiv = ?,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `);
 
-        const result = stmt.run(megnevezes, leiras || null, sorrend, kotelezo ? 1 : 0, aktiv ? 1 : 0, id);
+        const result = stmt.run(
+            megnevezes,
+            leiras || null,
+            sorrend,
+            kotelezo ? 1 : 0,
+            tipus || 'igen_nem',
+            suly || 5,
+            ugytipus_specifikus || null,
+            aktiv ? 1 : 0,
+            id
+        );
 
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Kritérium nem található' });
