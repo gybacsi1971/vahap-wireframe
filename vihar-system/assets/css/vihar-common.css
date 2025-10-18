@@ -2,30 +2,213 @@
 /* Közös stílusok mindkét modulhoz */
 
 :root {
-    /* Kormányzati színpaletta */
-    --vahap-primary: #004b87;
-    --vahap-secondary: #6c757d;
-    --vahap-success: #28a745;
-    --vahap-warning: #ffc107;
-    --vahap-danger: #dc3545;
-    --vahap-info: #17a2b8;
-    --vahap-light: #f8f9fa;
-    --vahap-dark: #343a40;
+    /* ============================================
+       DÁP Design System Alapszínek
+       ============================================ */
 
-    /* Modul specifikus színek */
+    /* Primér (Indigo/Lila) - DÁP előírt szín */
+    --vahap-primary: #4650FB;
+    --vahap-primary-hover: #3840C9;
+    --vahap-primary-light: #E8E9FE;
+    --vahap-primary-dark: #2A31A8;
+
+    /* Neutrális színek (OKLAB színtérben tervezett) */
+    --vahap-neutral-50: #F8FAFC;
+    --vahap-neutral-100: #F1F5F9;
+    --vahap-neutral-200: #E2E8F0;
+    --vahap-neutral-300: #CBD5E1;
+    --vahap-neutral-400: #94A3B8;
+    --vahap-neutral-500: #64748B;
+    --vahap-neutral-600: #475569;
+    --vahap-neutral-700: #334155;
+    --vahap-neutral-800: #1E293B;
+    --vahap-neutral-900: #0F172A;
+
+    /* Szemantikus színek - DÁP előírás szerint */
+    --vahap-positive: #059669;      /* Zöld - pozitív műveletek */
+    --vahap-positive-light: #D1FAE5;
+    --vahap-negative: #DC2626;      /* Piros - negatív műveletek */
+    --vahap-negative-light: #FEE2E2;
+    --vahap-informative: #0284C7;   /* Kék - informatív */
+    --vahap-informative-light: #E0F2FE;
+    --vahap-warning: #D97706;       /* Narancs - figyelmeztető */
+    --vahap-warning-light: #FEF3C7;
+
+    /* Legacy támogatás (Bootstrap kompatibilitás) */
+    --vahap-secondary: var(--vahap-neutral-500);
+    --vahap-success: var(--vahap-positive);
+    --vahap-danger: var(--vahap-negative);
+    --vahap-info: var(--vahap-informative);
+    --vahap-light: var(--vahap-neutral-50);
+    --vahap-dark: var(--vahap-neutral-900);
+
+    /* Modul specifikus header színek - DÁP compliance */
+    --vahap-vasut: #4650FB;         /* DÁP Indigo - vasúti modul */
+    --vahap-hajozas: #4650FB;       /* DÁP Indigo - hajózási modul */
+    --vahap-white: #FFFFFF;
+
+    /* ============================================
+       Komponens-specifikus color tokenek
+       DÁP ajánlott: ne használj globális színtokeneket
+       ============================================ */
+
+    /* Gombok */
+    --button-primary-bg: var(--vahap-primary);
+    --button-primary-text: #FFFFFF;
+    --button-primary-hover-bg: var(--vahap-primary-hover);
+    --button-primary-border: var(--vahap-primary);
+
+    --button-secondary-bg: var(--vahap-neutral-100);
+    --button-secondary-text: var(--vahap-neutral-900);
+    --button-secondary-hover-bg: var(--vahap-neutral-200);
+    --button-secondary-border: var(--vahap-neutral-300);
+
+    --button-positive-bg: var(--vahap-positive);
+    --button-positive-text: #FFFFFF;
+    --button-positive-hover-bg: #047857;
+
+    --button-negative-bg: var(--vahap-negative);
+    --button-negative-text: #FFFFFF;
+    --button-negative-hover-bg: #B91C1C;
+
+    /* Badge-ek */
+    --badge-primary-bg: var(--vahap-primary);
+    --badge-primary-text: #FFFFFF;
+    --badge-secondary-bg: var(--vahap-neutral-500);
+    --badge-secondary-text: #FFFFFF;
+    --badge-success-bg: var(--vahap-positive);
+    --badge-success-text: #FFFFFF;
+    --badge-warning-bg: var(--vahap-warning);
+    --badge-warning-text: var(--vahap-neutral-900);
+    --badge-danger-bg: var(--vahap-negative);
+    --badge-danger-text: #FFFFFF;
+
+    /* Űrlapok */
+    --input-border: var(--vahap-neutral-300);
+    --input-border-focus: var(--vahap-primary);
+    --input-bg: #FFFFFF;
+    --input-text: var(--vahap-neutral-900);
+    --input-placeholder: var(--vahap-neutral-400);
+
+    /* Kártyák */
+    --card-bg: #FFFFFF;
+    --card-border: var(--vahap-neutral-200);
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+    /* Navigáció */
+    --nav-bg: #FFFFFF;
+    --nav-text: var(--vahap-neutral-700);
+    --nav-text-hover: var(--vahap-primary);
+    --nav-active-bg: var(--vahap-primary);
+    --nav-active-text: #FFFFFF;
+
+    /* Táblázatok */
+    --table-header-bg: var(--vahap-primary);
+    --table-header-text: #FFFFFF;
+    --table-row-hover-bg: var(--vahap-primary-light);
+    --table-border: var(--vahap-neutral-200);
+
+    /* ============================================
+       Modul specifikus színek (megtartva)
+       ============================================ */
     --vasut-color: #8B4513;
     --hajozas-color: #006994;
 
     /* Funkció kategória színek */
-    --func-external: #e3f2fd;
-    --func-internal: #fff3e0;
-    --func-interface: #f3e5f5;
+    --func-external: #E0F2FE;
+    --func-internal: #FEF3C7;
+    --func-interface: #F3E8FF;
 
-    /* Árnyékok és átmenetek */
-    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    /* ============================================
+       Árnyékok és átmenetek
+       ============================================ */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+
+    /* Tipográfia */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-family-mono: 'Courier New', monospace;
+}
+
+/* ============================================
+   Sötét mód támogatás (DÁP követelmény)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Primér színek sötét módban világosabbak */
+        --vahap-primary: #5B6BFF;
+        --vahap-primary-hover: #7B87FF;
+        --vahap-primary-light: #1E293B;
+        --vahap-primary-dark: #4650FB;
+
+        /* Neutrális színek invertálása */
+        --vahap-neutral-50: #0F172A;
+        --vahap-neutral-100: #1E293B;
+        --vahap-neutral-200: #334155;
+        --vahap-neutral-300: #475569;
+        --vahap-neutral-400: #64748B;
+        --vahap-neutral-500: #94A3B8;
+        --vahap-neutral-600: #CBD5E1;
+        --vahap-neutral-700: #E2E8F0;
+        --vahap-neutral-800: #F1F5F9;
+        --vahap-neutral-900: #F8FAFC;
+
+        /* Szemantikus színek világosabbak */
+        --vahap-positive: #10B981;
+        --vahap-positive-light: #064E3B;
+        --vahap-negative: #EF4444;
+        --vahap-negative-light: #7F1D1D;
+        --vahap-informative: #0EA5E9;
+        --vahap-informative-light: #0C4A6E;
+        --vahap-warning: #F59E0B;
+        --vahap-warning-light: #78350F;
+
+        /* Komponens tokenek felülírása */
+        --card-bg: var(--vahap-neutral-100);
+        --input-bg: var(--vahap-neutral-100);
+        --input-text: var(--vahap-neutral-900);
+        --nav-bg: var(--vahap-neutral-100);
+        --table-row-hover-bg: var(--vahap-neutral-200);
+    }
+
+    body {
+        background-color: var(--vahap-neutral-50);
+        color: var(--vahap-neutral-900);
+    }
+
+    /* Disabled/readonly űrlap mezők sötét módban is olvashatóak */
+    .form-control:disabled,
+    .form-control[readonly],
+    .form-select:disabled,
+    .form-select[readonly] {
+        background-color: var(--vahap-neutral-200);
+        color: var(--vahap-neutral-800);
+    }
+}
+
+/* ============================================
+   Magas kontraszt mód (DÁP követelmény)
+   ============================================ */
+@media (prefers-contrast: high) {
+    :root {
+        --vahap-primary: #3840C9;
+        --button-primary-bg: #000000;
+        --input-border: #000000;
+        --card-border: #000000;
+        --table-border: #000000;
+    }
+
+    .btn {
+        border-width: 2px !important;
+    }
+
+    .form-control,
+    .form-select {
+        border-width: 2px !important;
+    }
 }
 
 /* Globális beállítások */
@@ -34,24 +217,117 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
+    font-family: var(--font-family-base);
+    background-color: var(--vahap-neutral-50);
+    color: var(--vahap-neutral-900);
     margin: 0;
     padding: 0;
+    line-height: 1.6;
 }
 
-/* Kormányzati gomb stílusok */
+/* ============================================
+   Tipográfia - Címsorok
+   ============================================ */
+
+/* Címsorok fehér színűek TÉNYLEG sötét háttér esetén */
+.bg-primary h1, .bg-primary h2, .bg-primary h3, .bg-primary h4, .bg-primary h5, .bg-primary h6,
+.case-header h1, .case-header h2, .case-header h3, .case-header h4, .case-header h5, .case-header h6,
+.vahap-header h1, .vahap-header h2, .vahap-header h3, .vahap-header h4, .vahap-header h5, .vahap-header h6,
+.vasut-header h1, .vasut-header h2, .vasut-header h3, .vasut-header h4, .vasut-header h5, .vasut-header h6,
+.hajozas-header h1, .hajozas-header h2, .hajozas-header h3, .hajozas-header h4, .hajozas-header h5, .hajozas-header h6,
+.force-dark h1, .force-dark h2, .force-dark h3, .force-dark h4, .force-dark h5, .force-dark h6 {
+    color: #FFFFFF !important;
+}
+
+/* .bg-dark címsorok NORMÁL színűek, mert a bg-dark már világosszürke! */
+.bg-dark h1, .bg-dark h2, .bg-dark h3, .bg-dark h4, .bg-dark h5, .bg-dark h6 {
+    color: var(--vahap-neutral-900) !important;
+}
+
+/* .bg-dark MINDEN szöveges elem sötét színű legyen! */
+.bg-dark,
+.bg-dark p,
+.bg-dark span,
+.bg-dark div,
+.bg-dark label,
+.bg-dark textarea,
+.bg-dark input {
+    color: var(--vahap-neutral-900) !important;
+}
+
+/* .bg-secondary is ugyanez */
+.bg-secondary,
+.bg-secondary p,
+.bg-secondary span,
+.bg-secondary div,
+.bg-secondary label {
+    color: var(--vahap-neutral-900) !important;
+}
+
+/* ============================================
+   Gomb komponensek - DÁP komponens tokenekkel
+   ============================================ */
+
 .btn-gov-primary {
-    background-color: var(--vahap-primary);
-    border-color: var(--vahap-primary);
-    color: white;
+    background-color: var(--button-primary-bg);
+    border-color: var(--button-primary-border);
+    color: var(--button-primary-text);
     transition: var(--transition);
+    font-weight: 500;
 }
 
 .btn-gov-primary:hover {
-    background-color: #003666;
-    border-color: #003666;
-    color: white;
+    background-color: var(--button-primary-hover-bg);
+    border-color: var(--button-primary-hover-bg);
+    color: var(--button-primary-text);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-gov-secondary {
+    background-color: var(--button-secondary-bg);
+    border-color: var(--button-secondary-border);
+    color: var(--button-secondary-text);
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-gov-secondary:hover {
+    background-color: var(--button-secondary-hover-bg);
+    border-color: var(--button-secondary-border);
+    color: var(--button-secondary-text);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-gov-positive {
+    background-color: var(--button-positive-bg);
+    border-color: var(--button-positive-bg);
+    color: var(--button-positive-text);
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-gov-positive:hover {
+    background-color: var(--button-positive-hover-bg);
+    border-color: var(--button-positive-hover-bg);
+    color: var(--button-positive-text);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-gov-negative {
+    background-color: var(--button-negative-bg);
+    border-color: var(--button-negative-bg);
+    color: var(--button-negative-text);
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-gov-negative:hover {
+    background-color: var(--button-negative-hover-bg);
+    border-color: var(--button-negative-hover-bg);
+    color: var(--button-negative-text);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -80,7 +356,10 @@ body {
     color: white;
 }
 
-/* Állapot jelvények */
+/* ============================================
+   Badge komponensek - DÁP komponens tokenekkel
+   ============================================ */
+
 .badge-status {
     padding: 0.5em 0.75em;
     font-size: 0.85em;
@@ -89,43 +368,43 @@ body {
 }
 
 .badge-status.badge-new {
-    background-color: #6c757d;
-    color: white;
+    background-color: var(--badge-secondary-bg);
+    color: var(--badge-secondary-text);
 }
 
 .badge-status.badge-pending {
-    background-color: #ffc107;
-    color: #212529;
+    background-color: var(--badge-warning-bg);
+    color: var(--badge-warning-text);
 }
 
 .badge-status.badge-approved {
-    background-color: #28a745;
-    color: white;
+    background-color: var(--badge-success-bg);
+    color: var(--badge-success-text);
 }
 
 .badge-status.badge-rejected {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--badge-danger-bg);
+    color: var(--badge-danger-text);
 }
 
 .badge-status.badge-expired {
-    background-color: #343a40;
-    color: white;
+    background-color: var(--vahap-neutral-800);
+    color: #FFFFFF;
 }
 
 /* Funkció kód badge-ek */
 .badge-function {
-    background-color: var(--vahap-secondary);
-    color: white;
-    font-family: 'Courier New', monospace;
+    background-color: var(--badge-secondary-bg);
+    color: var(--badge-secondary-text);
+    font-family: var(--font-family-mono);
     font-size: 0.75em;
     padding: 0.35em 0.5em;
 }
 
 .badge-usecase {
-    background-color: var(--vahap-info);
-    color: white;
-    font-family: 'Courier New', monospace;
+    background-color: var(--vahap-informative);
+    color: #FFFFFF;
+    font-family: var(--font-family-mono);
     font-size: 0.75em;
     padding: 0.35em 0.5em;
 }
@@ -291,22 +570,218 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* Form stílusok */
-.form-control:focus,
-.form-select:focus {
-    border-color: var(--vahap-primary);
-    box-shadow: 0 0 0 0.25rem rgba(0, 75, 135, 0.25);
+/* ============================================
+   Űrlap komponensek - DÁP komponens tokenekkel
+   ============================================ */
+
+.form-control,
+.form-select {
+    border-color: var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--input-text);
 }
 
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 0.25rem rgba(70, 80, 251, 0.25);
+    background-color: var(--input-bg);
+}
+
+.form-control::placeholder {
+    color: var(--input-placeholder);
+}
+
+/* Disabled és readonly állapotok - FONTOS: Olvasható szöveg! */
+.form-control:disabled,
+.form-control[readonly],
+.form-select:disabled,
+.form-select[readonly] {
+    background-color: var(--vahap-neutral-100) !important;
+    color: var(--vahap-neutral-700) !important;
+    border-color: var(--vahap-neutral-300);
+    opacity: 1 !important; /* Bootstrap alapértelmezett 0.5 felülírása */
+}
+
+/* Textarea specifikus */
+textarea.form-control:disabled,
+textarea.form-control[readonly] {
+    background-color: var(--vahap-neutral-100) !important;
+    color: var(--vahap-neutral-700) !important;
+    opacity: 1 !important;
+}
+
+/* KRITIKUS: MINDEN textarea legyen olvasható! ULTRA SPECIFIKUS! */
+textarea,
+textarea.form-control,
+textarea.form-control-sm,
+.form-control textarea,
+div textarea {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid var(--input-border) !important;
+}
+
+textarea:disabled,
+textarea[readonly],
+textarea.disabled,
+textarea[disabled],
+textarea.form-control:disabled,
+textarea.form-control[readonly] {
+    background-color: #F1F5F9 !important;
+    color: #334155 !important;
+    opacity: 1 !important;
+    cursor: not-allowed;
+}
+
+/* Textarea placeholder is legyen jól látható */
+textarea::placeholder,
+textarea.form-control::placeholder {
+    color: #94A3B8 !important;
+    opacity: 1 !important;
+}
+
+/* Sötét háttérű elemek szövegszíne - DE CSAK HA TÉNYLEG SÖTÉT! */
+[style*="background: #1e293b"],
+[style*="background-color: #1e293b"],
+[style*="background: #334155"],
+[style*="background-color: #334155"],
+[style*="background: #212529"],
+[style*="background-color: #212529"] {
+    color: #FFFFFF !important;
+}
+
+/* .bg-dark MÁR NEM kap fehér szöveget, mert felülírtuk világosszürkére */
+
+/* Bármilyen pre vagy code elem sötét háttérrel */
+pre, code {
+    background-color: var(--vahap-neutral-100);
+    color: var(--vahap-neutral-900);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+pre.bg-dark, code.bg-dark {
+    background-color: var(--vahap-neutral-800) !important;
+    color: #FFFFFF !important;
+}
+
+/* DÁP neutral színek - CSAK a tényleg sötét háttereknél fehér szöveg */
+.bg-neutral-700:not(.bg-dark):not(.bg-secondary),
+.bg-neutral-800:not(.bg-dark):not(.bg-secondary),
+.bg-neutral-900:not(.bg-dark):not(.bg-secondary) {
+    color: #FFFFFF !important;
+}
+
+/* bg-dark és bg-secondary KIVÉVE, mert azokat felülírtuk világosszürkére */
+
+/* Form label mindig jól látható */
 .form-label {
     font-weight: 500;
-    color: var(--vahap-dark);
+    color: var(--vahap-neutral-900) !important;
     margin-bottom: 0.5rem;
+}
+
+/* Segítség szövegek (help text) olvashatóak */
+.form-text,
+.help-text,
+small.text-muted {
+    color: var(--vahap-neutral-600) !important;
+}
+
+/* Label-ek NORMÁL színűek (NEM fehérek!) */
+label[for],
+label,
+.form-label {
+    color: var(--vahap-neutral-900) !important;
+}
+
+/* Ha TÉNYLEG sötét háttéren van (nem a felülírt .bg-dark!) */
+.force-dark .form-text,
+.force-dark .help-text,
+.force-dark small,
+.force-dark label,
+.force-dark .form-label,
+[style*="background: #1e293b"] label,
+[style*="background: #334155"] label,
+[style*="background: #212529"] label {
+    color: var(--vahap-neutral-100) !important;
+}
+
+/* Icon előtti szövegek (pl. "Segítség:") */
+.bi + *,
+* + .bi {
+    vertical-align: middle;
+}
+
+/* Notification boxes és info szövegek */
+.alert,
+.notification,
+.info-box,
+[role="alert"],
+[role="status"] {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+/* Sötét notification box - FONTOS: Világos szöveg! */
+.alert.bg-dark,
+.notification.bg-dark,
+.info-box.bg-dark,
+div[style*="background: #1e293b"],
+div[style*="background: #334155"],
+div[style*="background: #212529"],
+div[style*="background-color: #1e293b"],
+div[style*="background-color: #334155"],
+div[style*="background-color: #212529"] {
+    color: #FFFFFF !important;
+}
+
+/* Bármilyen div sötét háttérrel */
+div[class*="bg-dark"],
+div[class*="bg-secondary"][style*="background"] {
+    color: #FFFFFF !important;
+}
+
+/* UNIVERZÁLIS: Bármilyen elem ami sötét háttérszínű */
+*[style*="background:#1e293b"],
+*[style*="background-color:#1e293b"],
+*[style*="background:#334155"],
+*[style*="background-color:#334155"],
+*[style*="background:#212529"],
+*[style*="background-color:#212529"],
+*[style*="background: #1e293b"],
+*[style*="background-color: #1e293b"],
+*[style*="background: #334155"],
+*[style*="background-color: #334155"],
+*[style*="background: #212529"],
+*[style*="background-color: #212529"],
+*[class*="dark-bg"],
+*[class*="bg-darker"] {
+    color: #FFFFFF !important;
+    background-color: var(--vahap-neutral-200) !important;
+}
+
+/* BOOTSTRAP OVERRIDE: Minden sötét utility osztály */
+.bg-dark,
+.bg-secondary,
+.text-bg-dark,
+.text-bg-secondary {
+    background-color: var(--vahap-neutral-200) !important;
+    color: var(--vahap-neutral-900) !important;
+}
+
+/* Ha MUSZÁJ sötét háttér, akkor fehér szöveg */
+.bg-dark.force-dark,
+.bg-secondary.force-dark {
+    background-color: var(--vahap-neutral-800) !important;
+    color: #FFFFFF !important;
 }
 
 .required::after {
     content: ' *';
-    color: var(--vahap-danger);
+    color: var(--vahap-negative);
 }
 
 /* Ellenőrzési lista stílusok */
@@ -685,4 +1160,79 @@ body {
         font-size: 0.6rem;
         letter-spacing: 1px;
     }
+}
+
+/* ============================================
+   NUKLEÁRIS OPCIÓ: Textarea KÖTELEZŐEN olvasható!
+   Ez a LEGESLEGUTOLSÓ szabály, ami mindent felülír!
+   ============================================ */
+
+textarea,
+textarea[class],
+textarea.form-control,
+textarea.form-control-sm,
+textarea.form-control-lg {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+textarea:not(:disabled):not([readonly]) {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+/* ULTRA NUCLEAR: Minden input és select is legyen világos! */
+input.form-control,
+input.form-control-sm,
+input.form-control-lg,
+select.form-select,
+select.form-select-sm,
+select.form-select-lg,
+input[type="text"],
+input[type="email"],
+input[type="search"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"] {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid var(--vahap-neutral-300) !important;
+}
+
+/* Focus állapot */
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-select:focus {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border-color: var(--vahap-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(70, 80, 251, 0.15) !important;
+}
+
+/* ============================================
+   LABEL-EK KÖTELEZŐEN SÖTÉT SZÍNŰEK!
+   ============================================ */
+
+label,
+label[for],
+.form-label,
+label.form-label,
+.form-label.small,
+label.small,
+.small label,
+div label,
+form label {
+    color: #0F172A !important;
+    font-weight: 500 !important;
+}
+
+/* Ha fehér label-re van szükség (ritka!), használd a .text-white class-t */
+label.text-white,
+.form-label.text-white {
+    color: #FFFFFF !important;
 }

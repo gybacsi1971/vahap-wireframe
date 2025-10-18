@@ -21,7 +21,7 @@
         }
 
         .dashboard-header {
-            background: linear-gradient(135deg, #004b87 0%, #0066aa 100%);
+            background: linear-gradient(135deg, var(--vahap-primary) 0%, #0066aa 100%);
             color: white;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -41,19 +41,19 @@
         }
 
         .stat-card.new-cases {
-            border-left-color: #dc3545;
+            border-left-color: var(--vahap-negative);
         }
 
         .stat-card.in-progress {
-            border-left-color: #ffc107;
+            border-left-color: var(--vahap-warning);
         }
 
         .stat-card.pending-decision {
-            border-left-color: #17a2b8;
+            border-left-color: var(--vahap-informative);
         }
 
         .stat-card.completed {
-            border-left-color: #28a745;
+            border-left-color: var(--vahap-positive);
         }
 
         .ugy-card {
@@ -71,6 +71,11 @@
             height: 300px;
         }
     </style>
+
+    <!-- DÁP Design System - Inter betűtípus -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">

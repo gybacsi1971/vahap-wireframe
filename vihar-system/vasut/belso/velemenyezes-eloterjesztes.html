@@ -21,7 +21,7 @@
         }
 
         .page-header {
-            background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+            background: linear-gradient(135deg, var(--vahap-primary) 0%, #5a32a3 100%);
             color: white;
             padding: 2rem;
             margin-bottom: 2rem;
@@ -57,12 +57,12 @@
         }
 
         .workflow-step.active .step-circle {
-            background: #6f42c1;
+            background: var(--vahap-primary);
             color: white;
         }
 
         .workflow-step.completed .step-circle {
-            background: #28a745;
+            background: var(--vahap-positive);
             color: white;
         }
 
@@ -95,12 +95,12 @@
         }
 
         .velemenyezo-card:hover {
-            border-color: #6f42c1;
+            border-color: var(--vahap-primary);
             box-shadow: 0 4px 8px rgba(111, 66, 193, 0.2);
         }
 
         .velemenyezo-card.selected {
-            border-color: #6f42c1;
+            border-color: var(--vahap-primary);
             background-color: #f8f4ff;
         }
 
@@ -111,6 +111,11 @@
             margin: 0.25rem;
         }
     </style>
+
+    <!-- DÁP Design System - Inter betűtípus -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">

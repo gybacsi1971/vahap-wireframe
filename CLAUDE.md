@@ -431,18 +431,18 @@ html {
 ### CSS változók (vihar-common.css)
 ```css
 :root {
-    /* Kormányzati színpaletta */
-    --vihar-primary: #004b87;      /* Sötétkék */
-    --vihar-secondary: #6c757d;    /* Szürke */
-    --vihar-success: #28a745;      /* Zöld */
-    --vihar-warning: #ffc107;      /* Sárga */
-    --vihar-danger: #dc3545;       /* Piros */
-    --vihar-info: #17a2b8;         /* Világoskék */
-    
-    /* Modul specifikus színek */
-    --vasut-color: #8B4513;        /* Barna - vasút */
-    --hajozas-color: #006994;      /* Tengerkék - hajózás */
-    
+    /* DÁP Design System színpaletta */
+    --vahap-primary: #4650FB;      /* DÁP Indigo - primér szín */
+    --vahap-neutral-500: #64748B;  /* DÁP szürke */
+    --vahap-positive: #059669;     /* DÁP pozitív (zöld) */
+    --vahap-warning: #D97706;      /* DÁP figyelmeztető (narancs) */
+    --vahap-negative: #DC2626;     /* DÁP negatív (piros) */
+    --vahap-informative: #0284C7;  /* DÁP informatív (kék) */
+
+    /* Modul specifikus színek - DÁP compliance */
+    --vahap-vasut: #4650FB;        /* DÁP Indigo - vasúti modul */
+    --vahap-hajozas: #4650FB;      /* DÁP Indigo - hajózási modul */
+
     /* Funkció kategória színek */
     --func-external: #e3f2fd;      /* Világoskék háttér */
     --func-internal: #fff3e0;      /* Világos narancs háttér */
