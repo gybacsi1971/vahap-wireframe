@@ -360,6 +360,57 @@ router.delete('/dijtetelek/:ugytipus_kod/:id', (req, res) => {
     }
 });
 
+// Díjtétel módosítása (egyszerűsített endpoint)
+router.put('/dijak/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+        const { megnevezes, osszeg, tipus, kotelezo, leiras, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            UPDATE dijtetelek
+            SET megnevezes = ?, osszeg = ?, tipus = ?, kotelezo = ?, leiras = ?, aktiv = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(megnevezes, osszeg, tipus, kotelezo ? 1 : 0, leiras || null, aktiv !== false ? 1 : 0, id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Díjtétel nem található' });
+        }
+
+        res.json({ id, message: 'Díjtétel sikeresen frissítve' });
+    } catch (error) {
+        console.error('Hiba a díjtétel frissítésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Díjtétel törlése (egyszerűsített endpoint)
+router.delete('/dijak/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+
+        const stmt = db.prepare(`
+            UPDATE dijtetelek
+            SET aktiv = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Díjtétel nem található' });
+        }
+
+        res.json({ message: 'Díjtétel sikeresen törölve' });
+    } catch (error) {
+        console.error('Hiba a díjtétel törlésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============================================================================
 // KEDVEZMÉNYEK
 // ============================================================================
@@ -416,6 +467,57 @@ router.put('/kedvezmenyek/:ugytipus_kod/:id', (req, res) => {
 
 // Kedvezmény törlése
 router.delete('/kedvezmenyek/:ugytipus_kod/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+
+        const stmt = db.prepare(`
+            UPDATE kedvezmenyek
+            SET aktiv = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Kedvezmény nem található' });
+        }
+
+        res.json({ message: 'Kedvezmény sikeresen törölve' });
+    } catch (error) {
+        console.error('Hiba a kedvezmény törlésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Kedvezmény módosítása (egyszerűsített endpoint)
+router.put('/kedvezmenyek/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+        const { megnevezes, szazalek, leiras, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            UPDATE kedvezmenyek
+            SET megnevezes = ?, szazalek = ?, leiras = ?, aktiv = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(megnevezes, szazalek, leiras || null, aktiv !== false ? 1 : 0, id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Kedvezmény nem található' });
+        }
+
+        res.json({ id, message: 'Kedvezmény sikeresen frissítve' });
+    } catch (error) {
+        console.error('Hiba a kedvezmény frissítésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Kedvezmény törlése (egyszerűsített endpoint)
+router.delete('/kedvezmenyek/:id', (req, res) => {
     try {
         const db = req.app.locals.db;
         const { id } = req.params;
@@ -542,6 +644,27 @@ router.get('/felhasznalok', (req, res) => {
         res.json({ felhasznalok });
     } catch (error) {
         console.error('Hiba a felhasználók lekérésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================================================
+// ÜGYTÍPUSOK
+// ============================================================================
+
+// Összes ügytípus lekérése
+router.get('/ugytipusok', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const ugytipusok = db.prepare(`
+            SELECT * FROM ugytipus
+            WHERE aktiv = 1
+            ORDER BY kod
+        `).all();
+
+        res.json({ ugytipusok });
+    } catch (error) {
+        console.error('Hiba az ügytípusok lekérésénél:', error);
         res.status(500).json({ error: error.message });
     }
 });

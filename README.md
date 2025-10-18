@@ -117,8 +117,12 @@ A frontend elérhető a `http://localhost:8080` címen.
 Nyisd meg a böngészőt:
 
 - **Főoldal:** http://localhost:8080
-- **Paraméterező Díjtételek:** http://localhost:8080/parameterezo/dijtetelek.html
+- **API Demo:** http://localhost:8080/api-demo.html
+- **Határidők (API verzió):** http://localhost:8080/parameterezo/hataridok-api-demo.html
+- **Díjtételek (API verzió):** http://localhost:8080/parameterezo/dijtetelek-api-demo.html
 - **Backend Health Check:** http://localhost:3000/api/health
+
+**Megjegyzés:** Az API demo oldalak a teljes CRUD funkciót demonstrálják perzisztens SQLite adatbázissal.
 
 ---
 
@@ -192,11 +196,24 @@ GET  /api/hajozas/ugyek                               # Hajózási ügyek
 
 ## 📖 Dokumentáció
 
-- **[Backend README](backend/README.md)** - API dokumentáció
-- **[Frontend Migráció](backend/FRONTEND_MIGRATION.md)** - Mock → API átállás
-- **[CLAUDE.md](CLAUDE.md)** - Fejlesztési útmutató
+- **[Telepítési Útmutató](INSTALLATION.md)** - Lépésről lépésre telepítés
+- **[API Migráció Minta](API_MIGRATION_PATTERN.md)** - Mock → API átállás mintákkal
+- **[Backend README](backend/README.md)** - Teljes API dokumentáció
+- **[Frontend Migráció](backend/FRONTEND_MIGRATION.md)** - Komponens átállítási útmutató
+- **[CLAUDE.md](CLAUDE.md)** - Fejlesztési szabályok és konvenciók
 - **[Vasúti Specifikáció](spec/VAHAP%20Vasúti%20Modul%20Logikai%20Specifikáció.md)**
 - **[Hajózási Specifikáció](spec/VAHAP%20Hajózási%20Modul%20Logikai%20Specifikáció.md)**
+
+### API Komponensek
+
+Az alábbi komponensek már API-alapúak (SQLite backend):
+
+- ✅ **param-hataridok-api.js** - Határidők kezelő (teljes CRUD)
+- ✅ **param-dijtetelek-api.js** - Díjtételek és díjkalkulátor (F-0070, F-0082)
+
+Demo oldalak:
+- [hataridok-api-demo.html](vihar-system/parameterezo/hataridok-api-demo.html)
+- [dijtetelek-api-demo.html](vihar-system/parameterezo/dijtetelek-api-demo.html)
 
 ---
 

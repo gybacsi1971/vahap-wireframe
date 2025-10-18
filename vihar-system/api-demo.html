@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAHAP API Demo - SQLite Backend</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        .demo-section {
+            margin-bottom: 2rem;
+        }
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .response-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- API Státusz Badge -->
+        <div class="api-status">
+            <span v-if="apiOnline" class="badge bg-success">
+                <i class="bi bi-cloud-check"></i> Backend Online
+            </span>
+            <span v-else class="badge bg-danger">
+                <i class="bi bi-cloud-slash"></i> Backend Offline
+            </span>
+        </div>
+
+        <!-- Fejléc -->
+        <nav class="navbar navbar-dark bg-primary">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">
+                    <i class="bi bi-database"></i> VAHAP API Demo - SQLite Backend
+                </span>
+            </div>
+        </nav>
+
+        <!-- Fő tartalom -->
+        <div class="container-fluid py-4">
+            <div class="row">
+                <!-- Bal oldali menü -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-list-ul"></i> API Tesztek</h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="#" @click.prevent="testHealthCheck"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'health'}">
+                                <i class="bi bi-heart-pulse"></i> Health Check
+                            </a>
+                            <a href="#" @click.prevent="testEllenorzesiListak"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'ellenorzesi'}">
+                                <i class="bi bi-list-check"></i> Ellenőrzési Listák
+                            </a>
+                            <a href="#" @click.prevent="testDijtetelek('V-044')"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'dijak-v'}">
+                                <i class="bi bi-cash-stack"></i> Díjtételek (V-044)
+                            </a>
+                            <a href="#" @click.prevent="testDijtetelek('H-052')"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'dijak-h'}">
+                                <i class="bi bi-cash-stack"></i> Díjtételek (H-052)
+                            </a>
+                            <a href="#" @click.prevent="testHataridok"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'hataridok'}">
+                                <i class="bi bi-calendar-event"></i> Határidők
+                            </a>
+                            <a href="#" @click.prevent="testVasutUgyek"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'vasut'}">
+                                <i class="bi bi-train-front"></i> Vasúti Ügyek
+                            </a>
+                            <a href="#" @click.prevent="testHajozasUgyek"
+                               class="list-group-item list-group-item-action"
+                               :class="{'active': activeTest === 'hajozas'}">
+                                <i class="bi bi-water"></i> Hajózási Ügyek
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Statisztikák -->
+                    <div class="card mt-3" v-if="stats">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Statisztikák</h6>
+                        </div>
+                        <div class="card-body">
+                            <small class="text-muted">Legutóbbi válasz:</small>
+                            <div class="mt-2">
+                                <div class="mb-2">
+                                    <strong>Rekordok:</strong> {{ stats.recordCount }}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Válaszidő:</strong> {{ stats.responseTime }}ms
+                                </div>
+                                <div>
+                                    <strong>Státusz:</strong>
+                                    <span class="badge bg-success">{{ stats.status }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobb oldali tartalom -->
+                <div class="col-md-9">
+                    <!-- Loading -->
+                    <div v-if="loading" class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Betöltés...</span>
+                        </div>
+                        <p class="mt-3">API hívás folyamatban...</p>
+                    </div>
+
+                    <!-- Hiba -->
+                    <div v-else-if="error" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Hiba történt!</strong>
+                        <p class="mb-0 mt-2">{{ error }}</p>
+                    </div>
+
+                    <!-- Válasz megjelenítése -->
+                    <div v-else-if="response" class="demo-section">
+                        <div class="card">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-code-square"></i> API Válasz
+                                </h5>
+                                <div>
+                                    <button @click="copyResponse" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-clipboard"></i> Másolás
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="response-box">
+                                    <pre>{{ JSON.stringify(response, null, 2) }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kezdő állapot -->
+                    <div v-else class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-left" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Válassz egy API tesztet a bal oldali menüből</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- VAHAP API Config -->
+    <script src="assets/js/vihar-api-config.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    apiOnline: false,
+                    loading: false,
+                    error: null,
+                    response: null,
+                    activeTest: null,
+                    stats: null
+                };
+            },
+            methods: {
+                async checkBackend() {
+                    try {
+                        this.apiOnline = await VAHAP_API.healthCheck();
+                    } catch (error) {
+                        this.apiOnline = false;
+                    }
+                },
+
+                async executeTest(testName, apiCall) {
+                    this.activeTest = testName;
+                    this.loading = true;
+                    this.error = null;
+                    this.response = null;
+                    this.stats = null;
+
+                    const startTime = Date.now();
+
+                    try {
+                        const result = await apiCall();
+                        this.response = result;
+
+                        // Statisztikák számítása
+                        const endTime = Date.now();
+                        let recordCount = 0;
+
+                        if (Array.isArray(result)) {
+                            recordCount = result.length;
+                        } else if (result.listak) {
+                            recordCount = result.listak.length;
+                        } else if (result.dijak) {
+                            recordCount = result.dijak.length;
+                        } else if (result.hataridok) {
+                            recordCount = result.hataridok.length;
+                        } else if (result.ugyek) {
+                            recordCount = result.ugyek.length;
+                        }
+
+                        this.stats = {
+                            recordCount,
+                            responseTime: endTime - startTime,
+                            status: 'OK'
+                        };
+                    } catch (error) {
+                        this.error = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async testHealthCheck() {
+                    await this.executeTest('health', () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.health)
+                    );
+                },
+
+                async testEllenorzesiListak() {
+                    await this.executeTest('ellenorzesi', () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.parameterezo.ellenorzesiListak)
+                    );
+                },
+
+                async testDijtetelek(ugytipus) {
+                    await this.executeTest(`dijak-${ugytipus.toLowerCase().replace('-', '')}`, () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.parameterezo.dijtetelek(ugytipus))
+                    );
+                },
+
+                async testHataridok() {
+                    await this.executeTest('hataridok', () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.parameterezo.hataridok)
+                    );
+                },
+
+                async testVasutUgyek() {
+                    await this.executeTest('vasut', () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.vasut.ugyek)
+                    );
+                },
+
+                async testHajozasUgyek() {
+                    await this.executeTest('hajozas', () =>
+                        VAHAP_API.get(VAHAP_API.endpoints.hajozas.ugyek)
+                    );
+                },
+
+                copyResponse() {
+                    const text = JSON.stringify(this.response, null, 2);
+                    navigator.clipboard.writeText(text);
+                    alert('Válasz másolva a vágólapra!');
+                }
+            },
+            mounted() {
+                this.checkBackend();
+                // Rendszeres backend ellenőrzés
+                setInterval(() => {
+                    this.checkBackend();
+                }, 5000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -31,6 +31,8 @@ const ParamDijtetelek = {
             showKedvezmenyEditor: false,
             editMode: 'create',
             hasChanges: false,
+            loading: false,  // API loading state
+            error: null,     // API error state
             // Meta adatok
             metaAdatok: {
                 utolso_modositas: '',
@@ -324,28 +326,42 @@ const ParamDijtetelek = {
         </div>
     `,
     methods: {
-        loadDijak() {
+        async loadDijak() {
             console.log('[param-dijtetelek] Loading díjak for:', this.ugytipus);
+            this.loading = true;
+            this.error = null;
 
-            if (typeof VIHARMockData !== 'undefined' && VIHARMockData.parameterezo && VIHARMockData.parameterezo.dijtetelek) {
-                const key = this.ugytipus.replace('-', '_');
-                const data = VIHARMockData.parameterezo.dijtetelek[key];
+            try {
+                const response = await VAHAP_API.get(
+                    VAHAP_API.endpoints.parameterezo.dijtetelek(this.ugytipus)
+                );
 
-                if (data) {
-                    this.dijak = JSON.parse(JSON.stringify(data.dijak || []));
-                    this.kedvezmenyek = JSON.parse(JSON.stringify(data.kedvezmenyek || []));
+                console.log('[param-dijtetelek] API response:', response);
+
+                if (response && response.ugytipus) {
+                    this.dijak = response.dijak || [];
+                    this.kedvezmenyek = response.kedvezmenyek || [];
                     this.metaAdatok = {
-                        megnevezes: data.megnevezes || '',
-                        jogszabaly: data.jogszabaly || '',
-                        ervenyesseg_kezdete: data.ervenyesseg_kezdete || '',
-                        utolso_modositas: data.utolso_modositas || ''
+                        megnevezes: response.ugytipus.megnevezes || '',
+                        jogszabaly: response.ugytipus.jogszabaly || '',
+                        ervenyesseg_kezdete: response.ugytipus.created_at?.split(' ')[0] || '',
+                        utolso_modositas: response.ugytipus.updated_at?.split(' ')[0] || ''
                     };
                     console.log('[param-dijtetelek] Loaded', this.dijak.length, 'díjak,', this.kedvezmenyek.length, 'kedvezmények');
                 } else {
-                    console.warn('[param-dijtetelek] No data found for key:', key);
+                    throw new Error('Érvénytelen API válasz');
                 }
+
+                this.hasChanges = false;
+
+            } catch (err) {
+                console.error('[param-dijtetelek] Hiba a betöltés során:', err);
+                this.error = `Hiba a díjak betöltése során: ${err.message}`;
+                this.dijak = [];
+                this.kedvezmenyek = [];
+            } finally {
+                this.loading = false;
             }
-            this.hasChanges = false;
         },
 
         openCreateDijDialog() {
@@ -367,35 +383,69 @@ const ParamDijtetelek = {
             this.showDijEditor = true;
         },
 
-        saveDij() {
+        async saveDij() {
             if (!this.selectedDij.megnevezes || this.selectedDij.osszeg <= 0) {
                 alert('Kérem töltse ki a kötelező mezőket!');
                 return;
             }
 
-            if (this.editMode === 'create') {
-                this.dijak.push({
-                    id: Date.now(),
-                    ...this.selectedDij
-                });
-            } else {
-                const index = this.dijak.findIndex(d => d.id === this.selectedDij.id);
-                if (index > -1) {
-                    this.dijak[index] = { ...this.selectedDij };
-                }
-            }
+            this.loading = true;
+            this.error = null;
 
-            this.hasChanges = true;
-            this.closeDijEditor();
-            this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+            try {
+                if (this.editMode === 'create') {
+                    // POST - Új díj létrehozása
+                    await VAHAP_API.post(
+                        VAHAP_API.endpoints.parameterezo.dijtetelek(this.ugytipus),
+                        this.selectedDij
+                    );
+                } else {
+                    // PUT - Díj módosítása
+                    await VAHAP_API.put(
+                        VAHAP_API.endpoints.parameterezo.dijById(this.selectedDij.id),
+                        this.selectedDij
+                    );
+                }
+
+                // Újratöltés a szerverről
+                await this.loadDijak();
+
+                this.hasChanges = true;
+                this.closeDijEditor();
+                this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+
+            } catch (err) {
+                console.error('[param-dijtetelek] Hiba a díj mentése során:', err);
+                this.error = `Hiba a díj mentése során: ${err.message}`;
+            } finally {
+                this.loading = false;
+            }
         },
 
-        deleteDij(dij) {
-            const index = this.dijak.findIndex(d => d.id === dij.id);
-            if (index > -1) {
-                this.dijak.splice(index, 1);
+        async deleteDij(dij) {
+            if (!confirm(`Biztosan törli: ${dij.megnevezes}?`)) {
+                return;
+            }
+
+            this.loading = true;
+            this.error = null;
+
+            try {
+                await VAHAP_API.delete(
+                    VAHAP_API.endpoints.parameterezo.dijById(dij.id)
+                );
+
+                // Újratöltés a szerverről
+                await this.loadDijak();
+
                 this.hasChanges = true;
                 this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+
+            } catch (err) {
+                console.error('[param-dijtetelek] Hiba a díj törlése során:', err);
+                this.error = `Hiba a díj törlése során: ${err.message}`;
+            } finally {
+                this.loading = false;
             }
         },
 
@@ -420,35 +470,69 @@ const ParamDijtetelek = {
             this.showKedvezmenyEditor = true;
         },
 
-        saveKedvezmeny() {
+        async saveKedvezmeny() {
             if (!this.selectedKedvezmeny.megnevezes || this.selectedKedvezmeny.szazalek <= 0) {
                 alert('Kérem töltse ki a kötelező mezőket!');
                 return;
             }
 
-            if (this.editMode === 'create') {
-                this.kedvezmenyek.push({
-                    id: Date.now(),
-                    ...this.selectedKedvezmeny
-                });
-            } else {
-                const index = this.kedvezmenyek.findIndex(k => k.id === this.selectedKedvezmeny.id);
-                if (index > -1) {
-                    this.kedvezmenyek[index] = { ...this.selectedKedvezmeny };
-                }
-            }
+            this.loading = true;
+            this.error = null;
 
-            this.hasChanges = true;
-            this.closeKedvezmenyEditor();
-            this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+            try {
+                if (this.editMode === 'create') {
+                    // POST - Új kedvezmény létrehozása
+                    await VAHAP_API.post(
+                        VAHAP_API.endpoints.parameterezo.kedvezmenyek(this.ugytipus),
+                        this.selectedKedvezmeny
+                    );
+                } else {
+                    // PUT - Kedvezmény módosítása
+                    await VAHAP_API.put(
+                        VAHAP_API.endpoints.parameterezo.kedvezmenyById(this.selectedKedvezmeny.id),
+                        this.selectedKedvezmeny
+                    );
+                }
+
+                // Újratöltés a szerverről
+                await this.loadDijak();
+
+                this.hasChanges = true;
+                this.closeKedvezmenyEditor();
+                this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+
+            } catch (err) {
+                console.error('[param-dijtetelek] Hiba a kedvezmény mentése során:', err);
+                this.error = `Hiba a kedvezmény mentése során: ${err.message}`;
+            } finally {
+                this.loading = false;
+            }
         },
 
-        deleteKedvezmeny(kedv) {
-            const index = this.kedvezmenyek.findIndex(k => k.id === kedv.id);
-            if (index > -1) {
-                this.kedvezmenyek.splice(index, 1);
+        async deleteKedvezmeny(kedv) {
+            if (!confirm(`Biztosan törli: ${kedv.megnevezes}?`)) {
+                return;
+            }
+
+            this.loading = true;
+            this.error = null;
+
+            try {
+                await VAHAP_API.delete(
+                    VAHAP_API.endpoints.parameterezo.kedvezmenyById(kedv.id)
+                );
+
+                // Újratöltés a szerverről
+                await this.loadDijak();
+
                 this.hasChanges = true;
                 this.$emit('change', { dijak: this.dijak, kedvezmenyek: this.kedvezmenyek });
+
+            } catch (err) {
+                console.error('[param-dijtetelek] Hiba a kedvezmény törlése során:', err);
+                this.error = `Hiba a kedvezmény törlése során: ${err.message}`;
+            } finally {
+                this.loading = false;
             }
         },
 
@@ -465,8 +549,8 @@ const ParamDijtetelek = {
             }).format(value);
         }
     },
-    mounted() {
-        this.loadDijak();
+    async mounted() {
+        await this.loadDijak();
     },
     watch: {
         ugytipus() {
