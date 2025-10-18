@@ -28,6 +28,7 @@ const VAHAP_API = {
         vasut: {
             ugyek: '/vasut/ugyek',
             ugy: (ugyazonosito) => `/vasut/ugyek/${ugyazonosito}`,
+            ugyElozmeny: (ugyazonosito) => `/vasut/ugyek/${ugyazonosito}/elozmeny`,
             vny024: '/vasut/nyilvantartas/vny024'
         },
         hajozas: {
