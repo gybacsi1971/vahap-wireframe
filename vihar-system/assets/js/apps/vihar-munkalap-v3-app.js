@@ -10,6 +10,9 @@ const VahapMunkalapV3App = {
             sidebarCollapsed: false,
             workflowCollapsed: false,
 
+            // Teszt mód (minden lépés elérhető)
+            testMode: false,
+
             // Tab állapot
             activeTab: 'workflow', // 'workflow' vagy 'documents'
 
@@ -349,12 +352,28 @@ const VahapMunkalapV3App = {
     methods: {
         // Workflow lépés választása
         selectWorkflowStep(step) {
-            if (step.completed || this.isStepAvailable(step)) {
+            // Teszt módban minden lépés elérhető
+            if (this.testMode || step.completed || this.isStepAvailable(step)) {
                 this.currentStep = step.id;
                 this.activeTab = 'workflow'; // Automatikusan workflow tab-ra vált
                 this.updateAvailableDecisions(step);
+
+                if (this.testMode) {
+                    console.log('[TESZT MÓD] Lépés kiválasztva:', step.name, '(' + step.code + ')');
+                }
             } else {
                 alert('Ez a lépés még nem érhető el!');
+            }
+        },
+
+        // Teszt mód váltás eseménykezelő
+        onTestModeChange() {
+            if (this.testMode) {
+                console.log('🐛 [TESZT MÓD BEKAPCSOLVA] Minden workflow lépés elérhető');
+                console.log('ℹ️ A workflow korlátozások kikapcsolva. Bármely lépés szabadon kiválasztható.');
+            } else {
+                console.log('✅ [TESZT MÓD KIKAPCSOLVA] Workflow korlátozások aktívak');
+                console.log('ℹ️ Csak az elérhető lépések választhatók ki.');
             }
         },
 

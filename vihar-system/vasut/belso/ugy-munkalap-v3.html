@@ -281,6 +281,30 @@
             color: #adb5bd;
         }
 
+        /* Teszt mód - elérhető lépések */
+        .workflow-step.test-mode-available {
+            opacity: 1 !important;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-color: #ffc107;
+            cursor: pointer;
+        }
+
+        .workflow-step.test-mode-available:hover {
+            background: linear-gradient(135deg, #ffe8a1 0%, #ffd966 100%);
+            border-color: #ff9800;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        .workflow-step.test-mode-available .workflow-step-icon {
+            background: #ffc107;
+            color: white;
+        }
+
+        .workflow-step.test-mode-available .workflow-step-name {
+            color: #856404;
+            font-weight: 600;
+        }
+
         /* Indentált lépések - szaggatott kerettel */
         .workflow-step.indented {
             border-style: dashed;
@@ -766,6 +790,18 @@
                         </button>
                     </div>
 
+                    <!-- Teszt mód kapcsoló -->
+                    <div v-show="!workflowCollapsed" class="workflow-test-mode" style="padding: 0.75rem 1rem; background: #fff3cd; border-bottom: 2px solid #ffc107;">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="testModeSwitch" v-model="testMode" @change="onTestModeChange">
+                            <label class="form-check-label" for="testModeSwitch" style="font-size: 0.875rem; font-weight: 600; color: #856404; cursor: pointer;">
+                                <i class="bi bi-bug-fill me-1"></i>
+                                Teszt mód
+                                <small class="d-block text-muted" style="font-weight: 400; font-size: 0.75rem;">Minden lépés elérhető</small>
+                            </label>
+                        </div>
+                    </div>
+
                     <div v-show="!workflowCollapsed" class="workflow-steps-list">
                         <div v-for="(step, index) in workflowSteps" :key="step.id"
                              class="workflow-step-wrapper"
@@ -777,9 +813,11 @@
                                      'active': step.id === currentStep,
                                      'completed': step.completed,
                                      'pending': !step.completed && step.id !== currentStep,
-                                     'indented': step.indented
+                                     'indented': step.indented,
+                                     'test-mode-available': testMode && !step.completed && step.id !== currentStep
                                  }"
-                                 @click="selectWorkflowStep(step)">
+                                 @click="selectWorkflowStep(step)"
+                                 :title="testMode && !step.completed && step.id !== currentStep ? 'Teszt módban elérhető' : ''">
                                 <div class="workflow-step-icon">
                                     <i :class="step.icon"></i>
                                 </div>
@@ -788,6 +826,9 @@
                                 </div>
                                 <div v-if="step.completed" class="ms-auto">
                                     <i class="bi bi-check-circle-fill text-success"></i>
+                                </div>
+                                <div v-else-if="testMode && !step.completed && step.id !== currentStep" class="ms-auto">
+                                    <i class="bi bi-bug-fill text-warning" style="font-size: 0.875rem;"></i>
                                 </div>
                             </div>
                         </div>
