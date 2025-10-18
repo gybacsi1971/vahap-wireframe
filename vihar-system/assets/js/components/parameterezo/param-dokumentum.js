@@ -308,22 +308,34 @@ const ParamDokumentum = {
         </div>
     `,
     methods: {
-        loadSablonok() {
-            // Betöltés mock adatokból
-            const mockKey = 'dokumentum_sablonok';
-            console.log('[param-dokumentum] Loading sablonTipus:', this.sablonTipus);
+        async loadSablonok() {
+            // Betöltés API-ról
+            try {
+                console.log('[param-dokumentum] Loading sablonTipus from API:', this.sablonTipus);
 
-            if (typeof VIHARMockData !== 'undefined' && VIHARMockData.parameterezo && VIHARMockData.parameterezo[mockKey]) {
-                const allSablonok = VIHARMockData.parameterezo[mockKey];
-                console.log('[param-dokumentum] Available types:', Object.keys(allSablonok));
-                this.sablonok = JSON.parse(JSON.stringify(
-                    allSablonok[this.sablonTipus] || []
-                ));
-                console.log('[param-dokumentum] Loaded', this.sablonok.length, 'sablonok');
-            } else {
-                console.warn('[param-dokumentum] Mock data not found');
+                const endpoint = VAHAP_API.endpoints.parameterezo.dokumentumSablonok;
+                const response = await VAHAP_API.get(endpoint, { tipus: this.sablonTipus });
+
+                if (response && response.sablonok) {
+                    // Konverzió: megnevezes -> nev (API mezőnév -> komponens mezőnév)
+                    this.sablonok = response.sablonok.map(s => ({
+                        ...s,
+                        nev: s.megnevezes,  // Alias létrehozása
+                        modositva: s.updated_at,
+                        aktiv: Boolean(s.aktiv)
+                    }));
+                    console.log('[param-dokumentum] Loaded', this.sablonok.length, 'sablonok from API');
+                } else {
+                    console.warn('[param-dokumentum] Nincs sablon adat az API válaszban');
+                    this.sablonok = [];
+                }
+
+                this.hasChanges = false;
+            } catch (error) {
+                console.error('[param-dokumentum] API hiba:', error);
+                alert('Hiba a sablonok betöltésekor: ' + error.message);
+                this.sablonok = [];
             }
-            this.hasChanges = false;
         },
 
         openCreateDialog() {
@@ -348,28 +360,50 @@ const ParamDokumentum = {
             this.showEditor = true;
         },
 
-        handleSaveSablon() {
+        async handleSaveSablon() {
             if (!this.selectedSablon.nev || !this.selectedSablon.kod || !this.selectedSablon.tartalom) {
                 alert('Kérem töltse ki a kötelező mezőket!');
                 return;
             }
 
-            if (this.editMode === 'create') {
-                this.sablonok.push({ ...this.selectedSablon });
-            } else {
-                const index = this.sablonok.findIndex(s => s.id === this.selectedSablon.id);
-                if (index > -1) {
-                    // Verzió növelése módosításkor
-                    const currentVersion = parseFloat(this.selectedSablon.verzio);
-                    this.selectedSablon.verzio = (currentVersion + 0.1).toFixed(1);
-                    this.selectedSablon.modositva = new Date().toISOString();
-                    this.sablonok[index] = { ...this.selectedSablon };
-                }
-            }
+            try {
+                // Konverzió: nev -> megnevezes (komponens mezőnév -> API mezőnév)
+                const payload = {
+                    kod: this.selectedSablon.kod,
+                    megnevezes: this.selectedSablon.nev,  // nev -> megnevezes konverzió
+                    tipus: this.sablonTipus,
+                    modul: 'kozos',
+                    leiras: this.selectedSablon.leiras || null,
+                    verzio: this.selectedSablon.verzio || '1.0',
+                    tartalom: this.selectedSablon.tartalom,
+                    aktiv: this.selectedSablon.aktiv !== undefined ? this.selectedSablon.aktiv : true
+                };
 
-            this.hasChanges = true;
-            this.closeEditor();
-            this.$emit('change', this.sablonok);
+                if (this.editMode === 'create') {
+                    // Új sablon létrehozása
+                    const endpoint = VAHAP_API.endpoints.parameterezo.dokumentumSablonok;
+                    await VAHAP_API.post(endpoint, payload);
+                    console.log('[param-dokumentum] Sablon létrehozva API-n keresztül');
+                } else {
+                    // Meglévő sablon módosítása
+                    // Verzió növelése módosításkor
+                    const currentVersion = parseFloat(payload.verzio);
+                    payload.verzio = (currentVersion + 0.1).toFixed(1);
+
+                    const endpoint = `${VAHAP_API.endpoints.parameterezo.dokumentumSablonok}/${this.selectedSablon.id}`;
+                    await VAHAP_API.put(endpoint, payload);
+                    console.log('[param-dokumentum] Sablon frissítve API-n keresztül');
+                }
+
+                // Újratöltés az API-ról
+                await this.loadSablonok();
+
+                this.closeEditor();
+                this.$emit('change', this.sablonok);
+            } catch (error) {
+                console.error('[param-dokumentum] Mentési hiba:', error);
+                alert('Hiba a sablon mentésekor: ' + error.message);
+            }
         },
 
         cloneSablon() {
@@ -389,12 +423,24 @@ const ParamDokumentum = {
             this.$emit('change', this.sablonok);
         },
 
-        deleteSablon(sablon) {
-            const index = this.sablonok.findIndex(s => s.id === sablon.id);
-            if (index > -1) {
-                this.sablonok.splice(index, 1);
-                this.hasChanges = true;
+        async deleteSablon(sablon) {
+            if (!confirm(`Biztosan törli: ${sablon.nev}?`)) {
+                return;
+            }
+
+            try {
+                const endpoint = `${VAHAP_API.endpoints.parameterezo.dokumentumSablonok}/${sablon.id}`;
+                await VAHAP_API.delete(endpoint);
+
+                console.log('[param-dokumentum] Sablon törölve API-n keresztül');
+
+                // Újratöltés az API-ról
+                await this.loadSablonok();
+
                 this.$emit('change', this.sablonok);
+            } catch (error) {
+                console.error('[param-dokumentum] Törlési hiba:', error);
+                alert('Hiba a sablon törlésekor: ' + error.message);
             }
         },
 
@@ -403,13 +449,17 @@ const ParamDokumentum = {
             this.selectedSablon = null;
         },
 
-        saveSablonok() {
+        async saveSablonok() {
+            // Az adatok már mentve vannak az API-ra a handleSaveSablon-on keresztül
+            // Ez a gomb már nem szükséges API verzióban, de meghagyjuk kompatibilitás céljából
+
             this.$emit('save', {
                 sablonTipus: this.sablonTipus,
                 sablonok: this.sablonok
             });
             this.hasChanges = false;
             console.log('✅ Sablonok mentve:', this.sablonCim);
+            alert('Sablonok sikeresen mentve!');
         },
 
         renderSablon(tartalom) {

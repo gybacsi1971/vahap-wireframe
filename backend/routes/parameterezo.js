@@ -619,6 +619,112 @@ router.get('/dokumentum-sablonok/grouped', (req, res) => {
     }
 });
 
+// Új dokumentum sablon létrehozása
+router.post('/dokumentum-sablonok', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { kod, megnevezes, tipus, modul, sablon_fajl, leiras, verzio, tartalom, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            INSERT INTO dokumentum_sablonok (
+                kod, megnevezes, tipus, modul, sablon_fajl, leiras, verzio, tartalom, aktiv
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        const result = stmt.run(
+            kod,
+            megnevezes,
+            tipus,
+            modul || 'kozos',
+            sablon_fajl || null,
+            leiras || null,
+            verzio || '1.0',
+            tartalom || null,
+            aktiv !== undefined ? (aktiv ? 1 : 0) : 1
+        );
+
+        res.status(201).json({
+            id: result.lastInsertRowid,
+            message: 'Dokumentum sablon sikeresen létrehozva'
+        });
+    } catch (error) {
+        console.error('Hiba a dokumentum sablon létrehozásánál:', error);
+        if (error.message.includes('UNIQUE constraint failed')) {
+            res.status(400).json({ error: 'Ez a sablon kód már létezik' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Dokumentum sablon módosítása
+router.put('/dokumentum-sablonok/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+        const { kod, megnevezes, tipus, modul, sablon_fajl, leiras, verzio, tartalom, aktiv } = req.body;
+
+        const stmt = db.prepare(`
+            UPDATE dokumentum_sablonok
+            SET kod = ?, megnevezes = ?, tipus = ?, modul = ?, sablon_fajl = ?,
+                leiras = ?, verzio = ?, tartalom = ?, aktiv = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(
+            kod,
+            megnevezes,
+            tipus,
+            modul || 'kozos',
+            sablon_fajl || null,
+            leiras || null,
+            verzio || '1.0',
+            tartalom || null,
+            aktiv ? 1 : 0,
+            id
+        );
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Dokumentum sablon nem található' });
+        }
+
+        res.json({ message: 'Dokumentum sablon sikeresen frissítve' });
+    } catch (error) {
+        console.error('Hiba a dokumentum sablon frissítésénél:', error);
+        if (error.message.includes('UNIQUE constraint failed')) {
+            res.status(400).json({ error: 'Ez a sablon kód már létezik' });
+        } else {
+            res.status(500).json({ error: error.message });
+        }
+    }
+});
+
+// Dokumentum sablon törlése (soft delete)
+router.delete('/dokumentum-sablonok/:id', (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const { id } = req.params;
+
+        const stmt = db.prepare(`
+            UPDATE dokumentum_sablonok
+            SET aktiv = 0, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `);
+
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({ error: 'Dokumentum sablon nem található' });
+        }
+
+        res.json({ message: 'Dokumentum sablon sikeresen törölve' });
+    } catch (error) {
+        console.error('Hiba a dokumentum sablon törlésénél:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============================================================================
 // SZEREPKÖRÖK ÉS JOGOSULTSÁGOK
 // ============================================================================
